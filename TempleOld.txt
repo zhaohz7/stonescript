@@ -1,0 +1,113 @@
+var FoeStatus = import FoeStatus
+var PlayerStatus = import PlayerStatus
+var AdjustBFG = import UI/ActivationCenter
+var TD = new TempleDodge
+TD.dodgereset()
+?loc.begin
+	AdjustBFG.changeBFGthcurrentTo(10)
+	?loc.stars = 15
+		brew stone + bronze
+var PX
+var PY
+PX = screen.FromWorldX(pos.x)
+PY = screen.FromWorldZ(pos.z - pos.y)
+>`@PX@,@PY-6@,@#red@,0
+
+
+?loc=Temple
+ ?item.GetCooldown("blade") <= 0
+	screen.Next()
+ ?foe!boss
+	?foe.distance > 29 
+		?armor > 35
+			equipL trisk
+			equipR Cultist Mask
+		:?armor < 14
+			equipL trisk
+			equipR Compound Shield -shiny +21
+		:
+			equipL trisk
+			equipR shiny Compound Shield +21
+	:?foe.distance > 16 & foe.distance <=30
+		?foe = poison
+			?armor > 40 & PlayerStatus.smiteCount > 6
+				equipL trisk
+				equipR Ice Shield ai +21
+			:
+				equipL trisk
+				equipR Ice Shield A	+21
+		:?armor < 14
+			equipL trisk
+			equipR Compound Shield -shiny +21
+		:?armor >= 14
+			equipL trisk
+			equipR shiny Compound Shield +21
+	:
+		?foe = poison
+			?PlayerStatus.smiteCount > 14
+				equip ice staff dI +20
+			:?PlayerStatus.smiteCount < 4
+				equipL Big Aether Sword dU +21
+				equipR Big Ice Sword D +21
+			:
+				equipL Big Ice Sword dI +20
+				equipR Freezer dI +20				
+		:
+			equipL Big Poison Sword dP +21
+			equipR Big Fire Sword dF +21
+ ?foe = boss & item.GetCooldown("bardiche") < 879
+  ?foe.distance > 19
+    equipL trisk
+    equipR shiny Compound Shield +21
+  :?foe ! phase1
+   ?foe.distance < 17 & foe.distance > 11
+    ?item.GetCooldown("bash") <= 0
+     equipL trisk
+     equipR bashing shield
+    :?item.GetCooldown("dash") <= 0
+     equipL trisk
+     equipR dashing shield
+   :?foe.distance < 12
+    ?FoeStatus.chillCount < 6
+     equipL ice d_sword dI +20
+     equipR ice d_sword D +20
+    :
+     loadout 6
+  :?foe = phase1 
+   ?foe.distance < 10
+    ?foe.state > 31 & foe.state < 34 & (TD.CheckPoison(15,6,29,4) = 3 | TD.CheckPoison(15,8,27,3) = 7) & item.GetCooldown("mind") <= 0
+      equipR mind
+    :?foe.state = 112 & item.GetCooldown("mind") <= 0 & TD.NagaDrop(39,7,4,6)
+      equipR mind
+    :?FoeStatus.chillCount < 6 
+      equip ice staff dI +20
+    :
+      loadout 6
+   :?foe.distance < 20
+     ?foe.state = 32 & TD.CheckPoison(15,8,27,3) = 1 & item.GetCooldown("quarterstaff") <= 0 
+        equip quarterstaff
+        activate R
+     :?foe.state = 32 & TD.CheckPoison(15,8,27,3) = 4  & item.GetCooldown("quarterstaff") <= 0 
+        equip quarterstaff
+        activate R
+     :?foe.state = 32 & TD.CheckPoison(15,8,27,3) = 8 & item.GetCooldown("quarterstaff") <= 0 
+        equip quarterstaff
+        activate R
+     :?foe.state = 32 & TD.CheckPoison(15,8,27,3) = 2 & item.GetCooldown("bash") <= 0
+        equipR bashing shield
+     :?foe.state = 33 & foe.time > 14 & foe.time < 25 & item.GetCooldown("dash") <= 0 & TD.CheckPoison(15,8,27,3) = 5 
+       ?(foe.hp < 1000 | item.GetCooldown("mind") < 60) 
+         equipR dashing shield
+       : 
+         equip Cave Dominator D +21
+     :?foe.state = 32 & item.GetCooldown("dash") <= 0 & TD.CheckPoison(15,8,27,3) = 6 
+       ?(foe.hp < 500 | item.GetCooldown("mind") < 20) 
+         equipR dashing shield
+       : 
+         equip Cave Dominator D +21
+     :?FoeStatus.chillCount < 6
+       equip ice staff dI +20 
+     :
+       equip Cave Dominator D +21
+        ?loc.stars = 15 & item.potion ! empty & item.potion = Lucky & item.potion = auto
+         activate potion

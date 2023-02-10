@@ -1,0 +1,322 @@
+/*
+-没有hp blocking(闪一下双符文380血）!!
+*/
+var Extract = import Extract
+var swordtime = 0
+var SAtime = 0
+var unmadeonce = 0
+var potionuse = 0
+var armuse = 0
+var armregen = 0
+var smiteuse = 0
+?loc.begin
+	brew stone + bronze
+?loc.loop
+	swordtime = 0
+	SAtime = 0
+	unmadeonce = 0
+?Extract.Lucky[2] > 6000
+	potionuse = 1
+?Extract.Lucky[2] < 3000
+	potionuse = 0
+?Extract.Pick[2] > 36000
+	armuse = 1
+?Extract.Pick[2] < 3000
+	armuse = 0
+?Extract.Pick[2] > 2400
+	armregen = 1
+?Extract.Smite[1] = 30 & Extract.Smite[2] > 36000
+	smiteuse = 1
+?Extract.Smite[1] < 30
+	smiteuse = 0
+?item.GetCooldown("bardiche") < 879
+	?foe = acronian scout
+		?foe.distance <= 10
+			?smiteuse = 1
+				?swordtime % 8 < 4
+					?!Extract.FoePoison[0]
+						equipL Poison d_sword dP +20
+						equipR Ice d_sword dI +20
+					:?Extract.FoeChill[2] < 6 | Extract.FoeChill[1] < 6
+						equipL Ice d_sword dI +21
+						equipR Ice d_sword dI +20
+					swordtime++
+				:
+					?!Extract.FoeBurn[0]
+						equipL Fire d_sword dF +20
+						equipR Ice d_sword dI +21
+					:?Extract.FoeChill[2] < 6 | Extract.FoeChill[1] < 6
+						equipL Ice d_sword dI +20
+						equipR Ice d_sword dI +21
+					swordtime++
+			:?foe.state = 32 & foe.time = 14
+				?hp < 77
+					equipL Vigor hammer ah +21
+					equipR Vigor Shield ah +21 -shiny
+				:
+					equipL Vigor hammer ah +21
+					equipR Poison Shield ap +21
+			:?Extract.Lucky[0] & (foe.hp > 1000 | (armuse = 1 & foe.hp > 406))
+				?swordtime % 24
+					equipL Poison d_sword dP +21
+					equipR Cultist Mask
+					swordtime++
+				:
+					equipL Fire d_sword dF +21
+					equipR Cultist Mask
+					swordtime++
+			:?foe.hp > 105 & (foe.hp < 147 | (armuse = 1 & foe.hp < 407))
+				equip Repeating Crossbow +20 -shiny
+			:?foe.hp > 105
+				?SAtime < 4
+					equip Skeleton Arm +21
+					SAtime++
+				:
+					equip Shiny Repeating Crossbow +21
+					equip Skeleton Arm +21
+					SAtime = 1
+	?foe = phase1 
+		?foe.distance <= 10
+			equipR Cultist Mask
+			?potionuse = 0
+				activate potion
+			?foe.state = 32 & foe.time = 24
+				equipL Vigor Hammer ah +21
+				equipR Poison Shield ap +21
+			:?swordtime % 8 < 4
+				?Extract.Lucky[2] > 180 & armregen = 1 & smiteuse = 1
+					?Extract.FoeChill[2] < 6 | Extract.FoeChill[1] < 6
+						equipL Ice d_sword dI +21
+						equipR Ice d_sword dI +20
+					:?!Extract.FoePoison[0]
+						equipL Poison d_sword dP +20
+						equipR Fire d_sword D +21
+					:?hp < maxhp
+						equipL Vigor d_sword dL +20
+						equipR FastHeal +21
+					:
+						equipL Fire d_sword D +20
+						equipR Fire d_sword D +21
+				:
+					?!Extract.FoePoison[0]
+						equipL Poison d_sword dP +20
+						equipR Cultist Mask
+					:?hp < maxhp
+						equipL Vigor d_sword dL +20
+						equipR Cultist Mask
+					:
+						equipL quest
+						equipR Cultist Mask
+				swordtime++
+			:
+				?Extract.Lucky[2] > 180 & armregen = 1 & smiteuse = 1
+					?Extract.FoeChill[2] < 6 | Extract.FoeChill[1] < 6
+						equipL Ice d_sword dI +20
+						equipR Ice d_sword dI +21
+					:?!Extract.FoeBurn[0]
+						equipL Fire d_sword dF +20
+						equipR Fire d_sword D +20
+					:?hp < maxhp
+						equipL FastHeal +21
+						equipR Vigor d_sword dL +20
+					:
+						equipL Fire d_sword D +21
+						equipR Fire d_sword D +20
+				:
+					?hp < maxhp
+						equipL FastHeal +21
+						equipR Cultist Mask
+					:
+						equipL quest
+						equipR Cultist Mask
+				swordtime++
+	?foe = phase2
+		?foe.distance <= 10
+			?foe = Vigor
+				?swordtime % 8 < 4
+					?Extract.Lucky[2] > 180 & armregen = 1 & smiteuse = 1
+						?!Extract.FoeBuffProtec[0] & !Extract.FoePoison[0]
+							equipL Poison d_sword dP +20
+							equipR Poison d_sword D +21
+						:
+							equipL Poison d_sword D +20
+							equipR Poison d_sword D +21
+					:
+						?!Extract.FoeBuffProtec[0] & !Extract.FoePoison[0]
+							equipL Poison d_sword dP +20
+							equipR Cultist Mask
+						:
+							equipL Poison d_sword D +20
+							equipR Cultist Mask
+					swordtime++
+				:
+					?Extract.Lucky[2] > 180 & armregen = 1 & smiteuse = 1
+						equipL Poison d_sword D +21
+						equipR Poison d_sword D +20
+					:
+						equipL Poison d_sword D +21
+						equipR Cultist Mask
+					swordtime++
+			:?foe = Poison
+				?swordtime % 8 < 4
+					?Extract.Lucky[2] > 180 & armregen = 1 & smiteuse = 1
+						?!Extract.FoeBuffProtec[0] & (Extract.FoeChill[2] < 6 | Extract.FoeChill[1] < 6)
+							equipL Ice d_sword dI +20
+							equipR Ice d_sword dI +21
+						:
+							equipL Ice d_sword D +20
+							equipR Ice d_sword D +21
+					:
+						?!Extract.FoeBuffProtec[0] & !Extract.FoePoison[0]
+							equipL Poison d_sword dP +20
+							equipR Cultist Mask
+						:
+							equipL Ice d_sword D +20
+							equipR Cultist Mask
+					swordtime++
+				:
+					?Extract.Lucky[2] > 180 & armregen = 1 & smiteuse = 1
+						?!Extract.FoeBuffProtec[0] & (Extract.FoeChill[2] < 6 | Extract.FoeChill[1] < 6)
+							equipL Ice d_sword dI +21
+							equipR Ice d_sword dI +20
+						:
+							equipL Ice d_sword D +21
+							equipR Ice d_sword D +20
+					:
+						equipL Ice d_sword D +21
+						equipR Cultist Mask
+					swordtime++
+			:?foe = Aether
+				?swordtime % 8 < 4
+					?Extract.Lucky[2] > 180 & armregen = 1 & smiteuse = 1
+						equipL Vigor d_sword D +20
+						equipR Vigor d_sword D +21
+					:
+						?!Extract.FoeBuffProtec[0] & !Extract.FoePoison[0]
+							equipL Poison d_sword dP +20
+							equipR Cultist Mask
+						:
+							equipL Vigor d_sword D +20
+							equipR Cultist Mask
+					swordtime++
+				:
+					?Extract.Lucky[2] > 180 & armregen = 1 & smiteuse = 1
+						equipL Vigor d_sword D +21
+						equipR Vigor d_sword D +20
+					:
+						equipL Vigor d_sword D +21
+						equipR Cultist Mask
+					swordtime++
+			:?foe = Ice
+				?swordtime % 8 < 4
+					?Extract.Lucky[2] > 180 & armregen = 1 & smiteuse = 1
+						?!Extract.FoeBuffProtec[0] & !Extract.FoeBurn[0]
+							equipL Fire d_sword dF +20
+							equipR Fire d_sword D +21
+						:
+							equipL Fire d_sword D +20
+							equipR Fire d_sword D +21
+					:
+						?!Extract.FoeBuffProtec[0] & !Extract.FoePoison[0]
+							equipL Poison d_sword dP +20
+							equipR Cultist Mask
+						:
+							equipL Fire d_sword D +20
+							equipR Cultist Mask
+					swordtime++
+				:
+					?Extract.Lucky[2] > 180 & armregen = 1 & smiteuse = 1
+						equipL Fire d_sword D +21
+						equipR Fire d_sword D +20
+					:
+						equipL Fire d_sword D +21
+						equipR Cultist Mask
+					swordtime++
+			:?foe = Fire
+				?unmadeonce = 0 & foe.state = 32 & foe.time = 59
+					equipR Aether Shield au +20
+					unmadeonce = 1
+				:?swordtime % 8 < 4
+					?Extract.Lucky[2] > 180 & armregen = 1 & smiteuse = 1
+						equipL Aether d_sword D +20
+						equipR Aether d_sword D +21
+					:
+						?!Extract.FoeBuffProtec[0] & !Extract.FoePoison[0]
+							equipL Poison d_sword dP +20
+							equipR Cultist Mask
+						:
+							equipL Aether d_sword D +20
+							equipR Cultist Mask
+					swordtime++
+				:
+					?Extract.Lucky[2] > 180 & armregen = 1 & smiteuse = 1
+						equipL Aether d_sword D +21
+						equipR Aether d_sword D +20
+					:
+						equipL Aether d_sword D +21
+						equipR Cultist Mask
+					swordtime++
+	?foe = phase3
+		?foe.distance <= 10
+			?foe.state = 32 & foe.time = 89 & !Extract.Plusdamage[0]
+				equipR Poison Shield ap +21
+			:?swordtime % 8 < 4
+				?Extract.Lucky[2] > 180 & armregen = 1 & smiteuse = 1
+					?Extract.FoeChill[2] < 6 | Extract.FoeChill[1] < 6
+						equipL Ice d_sword dI +21
+						equipR Ice d_sword dI +20
+					:?!Extract.FoePoison[0]
+						equipL Poison d_sword dP +20
+						equipR Fire d_sword D +21
+					:
+						equipL Fire d_sword D +20
+						equipR Fire d_sword D +21
+				:
+					?!Extract.FoeBurn[0]
+						equipL Fire d_sword dF +20
+						equipR Cultist Mask
+					:?Extract.FoeChill[2] < 6 | Extract.FoeChill[1] < 6
+						equipL Ice d_sword dI +21
+						equipR Cultist Mask
+					:?!Extract.FoePoison[0]
+						equipL Poison d_sword dP +20
+						equipR Cultist Mask
+					:?hp < maxhp
+						equipL FastHeal +21
+						equipR Cultist Mask
+					:
+						equipL Fire d_sword D +20
+						equipR Cultist Mask
+				swordtime++
+			:
+				?Extract.Lucky[2] > 180 & armregen = 1 & smiteuse = 1
+					?Extract.FoeChill[2] < 6 | Extract.FoeChill[1] < 6
+						equipL Ice d_sword dI +20
+						equipR Ice d_sword dI +21
+					:?!Extract.FoeBurn[0]
+						equipL Fire d_sword dF +20
+						equipR Fire d_sword D +20
+					:
+						equipL Fire d_sword D +21
+						equipR Fire d_sword D +20
+				:
+					?Extract.FoeChill[2] < 6 | Extract.FoeChill[1] < 6
+						equipL Ice d_sword dI +20
+						equipR Cultist Mask
+					:?hp < maxhp
+						equipL Vigor d_sword dL +20
+						equipR Cultist Mask
+					:
+						equipL Fire d_sword D +21
+						equipR Cultist Mask
+				swordtime++
+	?!ai.enabled & foe = phase1 & foe.state = 118 & foe.time = 29
+		equipL Fire Hammer aF +21
+		equipR Fire Shield A +21
+	:?loc.begin | loc.loop | (foe.hp = foe.maxhp & foe.state = 127 & armuse = 1 & smiteuse = 1)
+		equipL quest
+		equipR Shiny Compound Shield +21
+	:?foe.distance > 10
+		equipL trisk
+		equipR Cultist Mask
+		swordtime = 0

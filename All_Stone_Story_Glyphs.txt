@@ -1,0 +1,453 @@
+		case '☆': return 0; // white star
+		case '☺': return 1; // white smiling face
+		case 'ʘ': return 2; // latin letter bilabial click
+		
+		case '♥':
+		case '❤': return 3; // black heart suit
+		case '♦': return 4; // black diamond suit
+		case '♣': return 5; // black club suit
+		case '♠': return 6; // black spade suit
+		
+		case '•': return 7; // bullet
+		case '◘': return 8; // inverse bullet
+
+		case '♀': return 12; // female sign
+		case '♪': return 13; // eighth note
+		case '♫': return 14; // beamed eight notes
+		case '☼': return 15; // white sun with rays
+		case '▶': return 16; // black right-pointing arrow
+		case '◀': return 17; // black left-pointing arrow
+
+		case 'œ': return 20; // Small ligature Oe
+		case '§': return 21;
+		case '≠': return 22; // not equal to
+		case '¿': return 23; // inverted question mark
+		case '↑': return 24; // upwards arrow
+		case '↓': return 25; // downwards arrow
+		case '→': return 26; // rightwards arrow
+		case '←': return 27; // leftwards arrow
+		case '¯': // macron
+		case '‾': return 28; // overscore / overline
+		case '¡': return 29; // inverted exclamation mark
+		case '▲': return 30; // black up-pointing arrow
+		case '▼': return 31; // black down-pointing arrow
+			
+		// ' ': return 32; 
+		// '!': return 33; 
+		
+		case '＂': // unicode quote
+		case '"': return 34; // ascii quote
+		
+		// '#': return 35; 
+		// '$': return 36; 
+		// '%': return 37; 
+		// '&': return 38; 
+		// ''': return 39; 
+		// '(': return 40; 
+		// ')': return 41; 
+		// '*': return 42; 
+		// '+': return 43; 
+		// ',': return 44; 
+		// '-': return 45; 
+		// '.': return 46; 
+		// '/': return 47; 
+		// '0': return 48; 
+		// '1': return 49; 
+		// '2': return 50; 
+		// '3': return 51; 
+		// '4': return 52; 
+		// '5': return 53; 
+		// '6': return 54; 
+		// '7': return 55; 
+		// '8': return 56; 
+		// '9': return 57; 
+		// ':': return 58; 
+		// ';': return 59; 
+		// '<': return 60; 
+		// '=': return 61; 
+		// '>': return 62; 
+		// '?': return 63; 
+		// '@': return 64; 
+		// 'A': return 65; 
+		// 'B': return 66; 
+		// 'C': return 67; 
+		// 'D': return 68; 
+		// 'E': return 69; 
+		// 'F': return 70; 
+		// 'G': return 71; 
+		// 'H': return 72; 
+		// 'I': return 73; 
+		// 'J': return 74; 
+		// 'K': return 75; 
+		// 'L': return 76; 
+		// 'M': return 77; 
+		// 'N': return 78; 
+		// 'O': return 79; 
+		// 'P': return 80; 
+		// 'Q': return 81; 
+		// 'R': return 82; 
+		// 'S': return 83; 
+		// 'T': return 84; 
+		// 'U': return 85; 
+		// 'V': return 86; 
+		// 'W': return 87; 
+		// 'X': return 88; 
+		// 'Y': return 89; 
+		// 'Z': return 90; 
+		// '[': return 91; 
+		// '\': return 92; 
+
+		case '］':
+		case ']': return 93;
+
+		// '^': return 94; 
+		// '_': return 95; 
+		// '`': return 96; 
+		// 'a': return 97; 
+		// 'b': return 98; 
+		// 'c': return 99; 
+		// 'd': return 100; 
+		// 'e': return 101; 
+		// 'f': return 102; 
+		// 'g': return 103; 
+		// 'h': return 104; 
+		// 'i': return 105; 
+		// 'j': return 106; 
+		// 'k': return 107; 
+		// 'l': return 108; 
+		// 'm': return 109; 
+		// 'n': return 110; 
+		// 'o': return 111; 
+		// 'p': return 112; 
+		// 'q': return 113; 
+		// 'r': return 114; 
+		// 's': return 115; 
+		// 't': return 116; 
+		// 'u': return 117; 
+		// 'v': return 118; 
+		// 'w': return 119; 
+		// 'x': return 120; 
+		// 'y': return 121; 
+		// 'z': return 122; 
+		// '{': return 123; 
+		// '|': return 124; 
+		// '}': return 125; 
+		// '~': return 126; 
+
+		case '´': return 127; // acute accent
+		case 'Ç': return 128; // capital cedilla
+		case 'ü': return 129; // small u with diaeresis
+		case 'é': return 130; // small e with acute
+		case 'â': return 131; // small a with circumflex
+		case 'ä': return 132; // small a with diaeresis
+		case 'à': return 133; // small a with grave
+		case 'å': return 134; // small a with ring
+		case 'ç': return 135; // small cedilla
+		case 'ê': return 136; // small e with circumflex
+		case 'ë': return 137; // small e with diaeresis
+		case 'è': return 138; // small e with grave
+		case 'ï': return 139; // small i with diaeresis
+		case 'î': return 140; // small i with circumflex
+		case 'ì': return 141; // small i with grave
+		case 'Ä': return 142; // capital A with diaeresis
+		case 'Å': return 143; // capital A with ring
+		case 'É': return 144; // capital E with acute
+		case 'æ': return 145; // small Ae
+		case 'Æ': return 146; // capital AE
+		case 'ô': return 147; // small o with circumflex
+		case 'ö': return 148; // small o with diaeresis
+		case 'ò': return 149; // small o with grave
+		case 'û': return 150; // small u with circumflex
+		case 'ù': return 151; // small u with grave
+		case 'ý': return 152; // small y with acute
+		case 'Ó': return 153; // capital O with acute
+		case 'Ü': return 154; // capital U with diaeresis
+		case '€': return 155; // Euro
+		case '£': return 156; // Pound
+		case '￥':
+		case '¥': return 157; // Yen
+
+		case 'Á': return 159; // capital A with acute
+		
+		case 'á': return 160; // small a with acute
+		case 'í': return 161; // small i with acute
+		case 'ó': return 162; // small o with acute
+		case 'ú': return 163; // small u with acute
+		case 'ñ': return 164; // small n with tilde
+		case 'Ñ': return 165; // capital n with tilde
+		case 'ã': return 166; // small a with tilde
+		case 'õ': return 167; // small o with tilde
+
+		case 'ζ': return 168; // lower-case zeta
+		case 'η': return 169; // lower-case eta
+		case 'ξ': return 170; // lower-case xi
+		case 'λ': return 171; // lower-case lambda
+		case 'ψ': return 172; // lower-case psi
+		case 'έ': return 173; // lower-case epsilon with tonos
+
+		case '«': return 174; // left-pointing double angle quotation
+		case '»': return 175; // right-pointing double angle quotation
+			
+		// Out of numeric order on purpose
+		case '┌': return 218; // box drawings light down and right
+		case '┐': return 191; // box drawings light down and left
+		case '└': return 192; // box drawings light up and right
+		case '┘': return 217; // box drawings light up and left
+		case '│': return 179; // box drawings light vertical
+		case '—': // EM dash
+		case '─': return 196; // box drawings light horizontal
+		case '┴': return 193; // box drawings light up and horizontal
+		case '├': return 195; // box drawings light right and vertical
+		case '┬': return 194; // box drawings light down and horizontal
+		case '┤': return 180; // box drawings light left and vertical
+		case '┼': return 197; // box drawings light vertical and horizontal
+			
+		case '╒': return 213; // box drawings down single and right double
+		case '╕': return 184; // box drawings down single and left double
+		case '╘': return 212; // box drawings up single and right double
+		case '╛': return 190; // box drawings up single and left double
+		case '╧': return 207; // box drawings up single and horizontal double
+		case '╞': return 198; // box drawings vertical single and right double
+		case '╤': return 209; // box drawings down single and horizontal double
+		case '╡': return 181; // box drawings vertical single and left double
+		case '╪': return 216; // box drawings vertical single and horizontal double
+			
+		case '╓': return 214; // box drawings down double and right single
+		case '╖': return 183; // box drawings down double and left single
+		case '╙': return 211; // box drawings up double and right single
+		case '╜': return 189; // box drawings up double and left single
+		case '╨': return 208; // box drawings up double and horizontal single
+		case '╟': return 199; // box drawings vertical double and right single
+		case '╥': return 210; // box drawings down double and horizontal single
+		case '╢': return 182; // box drawings vertical double and left single
+		case '╫': return 215; // box drawings vertical double and horizontal single
+
+		case '╔': return 201; // box drawings double down and right
+		case '╗': return 187; // box drawings double down and left
+		case '╚': return 200; // box drawings double up and right
+		case '╝': return 188; // box drawings double up and left
+		case '║': return 186; // box drawings double vertical
+		case '═': return 205; // box drawings double horizontal
+		case '╩': return 202; // box drawings double up and horizontal
+		case '╠': return 204; // box drawings double vertical and right
+		case '╦': return 203; // box drawings double down and horizontal
+		case '╣': return 185; // box drawings double vertical and left
+		case '╬': return 206; // box drawings double vertical and horizontal
+			
+		case '░': return 176; // light shade 25%
+		case '▒': return 177; // medium shade 50%
+		case '▓': return 178; // dark shade 75%
+		case '█': return 219; // FULL BLOCK
+		case '▄': return 220; // lower HALF BLOCK
+		case '▀': return 221; // upper HALF BLOCK
+
+		case 'ρ': return 222; // greek small rho
+		case 'ι': return 223; // greek small iota
+		case 'α': return 224; // greek small alpha
+		case 'β': return 225; // greek small beta
+		case 'γ': return 226; // greek small gamma
+		case 'π': return 227; // greek small pi
+		case 'Σ': return 228; // capital sigma
+		case '∑': return 228; // same as sigma, different unicode
+		case 'σ': return 229; // greek small sigma
+		case 'μ': return 230; // greek small mu
+		case 'µ': return 230; // micro (same as mu, but different unicode)
+		case 'τ': return 231; // greek small tau
+		case 'Φ': return 232; // capital phi
+		case 'Θ': return 233; // capital theta
+		case 'θ': return 233; // greek small theta
+		case 'Ω': return 234; // capital omega
+		case 'δ': return 235; // greek small delta
+		case '∞': return 236; // infinity
+		case 'φ': return 237; // greek small phi
+		case 'ε': return 238; // greek small epsilon
+		case 'ω': return 239; // greek small omega
+		case '≡': return 240; // identical to
+		case '±': return 241; // plus-minus sign
+		case '≥': return 242; // greater than or equal to
+		case '≤': return 243; // less than or equal to
+		case '⌐': return 244; // reversed not sign
+		case '¬': return 245; // not sign
+		case '÷': return 246; // division sign
+		case '≈': return 247; // almost equal to
+		case '°': return 248; // degree sign
+		case '…': return 249; // horizontal ellipsis
+
+		case '·': return 250; // middle/center dot
+
+		case '†': return 251; // dagger
+		case '✝': return 251; // latin cross
+		case '☤': return 252; // caduceus
+		case 'Δ':
+		case '∆': return 253; // upper-case delta
+		case '❄': return 254; // snowflake
+		case '┊': return 255; // box drawings quadruple dash vertical
+
+//latest
+'☆' // white star
+'☺' // white smiling face
+'ʘ' // latin letter bilabial click
+'♥'
+'❤' // black heart suit
+'♦' // black diamond suit
+'♣' // black club suit
+'♠' // black spade suit
+'•' // bullet
+'◘' // inverse bullet
+'♀' // female sign
+'♪' // eighth note
+'♫' // beamed eight notes
+'☼' // white sun with rays
+'▶' // black right-pointing arrow
+'◀' // black left-pointing arrow
+'œ' // Small ligature Oe
+'§'
+'≠' // not equal to
+'¿' // inverted question mark
+'↑' // upwards arrow
+'↓' // downwards arrow
+'→' // rightwards arrow
+'←' // leftwards arrow
+'¯' // macron
+'‾' // overscore / overline
+'¡' // inverted exclamation mark
+'▲' // black up-pointing arrow
+'▼' // black down-pointing arrow
+'＂' // unicode quote
+'"' // ascii quote
+']'
+'´' // acute accent
+'Ç' // capital cedilla
+'ü' // small u with diaeresis
+'é' // small e with acute
+'â' // small a with circumflex
+'ä' // small a with diaeresis
+'à' // small a with grave
+'å' // small a with ring
+'ç' // small cedilla
+'ê' // small e with circumflex
+'ë' // small e with diaeresis
+'è' // small e with grave
+'ï' // small i with diaeresis
+'î' // small i with circumflex
+'ì' // small i with grave
+'Ä' // capital A with diaeresis
+'Å' // capital A with ring
+'É' // capital E with acute
+'æ' // small Ae
+'Æ' // capital AE
+'ô' // small o with circumflex
+'ö' // small o with diaeresis
+'ò' // small o with grave
+'û' // small u with circumflex
+'ù' // small u with grave
+'ý' // small y with acute
+'Ó' // capital O with acute
+'Ü' // capital U with diaeresis
+'€' // Euro
+'£' // Pound
+'￥'
+'¥' // Yen
+'Á' // capital A with acute
+'á' // small a with acute
+'í' // small i with acute
+'ó' // small o with acute
+'ú' // small u with acute
+'ñ' // small n with tilde
+'Ñ' // capital n with tilde
+'ã' // small a with tilde
+'õ' // small o with tilde
+'ζ' // lower-case zeta
+'η' // lower-case eta
+'ξ' // lower-case xi
+'λ' // lower-case lambda
+'ψ' // lower-case psi
+'έ' // lower-case epsilon with tonos
+'«' // left-pointing double angle quotation
+'»' // right-pointing double angle quotation
+'┌' // box drawings light down and right
+'┐' // box drawings light down and left
+'└' // box drawings light up and right
+'┘' // box drawings light up and left
+'│' // box drawings light vertical
+'—' // EM dash
+'─' // box drawings light horizontal
+'┴' // box drawings light up and horizontal
+'├' // box drawings light right and vertical
+'┬' // box drawings light down and horizontal
+'┤' // box drawings light left and vertical
+'┼' // box drawings light vertical and horizontal
+'╒' // box drawings down single and right double
+'╕' // box drawings down single and left double
+'╘' // box drawings up single and right double
+'╛' // box drawings up single and left double
+'╧' // box drawings up single and horizontal double
+'╞' // box drawings vertical single and right double
+'╤' // box drawings down single and horizontal double
+'╡' // box drawings vertical single and left double
+'╪' // box drawings vertical single and horizontal double
+'╓' // box drawings down double and right single
+'╖' // box drawings down double and left single
+'╙' // box drawings up double and right single
+'╜' // box drawings up double and left single
+'╨' // box drawings up double and horizontal single
+'╟' // box drawings vertical double and right single
+'╥' // box drawings down double and horizontal single
+'╢' // box drawings vertical double and left single
+'╫' // box drawings vertical double and horizontal single
+'╔' // box drawings double down and right
+'╗' // box drawings double down and left
+'╚' // box drawings double up and right
+'╝' // box drawings double up and left
+'║' // box drawings double vertical
+'═' // box drawings double horizontal
+'╩' // box drawings double up and horizontal
+'╠' // box drawings double vertical and right
+'╦' // box drawings double down and horizontal
+'╣' // box drawings double vertical and left
+'╬' // box drawings double vertical and horizontal
+'░' // light shade %25
+'▒' // medium shade %50
+'▓' // dark shade %75
+'█' // FULL BLOCK
+'▄' // lower HALF BLOCK
+'▀' // upper HALF BLOCK
+'ρ' // greek small rho
+'ι' // greek small iota
+'α' // greek small alpha
+'β' // greek small beta
+'γ' // greek small gamma
+'π' // greek small pi
+'Σ' // capital sigma
+'∑' // same as sigma, different unicode
+'σ' // greek small sigma
+'μ' // greek small mu
+'µ' // micro (same as mu, but different unicode)
+'τ' // greek small tau
+'Φ' // capital phi
+'Θ' // capital theta
+'θ' // greek small theta
+'Ω' // capital omega
+'δ' // greek small delta
+'∞' // infinity
+'φ' // greek small phi
+'ε' // greek small epsilon
+'ω' // greek small omega
+'≡' // identical to
+'±' // plus-minus sign
+'≥' // greater than or equal to
+'≤' // less than or equal to
+'⌐' // reversed not sign
+'¬' // not sign
+'÷' // division sign
+'≈' // almost equal to
+'°' // degree sign
+'…' // horizontal ellipsis
+'·' // middle/center dot
+'†' // dagger
+'✝' // latin cross
+'☤' // caduceus
+'Δ'
+'∆' // upper-case delta
+'❄' // snowflake
+'┊' // box drawings quadruple dash vertical

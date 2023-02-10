@@ -1,0 +1,459 @@
+// Bsquare Script dedicated to Rocky Plateau.
+
+var stage_utils
+var equip_utils
+var bsquare_utils
+var weakness
+var boss_name
+
+var bardiche_locked
+var boss_acronian_debuffed
+var boss_acronian_debuff_ice_count
+var boss_phase2_fire_tentacle_unmaken
+var boss_phase2_fire_tentacle_hp_checker
+var boss_phase3_attack_counter
+var boss_disable_debuff_because_close_to_death
+
+
+func init(spec_stage_utils)
+  stage_utils = spec_stage_utils
+  equip_utils = stage_utils.equip_utils
+  bsquare_utils = stage_utils.bsquare_utils
+
+  stage_utils.average_stage_time_safe_guard_disabled = true
+  stage_utils.boss_forced_weakness = ""
+
+  equip_utils.aac_allow_break_by_weakness_change = false
+
+  // Configuration dedicated to Acronian scout boss.
+  boss_acronian_debuffed = false
+  boss_acronian_debuff_ice_count = Math.max(0, loc.stars - 9)
+
+  // Configuration dedicated to Dysangelos boss.
+  bardiche_locked = false
+  boss_phase2_fire_tentacle_unmaken = false
+  boss_phase2_fire_tentacle_hp_checker = 0
+  boss_phase3_attack_counter = 0
+  boss_disable_debuff_because_close_to_death = false
+
+
+func manage_special_before_common_foe_management()
+  return manage_quick_moving()
+
+
+func manage_specific_foe()
+  // No specific foe management for this stage
+  return false
+
+
+func configure_boss_options()
+  // TODO: test and define debuffs to apply on each of these bosses ...
+
+  ?boss_name = acronian
+    stage_utils.current_boss_name_human_readable = "Scout"
+
+  :?boss_name = dysangelos
+    // Defines common option for all the 3 phases of this boss.
+    //  - allow AAC break when boss weakness changes to avoid getting debuff on us with bad elemental attack.
+    equip_utils.aac_allow_break_by_weakness_change = true
+
+    //  - defines there should have no dash bash or any move between various boss phases.
+    stage_utils.boss_disable_bash_dash_between_bosses = true
+    stage_utils.boss_disable_move_between_bosses = true
+
+    //  - resets the HP threshold defining it is going to die
+    boss_disable_debuff_because_close_to_death = false
+
+    //  - resets bardiche lock (needed only if the boss died with a Bardiche hit during previous run)
+    bardiche_locked = false
+
+    //  - defines various debuff to apply
+    //    N.B.: they will be automatically disabled if boss gets its 'buff_protection' buff
+    stage_utils.boss_fire_off_debuff_to_apply = 1
+    stage_utils.boss_stun_off_debuff_to_apply = 1
+
+    // Defines option specific to each phase.
+    ?boss_name = bearer
+      stage_utils.current_boss_name_human_readable = "Dys. P1"
+
+      stage_utils.boss_ice_off_debuff_to_apply = 6
+
+    :?boss_name = elementalist
+      // Tips: no need to put Chill stack on boss in this phase because its attack are already slow, and low damage.
+      stage_utils.current_boss_name_human_readable = "Dys. P2"
+
+    :?boss_name = perfected
+      stage_utils.current_boss_name_human_readable = "Dys. P3"
+
+      stage_utils.boss_final_one = true
+      stage_utils.boss_forced_weakness = "fire"
+      stage_utils.boss_ice_off_debuff_to_apply = 6
+
+  :
+    bsquare_utils.register_tracker_message("Err. Need options for " + boss_name)
+
+
+
+func manage_boss()
+  ?harvest.distance < 10 & !speed_run // TODO: defines how to improve that ...
+    equip_utils.equip_weapon("right", "", shovel, "")
+
+  // Boss names:
+  //  Before end boss: acronian
+  //  Phase 1: "dysangelos bearer"
+  //  Phase 2: "dysangelos elementalist"
+  //  Phase 3: "dysangelos perfected"
+
+  ?boss_name = acronian
+    // Uses my dodge attack function, only if not in state 2 or 100 which corresponds to dialog.
+    ?foe.state >= 2 & foe.state ! 100
+      // Starts to quickly move to the boss.
+      ?!equip_utils.manage_bash_dash(fire, true)
+        // Uses an active Bardiche then.
+        ?!equip_utils.normal_bardiche()
+          // Applies debuff at beginning of the fight.
+          ?boss_acronian_debuffed | !equip_utils.apply_debuff(weakness, boss_acronian_debuff_ice_count, 0, 0, 0)
+            ?!boss_acronian_debuffed
+              boss_acronian_debuffed = true
+
+            // Ends it with dual AAC Bardiche.
+            equip_utils.equip_aac_bardiche()
+        :
+          // TODO: remove this debug info, whenever I want
+          equip_utils.track_bardiche_effect()
+
+    // Rebuilds health and armor asap.
+    :
+      equip_utils.auto_armor_static_no_healing()
+
+
+  // Defines once for all elemental attack timing whatever the dysangelos form.
+  // This boss is very a pain, because its elemental weakness/strength often changes,
+  //  need to use the same common way to act than for common factorized source code.
+  :?boss_name = dysangelos
+    // Safe-guard: ensures not getting debuff by the boss.
+    ?debuffs.count > 0
+      loc.pause()
+
+    // Debugs debuff application.
+    ?foe.state = 33 & foe.time = 1
+      debug_check_debuff()
+
+
+  // Manages Phase 1: "dysangelos bearer"
+  ?boss_name = bearer
+    // Informs.
+    var boss_msg = "Debuff=" + !boss_disable_debuff_because_close_to_death
+    stage_utils.boss_info(boss_msg)
+
+    // During dialog times, takes opportunity to rebuild health/armor.
+    ?(foe.state >= 100 & foe.state <= 102)
+      ?foe.distance > 18
+        ?!manage_quick_moving()
+          equip_utils.auto_heal_armor_pickup()
+      :
+        equip_utils.auto_armor_static_no_healing()
+
+    :?(foe.state >= 126 & foe.state <= 127) |
+    ^(foe.state >= 116 & foe.state <= 118)
+      equip_utils.auto_armor_static_no_healing()
+
+      // Tips: get extra armor in this phase (Mind stone thief tips).
+      ?foe.state = 118 & foe.time = 29
+        // TODO: craft and use an fire shield A +10
+        equip_utils.equip_weapon("left", fire, Hammer, A)
+
+    // Manages transformation time to second form.
+    :?(foe.state >= 124 & foe.state <= 125) | foe.hp <= 0
+      // This part is somehow useless, and manages automatically my generic code thanks to boss_disable_bash_dash_between_bosses option.
+      equip_utils.auto_armor_static_no_healing()
+
+    // Manages fight.
+    :
+      // Tips:
+      //  - starts asap with a normal bardiche, and anytime it can be used again against this Phase 1.
+      //  - N.B.: uses Bardiche on state 33 (instead of 32) to avoid my attack to be cancelled by the one of the Boss.
+      ?foe.state = 33  & foe.time >= 1 & !bardiche_locked
+        // Attempts to use the Bardiche, and locks algo on it if needed.
+        bardiche_locked = equip_utils.normal_bardiche()
+
+      //  - checks if the Bardiche Lock must be kept (will work even if the Bardiche is used across state 33 and another).
+      ?bardiche_locked
+        // This way lock will be maintained during all the Bardiche "animation", and will be released asap it is no more needed.
+        bardiche_locked = equip_utils.normal_bardiche()
+
+      //  - manages all other situation, if the Bardiche is not locked.
+      ?!bardiche_locked
+        // Manages all others elemental attack.
+        ?foe.state = 32
+          ?!manage_elemental_attack()
+            manage_highest_dps()
+
+        :
+          manage_highest_dps()
+
+      :
+        // TODO: remove this debug info, whenever I want
+        equip_utils.track_bardiche_effect()
+
+  // Manages Phase 2: "dysangelos elementalist"
+  :?boss_name = elementalist
+    // Informs.
+    var boss_msg = "Unmaken=" + boss_phase2_fire_tentacle_unmaken + " exp.at.time=" + define_attack_time()
+    ?bsquare_utils.get_foe_buff_count(buff_protection)
+      boss_msg = boss_msg + " Buffed!"
+    :
+      boss_msg = boss_msg + " Debuff=" + !boss_disable_debuff_because_close_to_death
+    stage_utils.boss_info(boss_msg)
+
+    // Checks if fire tentacle has just been unmaken !!!
+    ?foe.state = 33 & weakness = ether & !boss_phase2_fire_tentacle_unmaken
+      boss_phase2_fire_tentacle_unmaken = (boss_phase2_fire_tentacle_hp_checker - foe.hp > 300)
+
+      ?!boss_phase2_fire_tentacle_unmaken & foe.time = 0
+        var attack_time = define_attack_time()
+        var boss_chill_stack = bsquare_utils.get_foe_debuff_count(ice)
+        bsquare_utils.register_tracker_message_with_prefix("Err. Fire T. unmake failed? Chill on boss=" + boss_chill_stack + "; exp. att. time: " + define_attack_time())
+
+    // Manages transformation time to third form.
+    ?foe.state >= 107 & foe.state <= 108 | foe.hp <= 0
+      equip_utils.auto_armor_static_no_healing()
+
+    // Manages all elemental attacks.
+    :?foe.state = 32
+      // Unmakes the fire tentacle asap! if not already done.
+      ?!boss_phase2_fire_tentacle_unmaken & weakness = ether & foe.time = define_attack_time() & loc.stars > 8
+        equip_utils.break_aac_if_any()
+        equip_utils.equip_weapon("left", ether, Hammer, au)
+        equip_utils.equip_weapon("right", vigor, shield, ah)
+
+        // Updates checker.
+        boss_phase2_fire_tentacle_hp_checker = foe.hp
+
+      // Manages all others elemental attack, which is always at time 59 in this phase.
+      :?!manage_elemental_attack()
+        manage_highest_dps()
+
+    :
+      manage_highest_dps()
+
+  // Manages Phase 3: "dysangelos perfected"
+  :?boss_name = perfected
+    // Informs.
+    var boss_msg = "Att.n°" + boss_phase3_attack_counter + " Debuff=" + !boss_disable_debuff_because_close_to_death
+    stage_utils.boss_info(boss_msg)
+
+    // Updates count of attacks (to dodge at good time).
+    ?foe.state = 32 & foe.time = 1
+      boss_phase3_attack_counter++
+
+    // Tips:
+    //  - N.B.: uses Bardiche on state 33 (instead of 32) to avoid my attack to be cancelled by the one of the Boss.
+    //  - does NOT check boss_phase3_attack_counter anymore to take opportunity to use (normal) Bardiche again at end of fight.
+    ?foe.state = 33 & boss_phase3_attack_counter % 3 & !bardiche_locked
+      // Attempts to use the Bardiche, and locks algo on it if needed.
+      bardiche_locked = equip_utils.optimal_bardiche_with_potion()
+
+    //  - checks if the Bardiche Lock must be kept (will work even if the Bardiche is used across state 33 and another).
+    ?bardiche_locked
+      // This way lock will be maintained during all the Bardiche "animation", and will be released asap it is no more needed.
+      bardiche_locked = equip_utils.optimal_bardiche_with_potion()
+
+    //  - manages all other situation, if the Bardiche is not locked.
+    ?!bardiche_locked
+      // Dodges various attacks.
+      ?loc.stars >= 10 &
+      ^((foe.state = 115 & foe.time >= 49) |
+      ^(foe.state = 32 & !(boss_phase3_attack_counter % 3) & foe.time > 59) |
+      ^(foe.state = 33 & !(boss_phase3_attack_counter % 3) & foe.time < 7))
+        equip_utils.break_aac_if_any()
+        // Uses Mind stone, and asap distance is effective, switch to a swand on left hand.
+        ?foe.distance < 20
+          equip_utils.equip_weapon("left", "", mind, stone)
+        :
+          equip_utils.equip_weapon("left", fire, wand, D)
+
+        // Uses my best wand on right hand, in any case.
+        equip_utils.equip_weapon("right", ether, wand, D)
+
+      // Manages Boss when it has armor.
+      :?foe.armor > 0
+        ?!equip_utils.manage_bash_dash(weakness, true)
+          equip_utils.equip_aac_hammer_damage()
+
+      // Manages all others elemental attack.
+      :?foe.state = 32
+        ?!manage_elemental_attack()
+          manage_highest_dps()
+
+      :
+        manage_highest_dps()
+
+    :
+      // TODO: remove this debug info, whenever I want
+      equip_utils.track_bardiche_effect()
+
+
+func manage_quick_moving()
+  // Uses Quarterstaff to dash quickly, each time possible.
+  ?item.getcooldown("quarterstaff") <= 0 & item.CanActivate() & foe.distance > 9
+    equip_utils.equip_weapon("right", "", quarterstaff, "")
+    activate R
+    return true
+
+  return false
+
+
+func manage_highest_dps()
+  ?!equip_utils.manage_bash_dash(weakness, true)
+    equip_utils.equip_aac_weapon(weakness, Sword, Wand)
+
+
+func define_attack_time()
+  var boss_chill_stack = bsquare_utils.get_foe_debuff_count(ice)
+  var min_time
+  var max_time
+
+  // Defines min/max time according to Boss phase.
+  ?boss_name = bearer
+    min_time = 49
+    ?loc.stars < 11
+      max_time = 69
+    :
+      max_time = 64
+
+  :?boss_name = elementalist
+    min_time = 59
+    max_time = 99
+
+  :?boss_name = perfected
+    min_time = 49
+    max_time = 89
+
+  // Returns expected attack time according to Chill stacks on Boss.
+  ?boss_chill_stack = 6
+    return max_time
+
+  :?!boss_chill_stack
+    return min_time
+
+  :
+    // TODO: computation to be challenged
+    return min_time + ((max_time - min_time) * boss_chill_stack) / 6
+
+
+func manage_elemental_attack()
+  var attack_time = define_attack_time()
+
+  // TODO: adapts this threshold to speed up my timing according to my gear (could be /6 for +13/14; /4 for +16/17; /3 for +20/21).
+  ?foe.hp <= 2 * equip_utils.inventory.sword_D_dmg_per_hit & !boss_disable_debuff_because_close_to_death
+    boss_disable_debuff_because_close_to_death = true
+
+    // Disables some debuff requests.
+    // Important: keeps absolutely Ice debuff till the end.
+    stage_utils.update_debuff_request_fire_off(0)
+    stage_utils.update_debuff_request_poison_off(0)
+
+  // Checks if debuff has been disabled according to Boss HP.
+  ?boss_disable_debuff_because_close_to_death
+    // Informs there is nothing more this function can do atm.
+    return false
+
+  // Checks if the difficulty is enough for such defensive strategy to be interesting (otherwise bursts it down quickly).
+  ?loc.stars <= 8
+    return false
+
+  // Manages fire offensive debuff, if:
+  //  - not already applied (automatically checked inside AAC auto debuff system)
+  //  - in phase 1 & 3, without other condition
+  //  - in phase 2:
+  //    * not under 'buff_protection' buff (automatically checked inside AAC auto debuff system)
+  //    * not for vigor attack (weakness poison), because he is going to apply 'buff_protection', and will immediately remove it, so it is useless
+  ?boss_name = elementalist
+    ?weakness = poison
+      stage_utils.update_debuff_request_fire_off(0)
+    :
+      // Ensures to restore fire offensive debuff request for all others weakness
+      stage_utils.update_debuff_request_fire_off(1)
+
+  // Manages/requests poison offensive debuff, to reduce its attack strength, for higher Level(s), if:
+  //  - not already applied
+  //  - in phase 1 & 3, without other condition
+  //  - in phase 2:
+  //    * not under 'buff_protection' buff
+  //    * not for lower level
+  //    * not for vigor attack (weakness poison), its attack does no damage
+  //    * not for fire attack (weakness ether), if Fire Tentacle already unmaken, because its attack does no more damage
+  ?foe.time = Math.min(0, attack_time - 3 * equip_utils.aac_sword_timing_enchant_13) &
+  ^!bsquare_utils.get_foe_debuff_count(poison) &
+  ^!bsquare_utils.get_foe_buff_count(buff_protection) &
+  ^(boss_name ! elementalist | (loc.stars >= 13 & !(weakness = poison | (weakness = ether & boss_phase2_fire_tentacle_unmaken))))
+    // Updates AAC debuff auto to request poison debuff apply.
+    // If an AAC is requesting by other parts of this script, the poison should be automatically applied.
+    equip_utils.aac_configure_debuff_auto_one_shot_poison()
+    // Returns false for AAC request to be kept on.
+    return false
+
+  // Manages fire defensive debuff at specified timing if needed.
+  :?foe.time = attack_time
+    // Manages fire defensive debuff, if:
+    //  - not already applied
+    //  - in phase 1 & 3, without other condition
+    //  - in phase 2:
+    //    * not under 'buff_protection' buff
+    //    * not for vigor attack (weakness poison), because he is going to apply 'buff_protection', and will immediately remove it, so it is useless
+    //    * not for fire attack (weakness ether), if Fire Tentacle already unmaken, because it won't really be an attack anymore
+    // Safe_guard: when Dysangelos phase 2 gets 'buff_protection' buff, it is no more possible to debuff it, so uses directly the shield.
+    ?!bsquare_utils.get_foe_debuff_count(fire_def) &
+    ^!bsquare_utils.get_foe_buff_count(buff_protection) &
+    ^(boss_name ! elementalist | !(weakness = poison | (weakness = ether & boss_phase2_fire_tentacle_unmaken)))
+      // Equips on right hand either fire hammer af if not already debuff
+      equip_utils.break_aac_if_any()
+      equip_utils.equip_weapon("left", weakness, Sword, D)
+      equip_utils.equip_weapon("right", Fire, Hammer, af)
+      return true
+
+    // Manages Vigor Shield ah, in phase 3 only, if:
+    //  - not for lower level
+    //  - not if enough armor to support hit
+    //  - not under potion effect
+    ?boss_name = perfected &
+    ^loc.stars >= 13 & armor < 17 &
+    ^!bsquare_utils.get_foe_buff_count(buff_protection) &
+    ^!equip_utils.is_under_potion_effect()
+      // Breaks running AAC if any, but equips left a sword like it was certainly the case.
+      equip_utils.break_aac_if_any()
+      equip_utils.equip_weapon("left", weakness, Sword, D)
+      equip_utils.equip_weapon("right", vigor, shield, ah)
+      return true
+
+  // Nothing to do otherwise.
+  return false
+
+
+func debug_check_debuff()
+  // Function intended to be used in state 33, to ensure state 32 has been correctly managed.
+  // It is the way it can be used (in generic condition for ALL phases).
+  // ?foe.state = 33 & foe.time = 1
+  //   debug_check_debuff()
+
+  // Safe_guard: when Dysangelos phase 2 gets 'buff_protection' buff, it is no more possible to debuff it.
+  // Or when boss_disable_debuff_because_close_to_death option is set.
+  ?bsquare_utils.get_foe_buff_count(buff_protection) | boss_disable_debuff_because_close_to_death
+    // Considers it is OK.
+    return true
+
+  var check_message = "Debuff check: "
+  var check_ok = true
+  ?!bsquare_utils.get_foe_debuff_count(fire_def)
+    check_message = check_message + " fire_def KO"
+    check_ok = false
+
+  ?!bsquare_utils.get_foe_debuff_count(poison)
+    check_message = check_message + " poison KO"
+    check_ok = false
+
+  ?check_ok
+    bsquare_utils.register_tracker_message_with_prefix(check_message + " OK")
+  :
+    bsquare_utils.register_tracker_message_with_prefix("Err. " + check_message + " w=" + weakness)

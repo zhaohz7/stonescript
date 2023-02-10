@@ -1,0 +1,180 @@
+?loc=Boiling
+	var Extract = import Extract
+	var PotionTimer = import PotionFilter
+	var AdjustBFG = import UI/ActivationCenter
+	var BronzeKnockCount
+	var BronzeKnockCounted
+	var IceSmitetime
+	var SAtime
+	var swordtime
+	var hammertime
+	var crossbowtime
+	var dottime
+	var poisontime
+	?loc.begin
+		BronzeKnockCount = 0
+		BronzeKnockCounted = 0
+		IceSmitetime = 0
+		SAtime = 0
+		swordtime = 0
+		hammertime = 0
+		crossbowtime = 0
+		dottime = 0
+		poisontime = 0
+		AdjustBFG.changeBFGthcurrentTo(10)
+		?loc.stars > 12
+			brew stone
+	?loc.loop
+		BronzeKnockCount = 0
+		BronzeKnockCounted = 0
+		IceSmitetime = 0
+		SAtime = 0
+		swordtime = 0
+		hammertime = 0
+		crossbowtime = 0
+		dottime = 0
+		poisontime = 0
+	?ai.walking
+		SAtime = 0
+		IceSmitetime = 0
+	?item.GetCooldown("bardiche") < 879
+		?foe!boss
+			?foe.distance < 17
+				?foe.distance < 10 & (Extract.Smite[1] < 15 | (foe.hp + foe.armor) < 80)
+					?SAtime < 4
+						equip Skeleton Arm +21
+						SAtime++
+					:
+						equip Shiny Repeating Crossbow +21
+						equip Skeleton Arm +21
+						SAtime = 1
+				:?IceSmitetime % 7 < 3
+					equip Ice Staff dI +20
+					IceSmitetime++
+				:
+					equip Ice Crossbow dI +21
+					IceSmitetime++
+			:?foe.distance < 30 & foe.distance > 16
+				?armor > 70 & Extract.Smite[1] > 0
+					equipL trisk
+					equipR Ice Shield ai +21
+				:
+					equipL trisk
+					equipR Aether Shield A +21 -au
+		?foe = bomb cart
+			?foe.distance < 12
+				equipL mind stone
+				equipR Aether Shield au +21
+			:?foe.distance < 30
+				equipL trisk
+				equipR Aether Shield A +21
+		?foe = guardian
+			?BronzeKnockCount = 0 & loc.stars > 12 & hp < maxhp
+				loc.Leave()
+			?foe.state = 32 & BronzeKnockCounted = 0
+				BronzeKnockCount = BronzeKnockCount + 1
+				BronzeKnockCounted = 1
+			?foe.state = 33
+				BronzeKnockCounted = 0
+			?loc.stars > 12 & item.potion ! empty & item.potion = Strength & item.potion = auto & PotionTimer.PotionFilter(60)
+				activate potion
+			:?foe.state = 32 & foe.hp > 0
+				?BronzeKnockCount = 1
+					?foe.time > 33
+						?armor < 20
+							equipL trisk
+							equipR mind stone
+						:
+							equipL Vigor Hammer ah +21
+							equipR Fire Shield af -shiny +21
+				:?BronzeKnockCount = 2
+					?foe.time > 33
+						?armor < 40
+							equipL trisk
+							equipR mind stone
+						:
+							equipL Vigor Hammer ah +21
+							equipR Poison Shield ap +21
+				:?BronzeKnockCount = 3
+					?foe.time > 33
+						?armor < 60
+							equipL trisk
+							equipR mind stone
+						:
+							equipL Vigor Hammer ah +21
+							equipR Poison Shield ap +21
+			:?foe.distance > 16 & foe.distance < 30
+				?foe.distance <= 20 & !ai.paused & !(foe.state = 33 & foe.time < 150)
+					?Extract.FoeBurn[2] < 6 & dottime < 5
+						equip Fire Crossbow dF *0* +21
+						dottime++
+						crossbowtime = 0
+					:?Extract.FoePoison[2] < 17 & poisontime < 3
+						equip Shiny Rattlesnake dP +20
+						poisontime++
+						crossbowtime = 0
+					:
+						?crossbowtime % 8 < 4
+							equip Aether Crossbow D -shiny +21
+							crossbowtime++
+						:
+							equip Shiny Aether Crossbow D +21
+							crossbowtime++
+					?Extract.FoePoison[2] > 30
+						poisontime = 0
+					?Extract.FoeBurn[2] > 30
+						dottime = 0
+				:?armor < 14
+					equipL trisk
+					equipR Compound Shield +21
+				:
+					equipL trisk
+					equipR Shiny Compound Shield +21			
+			?foe.distance < 10
+				crossbowtime = 0
+				?foe.armor > 0
+					?loc.stars = 15 & item.potion = empty
+						loc.Leave()
+					?hammertime % 34 < 17
+						equipL Aether Hammer D +21
+						equipR Mjölnir +21
+						hammertime++
+					:
+						equipL Mjölnir +21
+						equipR Aether Hammer D +21
+						hammertime++
+				:
+					?swordtime % 8 < 4
+						?!Extract.FoePoison[0]
+							equipL Poison d_sword dP +20
+							equipR Aether d_sword D +21
+						:?!Extract.FoeBurn[0]
+							equipL Fire d_sword dF +20
+							equipR Aether d_sword D +21
+						:
+							equipL Aether d_sword D +20
+							equipR Aether d_sword D +21
+						swordtime++
+					:
+						?!Extract.FoePoison[0]
+							equipL Aether d_sword D +21
+							equipR Poison d_sword dP +20
+						:?!Extract.FoeBurn[0]
+							equipL Aether d_sword D +21
+							equipR Fire d_sword dF +20
+						:
+							equipL Aether d_sword D +21
+							equipR Aether d_sword D +20
+						swordtime++
+	?foe.distance > 29
+		?armor > 35
+			equipL trisk
+			equipR Cultist Mask
+		:?armor >= 14 | loc.begin | loc.loop
+			equipL trisk
+			equipR Shiny Compound Shield +21
+		:
+			equipL trisk
+			equipR Compound Shield -shiny +21			
+	?hp < maxhp
+		loc.Leave()

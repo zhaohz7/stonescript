@@ -1,0 +1,8 @@
+?ai.enabled
+  >`0,10,ai is on @time@
+:
+  >`0,10,ai is off @time@
+?ai.paused
+  >`0,11,ai suspend
+:
+  >`0,11,ai not suspend

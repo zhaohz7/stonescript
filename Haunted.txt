@@ -1,0 +1,201 @@
+?loc = Haunted
+	var Extract = import Extract
+	var PotionTimer = import PotionFilter
+	var AdjustBFG = import UI/ActivationCenter
+	var wandtime
+	var stafftime
+	var swordtime
+	var logx
+	var logy
+	var logz
+	?loc.begin
+		wandtime = 0
+		stafftime = 0
+		swordtime = 0
+		AdjustBFG.changeBFGthcurrentTo(12)
+		?loc.stars = 15
+			brew stone + bronze
+	?loc.loop
+		AdjustBFG.changeBFGthcurrentTo(13)
+		wandtime = 0
+		stafftime = 0
+		swordtime = 0
+	?totaltime % 2 = 0
+		logx = pos.x
+		logy = pos.y
+		logz = pos.z
+	?ai.walking | loc.loop | logx ! pos.x | logy ! pos.y | logz ! pos.z
+		wandtime = 0
+		stafftime = 0
+		swordtime = 0
+	?foe!boss
+		?foe.distance < 12 & foe.distance > 0
+			?Extract.Lucky[0] & Extract.Lucky[2] < 6000
+				?Extract.Smite[1] > 3 & Extract.FoeChill[1] < 6
+					?wandtime % 10 < 5
+						equipL Ice Wand dI +20
+						equipR Cultist Mask
+						wandtime++
+					:
+						equipL Ice Wand dI +21
+						equipR Cultist Mask
+						wandtime++
+				:
+					?wandtime % 10 < 5
+						equipL Vigor Wand D +20
+						equipR Cultist Mask
+						wandtime++
+					:
+						equipL Vigor Wand D +21
+						equipR Cultist Mask
+						wandtime++
+			:
+				?Extract.Smite[1] > 3 & Extract.FoeChill[1] < 6
+					?foe.count > 3
+						?wandtime % 10 < 5
+							equipL Ice Wand dI +20
+							equipR Ice Wand dI +21
+							wandtime++
+						:
+							equipL Ice Wand dI +21
+							equipR Ice Wand dI +20
+							wandtime++
+					:
+						?stafftime % 4 < 2
+							equip Shiny Ice Staff dI +20
+							stafftime++
+						:
+							equip Ice Staff dI +20 -shiny
+							stafftime++
+				:
+					?wandtime % 10 < 5
+						equipL Vigor Wand D +20
+						equipR Vigor Wand D +21
+						wandtime++
+					:
+						equipL Vigor Wand D +21
+						equipR Vigor Wand D +20
+						wandtime++
+	?foe = boss
+		?item.GetCooldown("bardiche") < 879
+			?foe = phase1
+				?foe.distance < 10
+					?foe.state = 32 & foe.time = 69
+						?armor < 30
+							equipR Aether Shield au +21
+						:
+							equipR Fire Shield af -shiny +21
+					:?swordtime % 8 < 4
+						?Extract.FoeChill[2] < 6 | Extract.FoeChill[1] < 6
+							equipL Ice d_sword dI +21
+							equipR Ice d_sword dI +20
+						:?!Extract.FoePoison[0]
+							equipL Vigor d_sword D +20
+							equipR Poison d_sword dP +20
+						:?!Extract.FoeBurn[0]
+							equipL Vigor d_sword D +20
+							equipR Fire d_sword dF +20
+						:?hp < maxhp
+							equipL Vigor d_sword D +20
+							equipR Vigor d_sword dL +20
+						:
+							equipL Vigor d_sword D +20
+							equipR Vigor d_sword D +21
+						swordtime++
+					:
+						?Extract.FoeChill[2] < 6 | Extract.FoeChill[1] < 6
+							equipL Ice d_sword dI +20
+							equipR Ice d_sword dI +21
+						:?!Extract.FoePoison[0]
+							equipL Poison d_sword dP +20
+							equipR Vigor d_sword D +20
+						:?!Extract.FoeBurn[0]
+							equipL Fire d_sword dF +20
+							equipR Vigor d_sword D +20
+						:?hp < maxhp
+							equipL Vigor d_sword dL +20
+							equipR Vigor d_sword D +20
+						:
+							equipL Vigor d_sword D +21
+							equipR Vigor d_sword D +20
+						swordtime++
+			:?foe = phase2
+				?foe.distance < 10
+					?foe.state = 33 & foe.time > 7 & foe.time < 23
+						equipL Vigor Hammer aL +21
+						equipR Vigor Shield A +21
+					:?swordtime % 8 < 4
+						?Extract.FoeChill[2] < 6 | Extract.FoeChill[1] < 6
+							equipL Ice d_sword dI +21
+							equipR Ice d_sword dI +20
+						:?!Extract.FoePoison[0]
+							equipL Vigor d_sword D +20
+							equipR Poison d_sword dP +20
+						:?!Extract.FoeBurn[0]
+							equipL Vigor d_sword D +20
+							equipR Fire d_sword dF +20
+						:?hp < maxhp
+							equipL Vigor d_sword D +20
+							equipR Vigor d_sword dL +20
+						:
+							equipL Vigor d_sword D +20
+							equipR Vigor d_sword D +21
+						swordtime++
+					:
+						?Extract.FoeChill[2] < 6 | Extract.FoeChill[1] < 6
+							equipL Ice d_sword dI +20
+							equipR Ice d_sword dI +21
+						:?!Extract.FoePoison[0]
+							equipL Poison d_sword dP +20
+							equipR Vigor d_sword D +20
+						:?!Extract.FoeBurn[0]
+							equipL Fire d_sword dF +20
+							equipR Vigor d_sword D +20
+						:?hp < maxhp
+							equipL Vigor d_sword dL +20
+							equipR Vigor d_sword D +20
+						:
+							equipL Vigor d_sword D +21
+							equipR Vigor d_sword D +20
+						swordtime++
+			:?foe = ghost_tomb
+				?swordtime % 8 < 4
+					equipL Vigor d_sword D +20
+					equipR Vigor d_sword D +21
+					swordtime++
+				:
+					equipL Vigor d_sword D +21
+					equipR Vigor d_sword D +20
+					swordtime++
+		:?item.GetCooldown("bardiche") < 881
+			?foe = phase1 & loc.stars = 15 & item.potion ! empty & item.potion = Lucky & item.potion = auto & Extract.Lucky[2] < 12000
+				activate potion
+	?foe.distance > 29 | ai.paused
+		?armor > 20
+			?hp < maxhp
+				equipL trisk
+				equipR Ouroboros
+			:
+				equipL trisk
+				equipR Cultist Mask
+		:?loc.begin | loc.loop | armor >= 14
+			equipL trisk
+			equipR Shiny Compound Shield +21
+		:
+			equipL trisk
+			equipR Compound Shield -shiny +21
+	:?foe.distance > 11 | ai.paused
+		?foe = boss
+			equipL trisk
+			equipR Cultist Mask
+		:?hp < maxhp & foe.distance > 18
+			equipL trisk
+			equipR Ouroboros
+		:?foe.distance < 26
+			equipL trisk
+			equipR Vigor Shield A +21
+		:
+			equipL trisk
+			equipR Cultist Mask
+	?hp < maxhp - 10
+		loc.Leave()

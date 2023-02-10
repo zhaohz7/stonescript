@@ -1,0 +1,611 @@
+//
+//  --------------------------------------------------------------------------
+//                           showLIP v0.1 (2021-07-19)
+//                         SHOW LOCATION INFO PERMANENT
+//                      AUTHOR: Max Bobisch aka Mindflower
+//                         (Mindflower#7650 on discord)
+//  --------------------------------------------------------------------------
+//
+//  Displays a detailed info sheet about the current Location
+//  in two Boxes at the top left, containing:
+//
+//                               ☆loc.name☆
+//  ☆loc.stars☆ ☆loopCount☆ ∑(index of recorded Runs) entireRecordedTime
+//  ┌───────────────────────────────┐
+//  │       ☆·Haunted Halls·☆       │
+//  │☆·LVL·7·☆ ☆·ROUND·2·☆ ∑(2)06:38│ 
+//  └───────────────────────────────┘
+//  ╓─╥─────╥───╖
+//  ║≡║TIME±║HPΔ║ (HPΔ: Player's HP at the end of a run
+//  ╠═╬═════╬═══╣       - HP at the run's beginning)
+//  ║→║00:07║  1║ runTime | currentHPDelta
+//  ║←║02:38║ -1║ last runTime | lastHPΔ
+//  ║↓║02:35║ -2║ minimumTime | minimumΔ
+//  ║↑║02:40║  2║ maximumTime | maximumΔ
+//  ║Ø║02:37║  0║ averageTime | averageΔ
+//  ║∑║01:45║  0║ Time since loc.begin | calculated future averageΔ when considering currentΔ
+//  ╙─╨─────╨───╜
+
+//  You can turn the functionality on and off using the showLI variable directly below (line 43).
+//  If you want to reset / delete the records (i did this several times when testing the script),
+//  just delete the commentar // signs in lines [215 - 223]
+
+
+// LI = Location Info
+
+  //Variables
+?loc.begin
+
+// ********************
+// *  DE- / ACTIVATE  *
+// * 1 = on , 0 = 0ff *
+// ********************
+  var showLI = 1
+  
+    // LEVEL NAME, LVL ROUND
+  var liLines = ["0"]
+  var liLineSizes = [0]
+  var maxliLineSize = 0
+  var liCount = 0
+  var loopCountLI = 1
+  var locNameLI = "☆·" + loc.name + "·☆"
+  var locStars = loc.stars
+  var difficultyLI
+  var entireTimeString = "0"
+  var offsetLI = 0  
+  var tmpoffsetLILI = 0
+  var tmpStringLI = "0"
+  var tmpSizeLI = 0
+  var horLinesLI = "0"
+  var tmpSpacesLI = "0"
+
+    //STATS DISPLAY
+  var runTimeTotal = 0
+  var frameCount = 0
+  var runFrames = 0
+  var lastRunFrames = 0
+  var timeString = "0"
+  var tmpMin = 0
+  var tmpMax = 0
+  var tmpAvg = 0
+  var minT = 0
+  var maxT = 0
+  var avgT = 0
+  var tmpSumAVG = 0
+  var tmpSum = 0
+  var startHP = hp
+  var endHP = 0
+  var tmpMinDiff = 0
+  var tmpMaxDiff = 0
+  var tmpAvgDiff = 0
+  var lastDiff = 0
+  var diffTMP = 0
+  var currentDiff = 0
+  var liStatLines = ["0"]
+  var stat1 = "╓─╥─────╥───╖"
+  var stat2 = "║≡║TIME±║HPΔ║"
+  var stat3 = "╠═╬═════╬═══╣"
+  var stat4 = "║→║00:00║  0║"
+  var stat5 = "║←║--:--║  -║"
+  var stat6 = "║↓║--:--║  -║"
+  var stat7 = "║↑║--:--║  -║"
+  var stat8 = "║Ø║--:--║  -║"
+  var stat9 = "║∑║00:00║  0║"
+  var stat10= "╙─╨─────╨───╜"
+  var accumDiff = 0
+  var liStatCount = 0
+  var tmpStringLIStat = "0"
+  var full = 0
+  var tmpStatTimeString = "0"
+  var tmpStatTimePadded = "0"
+  var tmpPadTime = "0"
+  var dayD = 0
+  var hourD = 0
+  var minD = 0
+  var secD = 0
+  var dayString = "0"
+  var hourString = "0"
+  var minString = "0"
+  var secString = "0"
+  var tmp = 0
+  
+    //permanant storage of Stats
+  // Wood W
+  // Rocky R
+  // Caves C
+  // Temple T
+  // Mushroom M
+  // Haunted H
+  // Boiling Mines B
+  // Icy I
+  // Other X
+  // z.B. recordedLoopsH13☆00001
+  
+  var locID 
+  var permSuffix
+  var permRunSuffix
+  ?loc=wood
+    locID="W"
+  :?loc=rocky
+    locID="R"
+  :?loc=cave
+    locID="C"
+  :?loc=temple
+    locID="T"
+  :?loc=mushroom
+    locID="M"
+  :?loc=haunted
+    locID="H"
+  :?loc=mine
+    locID="B"
+  :?loc=icy
+    locID="I"
+  :
+    locID="X"
+  permSuffix = locID + locStars + "☆"
+  
+  var permCountKey = "recordedLoops" + permSuffix
+  var permAvgTimeKey = "avgTime" + permSuffix
+  var permAvgDiffKey = "avgDiff" + permSuffix
+  var permMinTimeKey = "minTime" + permSuffix
+  var permMinDiffKey = "minDiff" + permSuffix
+  var permMaxTimeKey = "maxTime" + permSuffix
+  var permMaxDiffKey = "maxDiff" + permSuffix
+  var permRecordedTimeKey = "0"
+  var permDiffKey = "0"
+  
+  var permCount = -1
+  var permAvgTime = 0
+  var permAvgDiff = 0
+  var permMinTime = 0
+  var permMinDiff = 0
+  var permMaxTime = 0
+  var permMaxDiff = 0
+  var tmpSumDiff = 0
+  
+  var permRecordedTime = 0
+  var diffHP = 0
+  
+  ?Storage.Has(permCountKey)
+    permCount = Storage.Get(permCountKey)
+    permRunSuffix = padCountKey(permCount)
+    permRecordedTimeKey = "recordedTime" + permSuffix + permRunSuffix
+    permDiffKey = "diffHP" + permSuffix + permRunSuffix
+  ?Storage.Has(permAvgTimeKey)
+    permAvgTime = Storage.Get(permAvgTimeKey)
+    tmpAvg = timeDisplay(permAvgTime)
+  ?Storage.Has(permAvgDiffKey)
+    permAvgDiff = Storage.Get(permAvgDiffKey)
+  ?Storage.Has(permMinTimeKey)
+    permMinTime = Storage.Get(permMinTimeKey)
+    tmpMin = timeDisplay(permMinTime)
+  ?Storage.Has(permMinDiffKey)
+    permMinDiff = Storage.Get(permMinDiffKey)
+  ?Storage.Has(permMaxTimeKey)
+    permMaxTime = Storage.Get(permMaxTimeKey)
+    tmpMax = timeDisplay(permMaxTime)
+  ?Storage.Has(permMaxDiffKey)
+    permMaxDiff = Storage.Get(permMaxDiffKey)
+  ?Storage.Has(permRecordedTimeKey)
+    ?permCount=0
+      permRecordedTime = Storage.Get(permRecordedTimeKey)
+      lastRunFrames = permRecordedTime
+    ?permCount>0
+      permRecordedTimeKey = "recordedTime" + permSuffix + padCountKey(permCount-1)
+      lastRunFrames = Storage.Get(permRecordedTimeKey)
+  :
+    permRecordedTime = 0
+  ?Storage.Has(permDiffKey)
+    ?permCount=0
+      diffHP = Storage.Get(permDiffKey)
+      lastDiff = diffHP
+    ?permCount>0
+      permDiffKey = "diffHP" + permSuffix + padCountKey(permCount-1)
+      lastDiff = Storage.Get(permDiffKey)
+  :
+    diffHP = 0
+    
+  ?permCount=0
+    difficultyLI = "☆·LVL·" + locStars + "·☆ ☆·ROUND·"+ loopCountLI + "·☆"
+  :
+    entireTimeString = timeDisplay(entireTime())
+    difficultyLI = "☆·LVL·" + locStars + "·☆ ☆·ROUND·"+ loopCountLI + "·☆ ∑(" +
+    ^ permCount + ")" + entireTimeString
+
+  //Storage.Delete(permCountKey)
+  //Storage.Delete(permAvgTimeKey)
+  //Storage.Delete(permAvgDiffKey)
+  //Storage.Delete(permMinTimeKey)
+  //Storage.Delete(permMinDiffKey)
+  //Storage.Delete(permMaxTimeKey)
+  //Storage.Delete(permMaxDiffKey)
+  //Storage.Delete(permRecordedTimeKey)
+  //Storage.Delete(permDiffKey)
+
+
+?loc.loop
+  loopCountLI++
+
+  endHP = hp
+  diffTMP = endHP - startHP
+  startHP = hp
+  currentDiff = 0
+  runTimeTotal = runTimeTotal + runFrames
+  lastRunFrames = runFrames
+  lastDiff = diffTMP
+  
+    //permanent Storage
+  ?Storage.Has(permCountKey)
+    //permCount = Storage.Get(permCountKey)
+    Storage.Incr(permCountKey)
+    permCount++
+  :
+    permCount = 0
+    Storage.Set(permCountKey,permCount)
+  permRunSuffix = padCountKey(permCount)
+  permRecordedTimeKey = "recordedTime" + permSuffix + permRunSuffix
+  Storage.Set(permRecordedTimeKey,runFrames)
+  permDiffKey = "diffHP" + permSuffix + permRunSuffix
+  Storage.Set(permDiffKey,diffTMP)
+    //calculate min, max & avg
+  ?Storage.Has(permMinTimeKey)
+    permMinTime = Storage.Get(permMinTimeKey)
+  ?Storage.Has(permMinDiffKey)
+    permMinDiff = Storage.Get(permMinDiffKey)
+  ?Storage.Has(permMaxTimeKey)
+    permMaxTime = Storage.Get(permMaxTimeKey)
+  ?Storage.Has(permMaxDiffKey)
+    permMaxDiff = Storage.Get(permMaxDiffKey)
+  minT = minTime()
+  tmpMin = timeDisplay(minT)
+  maxT = maxTime()
+  tmpMax = timeDisplay(maxT)
+  avgT = avgTime()
+  tmpAvg = timeDisplay(avgT)
+  tmpMinDiff = minDiff()
+  tmpMaxDiff = maxDiff()
+  tmpAvgDiff = avgDiff()
+  Storage.Set(permAvgTimeKey,avgT)
+  Storage.Set(permAvgDiffKey,tmpAvgDiff)
+  Storage.Set(permMinTimeKey,minT)
+  Storage.Set(permMinDiffKey,tmpMinDiff)
+  Storage.Set(permMaxTimeKey,maxT)
+  Storage.Set(permMaxDiffKey,tmpMaxDiff)
+
+  //Updated every frame
+currentDiff = hp - startHP
+runFrames=totaltime
+?permCount=-1
+  difficultyLI = "☆·LVL·" + locStars + "·☆ ☆·ROUND·"+ loopCountLI + "·☆"
+:
+  entireTimeString = timeDisplay(entireTime())
+  difficultyLI = "☆·LVL·" + locStars + "·☆ ☆·ROUND·"+ loopCountLI + "·☆ ∑(" +
+  ^ permCount + ")" + entireTimeString
+
+
+func padCountKey(parKey)
+  var padTmp = ""
+  ?parKey<10000
+    padTmp = "0" + padTmp
+  ?parKey<1000
+    padTmp = "0" + padTmp
+  ?parKey<100
+    padTmp = "0" + padTmp
+  ?parKey<10
+    padTmp = "0" + padTmp
+  return padTmp + parKey
+  
+//[DD:][HH:]MM:SS Zeitanzeige-Funktion
+func timeDisplay(tmpTime)
+  var tmpInt = 0
+  dayD = tmpTime / 2592000
+  hourD = tmpTime / 108000
+  tmpInt = tmpTime % 108000
+  minD = tmpInt / 1800
+  tmpInt = tmpTime % 1800
+  secD = tmpInt / 30
+  dayString = "" + dayD
+  hourString = ＂＂ + hourD
+  minString = ＂＂ + minD
+  secString = ＂＂ + secD
+  ?dayD<10
+    dayString = "0" + dayD
+  ?hourD<10
+    hourString = ＂0＂ + hourD
+  ?minD<10
+    minString = ＂0＂ + minD
+  ?secD<10
+    secString = ＂0＂ + secD
+    
+  timeString = ""
+  ?dayD>0
+    timeString = dayString + ":" + hourString + ":" +
+    ^ minString + ":" + secString
+  :?hourD>0
+    timeString = hourString + ":" +
+    ^ minString + ":" + secString
+  :
+    timeString = minString + ":" + secString
+  
+  return timeString
+
+func padTime(tmpPar)
+  tmpPadTime = "" + tmpPar
+  full = String.Size(tmpPadTime)
+  for i = full..7
+    tmpPadTime = " " + tmpPadTime
+  return tmpPadTime
+  
+func padDelta(tmpDelta)
+  var returnDelta
+  ?tmpDelta <= -10 | tmpDelta >= 100
+    returnDelta = "" + tmpDelta
+  :?(tmpDelta  > -10 & tmpDelta < 0) | 
+  ^(tmpDelta >= 10 & tmpDelta < 100)
+    returnDelta = " " + tmpDelta
+  :?tmpDelta >= 0 & tmpDelta < 10
+    returnDelta = "  " + tmpDelta
+  :
+    returnDelta = "ERR"
+    
+  return returnDelta   
+
+func minDiff()
+  ?permCount>0
+    ?permMinDiff<diffTMP
+      return permMinDiff
+    :
+      return diffTMP
+  :?permCount=0
+    return currentDiff
+  :
+    return -1
+    
+func minTime()
+  ?permCount>0
+    ?permMinTime<runFrames
+      return permMinTime
+    :
+      return runFrames
+  :?permCount=0
+    return runFrames
+  :
+    return -1
+    
+func maxDiff()
+  ?permCount>0
+    ?permMaxDiff>diffTMP
+      return permMaxDiff
+    :
+      return diffTMP
+  :?permCount=0
+    return currentDiff
+  :
+    return -1
+    
+func maxTime()
+  ?permCount>0
+    ?permMaxTime>runFrames
+      return permMaxTime
+    :
+      return runFrames
+  :?permCount=0
+    return runFrames
+  :
+    return -1
+   
+func avgDiff()
+  //var tmpDiff = 0
+  ?permCount=0
+    return currentDiff
+  :?permCount > 0
+    tmpSumDiff = 0
+    for i = 0..permCount
+      permDiffKey = "diffHP" + permSuffix + padCountKey(i)
+      diffHP = Storage.Get(permDiffKey)
+      //tmpDiff = Int.Parse(diffHP)
+      tmpSumDiff = tmpSumDiff + diffHP
+    tmpAvgDiff = tmpSumDiff / (permCount+1)
+    return tmpAvgDiff
+  :
+    return -1
+
+func avgTime()
+  //var tmpFrames = 0
+  ?permCount=0
+    return runFrames
+  :?permCount > 0
+    tmpSumAVG = 0
+    for i = 0..permCount
+      permRecordedTimeKey = "recordedTime" + permSuffix + padCountKey(i)
+      permRecordedTime = Storage.Get(permRecordedTimeKey)
+      //tmpFrames = Int.Parse(permRecordedTime)
+      tmpSumAVG = tmpSumAVG + permRecordedTime
+    avgT = tmpSumAVG / (permCount+1)
+    return avgT
+  :
+    return -1
+
+func sumTime()
+  return runTimeTotal + runFrames
+  
+func entireTime()
+  var entireTMP = 0
+  //var tmpFrames = 0
+  ?permCount>=0
+    for i = 0..permCount
+      permRecordedTimeKey = "recordedTime" + permSuffix + padCountKey(i)
+      permRecordedTime = Storage.Get(permRecordedTimeKey)
+      //>c 0,0,permRecordedTime:@permRecordedTime@
+      //tmpFrames = Int.Parse(permRecordedTime)
+      entireTMP = entireTMP + permRecordedTime
+  entireTMP = entireTMP + runFrames
+  return entireTMP
+  
+func sumDiff()
+  accumDiff = currentDiff
+  //var tmpDiff = 0
+  ?permCount>0
+    tmpSumDiff = 0
+    for i = 0..permCount
+      permDiffKey = "diffHP" + permSuffix + padCountKey(i)
+      diffHP = Storage.Get(permDiffKey)
+      //tmpDiff = Int.Parse(diffHP)
+      tmpSumDiff = tmpSumDiff + diffHP
+    tmpSumDiff = tmpSumDiff + currentDiff
+    accumDiff = tmpSumDiff / (permCount+2)
+  return accumDiff
+    
+
+  //the actual Displayfunction
+?showLI=1
+
+    //String calculations
+ 
+    //Init maxLineSizes & Arrays
+  maxliLineSize = 0
+  liLineSizes.Clear()
+  liLineSizes.Add(String.Size(locNameLI))
+  liLineSizes.Add(String.Size(difficultyLI))  
+    
+    //Calculate maxliLineSize
+  for i = 0..liLineSizes.Count()-1
+    ?maxliLineSize<liLineSizes[i]
+      maxliLineSize=liLineSizes[i]
+
+    //Border Lines
+  horLinesLI=＂═＂
+  for i = 2.. maxliLineSize
+    horLinesLI = horLinesLI + ＂═＂
+  
+    //String-Array Building
+  liLines.Clear()
+  
+  tmpStringLI = "╒" + horLinesLI + "╕"
+  liLines.Add(tmpStringLI)
+  liLines.Add(locNameLI)
+  liLines.Add(difficultyLI)
+  tmpStringLI = "╘" + horLinesLI + "╛"
+  liLines.Add(tmpStringLI)
+  
+  liCount = liLines.Count()
+  
+    //fill with Spaces (if needed) and borders
+  for i = 1..liCount-2
+    tmpStringLI = liLines[i]
+    tmpSizeLI = String.Size(tmpStringLI)
+    tmpoffsetLILI = (maxliLineSize - tmpSizeLI) / 2
+    var mod = (maxliLineSize - tmpSizeLI) %2
+    ?(maxliLineSize - tmpSizeLI)>1
+      tmpSpacesLI = " "
+      ?(maxliLineSize - tmpSizeLI)>=4
+        for i = 2..tmpoffsetLILI
+          tmpSpacesLI = " " + tmpSpacesLI
+      ?mod=1
+        tmpStringLI = "│ " + tmpSpacesLI +
+        ^ tmpStringLI + tmpSpacesLI + ＂│＂
+      :
+        tmpStringLI = "│" + tmpSpacesLI +
+        ^ tmpStringLI + tmpSpacesLI + ＂│＂
+    :?(maxliLineSize - tmpSizeLI)=0
+      tmpStringLI = "│" + tmpStringLI + ＂│＂
+    :
+      tmpStringLI = "│ " + tmpStringLI + ＂│＂
+      
+    liLines.Emplace(i,tmpStringLI)
+  
+  
+    //STATS DISPLAY
+
+  
+  ?loopCountLI=1 & permCount=-1
+    tmpStatTimeString = timeDisplay(runFrames)
+    stat4 = "║→║" + tmpStatTimeString + "║" +
+    ^ padDelta(currentDiff) + "║"
+    tmpStatTimeString = timeDisplay(sumTime())
+    stat9 = "║∑║" + tmpStatTimeString + "║" +
+        ^ padDelta(accumDiff) + "║"
+    stat10= "╙─╨─────╨───╜"
+  
+  :?sumTime()>=108000
+    stat1 = "╓─╥────────╥───╖"
+    stat2 = "║≡║   TIME±║HPΔ║"
+    stat3 = "╠═╬════════╬═══╣"
+    stat10= "╙─╨────────╨───╜"
+    tmpStatTimeString = timeDisplay(runFrames)
+    tmpStatTimePadded = padTime(tmpStatTimeString)
+    stat4 = "║→║" + tmpStatTimePadded + "║" +
+    ^ padDelta(currentDiff) + "║"
+    tmpStatTimeString = timeDisplay(lastRunFrames)
+    tmpStatTimePadded = padTime(tmpStatTimeString)
+    stat5 = "║←║" + tmpStatTimePadded + "║" +
+    ^ padDelta(lastDiff) + "║"
+    tmpStatTimePadded = padTime(tmpMin)
+    stat6 = "║↓║" + tmpStatTimePadded + "║" +
+    ^ padDelta(tmpMinDiff) + "║"
+    tmpStatTimePadded = padTime(tmpMax)
+    stat7 = "║↑║" + tmpStatTimePadded + "║" +
+    ^ padDelta(tmpMaxDiff) + "║"
+    tmpStatTimePadded = padTime(tmpAvg)
+    stat8 = "║Ø║" + tmpStatTimePadded + "║" +
+    ^ padDelta(tmpAvgDiff) + "║"
+    tmp = sumTime()
+    tmpStatTimeString = timeDisplay(tmp)
+    tmpStatTimePadded = padTime(tmpStatTimeString)
+    accumDiff = sumDiff()
+    stat9 = "║∑║" + tmpStatTimePadded + "║" +
+    ^ padDelta(accumDiff) + "║"
+  :
+    stat1 = "╓─╥─────╥───╖"
+    stat2 = "║≡║TIME±║HPΔ║"
+    stat3 = "╠═╬═════╬═══╣"
+    tmpStatTimeString = timeDisplay(runFrames)
+    stat4 = "║→║" + tmpStatTimeString + "║" +
+    ^ padDelta(currentDiff) + "║"
+    tmpStatTimeString = timeDisplay(lastRunFrames)
+    stat5 = "║←║" + tmpStatTimeString + "║" +
+    ^ padDelta(lastDiff) + "║"
+    stat6 = "║↓║" + tmpMin + "║" +
+    ^ padDelta(tmpMinDiff) + "║"
+    stat7 = "║↑║" + tmpMax + "║" +
+    ^ padDelta(tmpMaxDiff) + "║"
+    stat8 = "║Ø║" + tmpAvg + "║" +
+    ^ padDelta(tmpAvgDiff) + "║"
+    tmp = sumTime()
+    tmpStatTimeString = timeDisplay(tmp)
+    accumDiff = sumDiff()
+    stat9 = "║∑║" + tmpStatTimeString + "║" +
+        ^ padDelta(accumDiff) + "║"
+    stat10= "╙─╨─────╨───╜"
+  
+  liStatLines.Clear()
+  liStatLines.Add(stat1)
+  liStatLines.Add(stat2)
+  liStatLines.Add(stat3)
+  liStatLines.Add(stat4)
+  liStatLines.Add(stat5)
+  liStatLines.Add(stat6)
+  liStatLines.Add(stat7)
+  liStatLines.Add(stat8)
+  liStatLines.Add(stat9) 
+  liStatLines.Add(stat10)
+  
+  liStatCount = liStatLines.Count()
+  
+
+    //Print-Instructions
+  for i = 0..liCount-1
+    tmpStringLI = liLines[i]
+    var j = i //+ 1
+    ?loc.stars<=5
+      >` 0,@j@,#white,@tmpStringLI@
+    :?loc.stars<=10
+      >` 0,@j@,#cyan,@tmpStringLI@
+    :?loc.stars<=15
+      >` 0,@j@,#yellow,@tmpStringLI@
+      
+  for i = 0..liStatCount-1
+    tmpStringLIStat = liStatLines[i]
+    var j = liCount + i //+ 1
+    >` 0,@j@,#white,@tmpStringLIStat@
+

@@ -1,0 +1,884 @@
+/*
+FrogJump by @Mind Stone Thief
+v0.6 unfinished prototype
+put into the game folder then:
+import Games/FrogJump
+
+Art by Joan Stark
+
+         .   ,
+       '. '.  \  \
+      ._ '-.'. `\  \
+        '-._; .'; `-.'. 
+       `~-.; '.       '.
+        '--,`           '.
+           -='.          ;
+ .--=~~=-,    -.;        ;
+ .-=`;    `~,_.;        /
+`  ,-`'    .-;         |
+   .-~`.    .;         ;
+    .;.-   .-;         ,\
+      `.'   ,=;     .-'  `~.-._
+       .';   .';  .'      .'   '-.
+         .\  ;  ;        ,.' _  a',
+        .'~";-`   ;      ;"~` `'-=.)
+      .' .'   . _;  ;',  ;
+      '-.._`~`.'  \  ; ; :
+           `~'    _'\\_ \\_ 
+                 /=`^^=`""/`)-.
+            jgs  \ =  _ =     =\
+                  `""` `~-. =   ;
+
+>c-7,5,#ffd700,@coin@
+*/
+ui.root.visible = true
+ui.root.style = 0
+
+var LotuAry = [0,1,1,1,1,1,1,1]
+
+var coin = ascii
+ _
+($)
+ ‾
+asciiend
+
+var LOGO
+var River
+var edge
+var LilyLeave0
+var LilyLeave1
+var LilyLeave2
+var LilyLeave3
+var LilyLeave4
+var LilyLeave5
+var LilyLeave6
+var LilyLeave7
+var Startbutton
+var GAMEOVER
+var eagle
+var transtyle
+var Frog
+var FrogJump
+var FrogEye
+var JumpArrow
+
+var croakonce = 0
+var startpos = 1
+var flytime = 0
+var staytime = 0
+var frogtime = -1
+var starttime = 0
+var presstime = -1
+
+var rngLD = 1
+var EmAry = [0,0,0,0,0,1]
+
+?loc.begin
+	ambient.Stop()
+	LOGO = ui.AddAnim(ascii
+    __
+   / _)              _          _
+ _/ /_ _ __  ___   _( )       _( )_   _  _ _  _ __
+|_   _| '__|/ _ \ / _ \      |_  | | | |'_'_'| '_ \
+  | | | |  | (_) | |_) |    _  | | |_| || | || |_) |
+  | | |_|   \___/ \__. |   | | | |\___/|| | || .__/
+  |_|              __/ /   | \_/ |     ‾‾ ‾ ‾| |
+                  |___/     \___/            |_|
+asciiend)
+	LOGO.x = 7
+	LOGO.y = -8
+	LOGO.w = 54
+	LOGO.h = 8
+	LOGO.anchor = center_center
+	LOGO.dock = center_center
+	LOGO.pivotX = 0
+	LOGO.pivotY = 0
+	LOGO.color = #32da5a
+	LOGO.duration = 0
+	LOGO.frame = 0
+	LOGO.loop = false
+	LOGO.flipX = false
+	LOGO.flipY = false
+	LOGO.playOnStart = false
+	LOGO.Stop()
+
+	River = ui.AddAnim(ascii
+-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~
+~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -
+ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~
+  ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~- 
+-   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  -
+  -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~  
+ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~
+~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   
+  ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~  
+    ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   - 
+~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~
+   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -
+  ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     - 
+ -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~   
+asciiend)
+	River.x = 0
+	River.y = screen.h/2 - 5
+	River.anchor = center_left
+	River.dock = center_left
+	River.color = #323232
+	River.duration = 0
+	River.frame = 0
+	River.loop = false
+	River.flipX = false
+	River.flipY = false
+	River.playOnStart = false
+	River.pivotX = 0
+	River.pivotY = 0
+	River.Stop()
+
+	edge = ui.AddAnim(ascii
+-,-^-,_,- -._-,__,^-_,-,^-_,-,^--,-^-,_,- -._-,__,^-_,-,^-_,-,^--,-^-,_,-^-._-,__,^-_,-,^--,-^-,^
+ | '||  | '|'|  '|  | '|  |'|  | | '||  | '|'|  '|  | '|  |'|  | | '||  | '|'|  '|  | '| ' | | '|
+asciiend)
+	edge.x = 0
+	edge.y = 0
+	edge.anchor = center_left
+	edge.dock = center_left
+	edge.color = #323232
+	edge.duration = 0
+	edge.frame = 0
+	edge.loop = false
+	edge.flipX = false
+	edge.flipY = false
+	edge.playOnStart = false
+	edge.pivotX = 0
+	edge.pivotY = 0
+	edge.Stop()
+
+	LilyLeave0 = ui.AddAnim(ascii
+####_
+#,´   `.
+/       \
+\       /
+#\/|..-´
+%%
+#
+asciiend)
+	LilyLeave0.anchor = center_left
+	LilyLeave0.dock = center_left
+	LilyLeave0.x = 0
+	LilyLeave0.y = 6
+	LilyLeave0.w = 10
+	LilyLeave0.h = 5
+	LilyLeave0.pivotX = 0
+	LilyLeave0.pivotY = 0
+	LilyLeave0.color = #618a3d
+	LilyLeave0.duration = 0
+	LilyLeave0.frame = 1
+	LilyLeave0.loop = false
+	LilyLeave0.flipX = false
+	LilyLeave0.flipY = false
+	LilyLeave0.playOnStart = false
+	LilyLeave0.Stop()
+
+	LilyLeave1 = ui.AddAnim(ascii
+####_
+#,´   `.
+/       \
+\       /
+#\/|..-´
+%%
+#
+asciiend)
+	LilyLeave1.anchor = center_left
+	LilyLeave1.dock = center_left
+	LilyLeave1.x = 10
+	LilyLeave1.y = 6
+	LilyLeave1.w = 10
+	LilyLeave1.h = 5
+	LilyLeave1.pivotX = 0
+	LilyLeave1.pivotY = 0
+	LilyLeave1.color = #618a3d
+	LilyLeave1.duration = 0
+	LilyLeave1.frame = 0
+	LilyLeave1.loop = false
+	LilyLeave1.flipX = false
+	LilyLeave1.flipY = false
+	LilyLeave1.playOnStart = false
+	LilyLeave1.Stop()
+
+	LilyLeave2 = ui.AddAnim(ascii
+####_
+#,´   `.
+/       \
+\       /
+#\/|..-´
+%%
+#
+asciiend)
+	LilyLeave2.anchor = center_left
+	LilyLeave2.dock = center_left
+	LilyLeave2.x = 20
+	LilyLeave2.y = 6
+	LilyLeave2.w = 10
+	LilyLeave2.h = 5
+	LilyLeave2.pivotX = 0
+	LilyLeave2.pivotY = 0
+	LilyLeave2.color = #618a3d
+	LilyLeave2.duration = 0
+	LilyLeave2.frame = 0
+	LilyLeave2.loop = false
+	LilyLeave2.flipX = false
+	LilyLeave2.flipY = false
+	LilyLeave2.playOnStart = false
+	LilyLeave2.Stop()
+
+	LilyLeave3 = ui.AddAnim(ascii
+####_
+#,´   `.
+/       \
+\       /
+#\/|..-´
+%%
+#
+asciiend)
+	LilyLeave3.anchor = center_left
+	LilyLeave3.dock = center_left
+	LilyLeave3.x = 30
+	LilyLeave3.y = 6
+	LilyLeave3.w = 10
+	LilyLeave3.h = 5
+	LilyLeave3.pivotX = 0
+	LilyLeave3.pivotY = 0
+	LilyLeave3.color = #618a3d
+	LilyLeave3.duration = 0
+	LilyLeave3.frame = 0
+	LilyLeave3.loop = false
+	LilyLeave3.flipX = false
+	LilyLeave3.flipY = false
+	LilyLeave3.playOnStart = false
+	LilyLeave3.Stop()
+
+	LilyLeave4 = ui.AddAnim(ascii
+####_
+#,´   `.
+/       \
+\       /
+#\/|..-´
+%%
+#
+asciiend)
+	LilyLeave4.anchor = center_left
+	LilyLeave4.dock = center_left
+	LilyLeave4.x = 40
+	LilyLeave4.y = 6
+	LilyLeave4.w = 10
+	LilyLeave4.h = 5
+	LilyLeave4.pivotX = 0
+	LilyLeave4.pivotY = 0
+	LilyLeave4.color = #618a3d
+	LilyLeave4.duration = 0
+	LilyLeave4.frame = 0
+	LilyLeave4.loop = false
+	LilyLeave4.flipX = false
+	LilyLeave4.flipY = false
+	LilyLeave4.playOnStart = false
+	LilyLeave4.Stop()
+
+	LilyLeave5 = ui.AddAnim(ascii
+####_
+#,´   `.
+/       \
+\       /
+#\/|..-´
+%%
+#
+asciiend)
+	LilyLeave5.anchor = center_left
+	LilyLeave5.dock = center_left
+	LilyLeave5.x = 50
+	LilyLeave5.y = 6
+	LilyLeave5.w = 10
+	LilyLeave5.h = 5
+	LilyLeave5.pivotX = 0
+	LilyLeave5.pivotY = 0
+	LilyLeave5.color = #618a3d
+	LilyLeave5.duration = 0
+	LilyLeave5.frame = 0
+	LilyLeave5.loop = false
+	LilyLeave5.flipX = false
+	LilyLeave5.flipY = false
+	LilyLeave5.playOnStart = false
+	LilyLeave5.Stop()
+
+	LilyLeave6 = ui.AddAnim(ascii
+####_
+#,´   `.
+/       \
+\       /
+#\/|..-´
+%%
+#
+asciiend)
+	LilyLeave6.anchor = center_left
+	LilyLeave6.dock = center_left
+	LilyLeave6.x = 60
+	LilyLeave6.y = 6
+	LilyLeave6.w = 10
+	LilyLeave6.h = 5
+	LilyLeave6.pivotX = 0
+	LilyLeave6.pivotY = 0
+	LilyLeave6.color = #618a3d
+	LilyLeave6.duration = 0
+	LilyLeave6.frame = 0
+	LilyLeave6.loop = false
+	LilyLeave6.flipX = false
+	LilyLeave6.flipY = false
+	LilyLeave6.playOnStart = false
+	LilyLeave6.Stop()
+
+	LilyLeave7 = ui.AddAnim(ascii
+####_
+#,´   `.
+/       \
+\       /
+#\/|..-´
+%%
+#
+asciiend)
+	LilyLeave7.anchor = center_left
+	LilyLeave7.dock = center_left
+	LilyLeave7.x = 70
+	LilyLeave7.y = 6
+	LilyLeave7.w = 10
+	LilyLeave7.h = 5
+	LilyLeave7.pivotX = 0
+	LilyLeave7.pivotY = 0
+	LilyLeave7.color = #618a3d
+	LilyLeave7.duration = 0
+	LilyLeave7.frame = 0
+	LilyLeave7.loop = false
+	LilyLeave7.flipX = false
+	LilyLeave7.flipY = false
+	LilyLeave7.playOnStart = false
+	LilyLeave7.Stop()
+
+	Startbutton = ui.AddButton()
+	Startbutton.x = 0
+	Startbutton.y = 0
+	Startbutton.text = te.xt(Play)
+	Startbutton.w = string.Size(Startbutton.text) + 6
+	Startbutton.h = 5
+	Startbutton.anchor = center_center
+	Startbutton.dock = center_center
+	Startbutton.tcolor = #EEEEEE
+	Startbutton.bcolor = #666666
+	Startbutton.hcolor = #999999
+	Startbutton.sound = confirm
+	Startbutton.style = 1
+	Startbutton.SetPressed(StartAnim)
+
+	GAMEOVER = ui.AddText()
+	GAMEOVER.x = 0
+	GAMEOVER.y = -3
+	GAMEOVER.w = 9
+	GAMEOVER.h = 1
+	GAMEOVER.anchor = center_center
+	GAMEOVER.dock = center_center
+	GAMEOVER.visible = false
+	GAMEOVER.align = "center"
+	GAMEOVER.text = "GAME OVER"
+	GAMEOVER.color = #ff2222
+
+	eagle = ui.AddAnim(ascii
+######## .###,
+#######'. '.  \  \
+######._ '-.'. `\  \
+######  '-._; .'; `-.'. 
+###### `~-.; '.       '.
+########'--,`           '.
+###########-='.          ;
+ .--=~~=-,####-.;        ;
+ .-=`;    `~,_.;        /
+`  ,-`'    .-;         |
+###.-~`.    .;         ;
+####.;.-   .-;         ,\
+######`.'   ,=;     .-'  `~.-._
+#######.';   .';  .'      .'   '-.
+#########.\  ;  ;        ,.' _  o',
+########.'~";-`   ;      ;"~` `'-=.)
+######.' .'   . _;  ;',  ;
+######'-.._`~`.'###\  ;; :
+###########`~'######'\\_\\_
+#####################/`("/`)-.
+asciiend)
+	eagle.anchor = center_left
+	eagle.dock = center_left
+	eagle.x = -10
+	eagle.y = -4
+	eagle.w = 36
+	eagle.h = 20
+	eagle.pivotX = 60
+	eagle.pivotY = 20
+	eagle.color = #9f9f9f
+	eagle.duration = 0
+	eagle.frame = 0
+	eagle.loop = false
+	eagle.flipX = false
+	eagle.flipY = false
+	eagle.playOnStart = false
+	eagle.visible = true
+	eagle.Stop()
+
+	transtyle = ui.AddStyle("#########")
+
+	Frog = ui.AddPanel()
+	Frog.x = 9
+	Frog.y = 5
+	Frog.w = 9
+	Frog.h = 5
+	Frog.anchor = center_left
+	Frog.dock = center_left
+	Frog.clip = false
+	Frog.color = #white
+	Frog.style = transtyle
+
+	FrogJump = ui.AddAnim(ascii
+#
+#
+#####,--
+###(! .-)
+###'·-((
+%%
+#
+#####,--
+####/ .-)
+##_(;-//
+###`
+%%
+#####.=-
+### / .-)
+##_(/-)´`
+#-´‾
+#
+%%
+#####.O-
+###,´ .-)
+#_(/--‾´‾
+-´‾
+#
+%%
+#
+#####.Oo
+-´-`´ .-)
+####`-‾´‾
+#
+%%
+#
+#
+##_##.Oo
+#/-`´ .-)
+###`--\´\
+%%
+#
+#
+#####,Oo
+##(\/ .-)
+##´ ·-\´\
+asciiend)
+	FrogJump.anchor = center_left
+	FrogJump.dock = center_left
+	FrogJump.x = 0
+	FrogJump.y = 0
+	FrogJump.w = 9
+	FrogJump.h = 5
+	FrogJump.pivotX = 0
+	FrogJump.pivotY = 0
+	FrogJump.color = #32da5a
+	FrogJump.duration = 30
+	FrogJump.flipX = false
+	FrogJump.flipY = false
+	FrogJump.frame = 0
+	FrogJump.gamePause = true
+	FrogJump.loop = true
+	FrogJump.Play()
+	Frog.Add(FrogJump)
+
+	FrogEye = ui.AddAnim(ascii
+#
+#
+######--
+#
+#
+%%
+#
+######--
+#
+#
+#
+%%
+######=-
+#
+#
+#
+#
+%%
+######O-
+#
+#
+#
+#
+%%
+#
+######Oo
+#
+#
+#
+%%
+#
+#
+######Oo
+#
+#
+%%
+#
+#
+######Oo
+#
+#
+asciiend)
+	FrogEye.anchor = center_left
+	FrogEye.dock = center_left
+	FrogEye.x = 0
+	FrogEye.y = 0
+	FrogEye.w = 9
+	FrogEye.h = 5
+	FrogEye.pivotX = 0
+	FrogEye.pivotY = 0
+	FrogEye.color = #EEEEEE
+	FrogEye.duration = 30
+	FrogEye.flipX = false
+	FrogEye.flipY = false
+	FrogEye.frame = 0
+	FrogEye.gamePause = true
+	FrogEye.loop = true
+	FrogEye.Play()
+	Frog.Add(FrogEye)
+
+	JumpArrow = ui.AddAnim(ascii
+#
+#
+#
+#
+#
+.......
+##;;;:;
+.;;;::;
+######'
+%%
+#
+#
+#
+#
+##.......
+####;;;:;
+##.;;;::;
+.;;;:###'
+%%
+#
+#
+#
+####.......
+######;;;:;
+####.;;;::;
+##.;;;:###'
+.;;;:
+%%
+#
+#
+######.......
+########;;;:;
+######.;;;::;
+####.;;;:###'
+##.;;;:
+.;;;:
+%%
+#
+########.......
+##########;;;:;
+########.;;;::;
+######.;;;:###'
+####.;;;:
+##.;;;:
+.;;;:
+%%
+##########.......
+############;;;:;
+##########.;;;::;
+########.;;;:###'
+######.;;;:
+####.;;;:
+##.;;;:
+.;;;:
+asciiend)
+	JumpArrow.x = 15
+	JumpArrow.y = 1
+	JumpArrow.w = 17
+	JumpArrow.h = 8
+	JumpArrow.anchor = center_left
+	JumpArrow.dock = center_left
+	JumpArrow.visible = false
+	JumpArrow.pivotX = 0
+	JumpArrow.pivotY = 0
+	JumpArrow.color = #02e5ff
+	JumpArrow.duration = 72
+	JumpArrow.flipX = false
+	JumpArrow.flipY = false
+	JumpArrow.frame = 0
+	JumpArrow.gamePause = true
+	JumpArrow.loop = false
+	JumpArrow.Stop()
+
+func DisplayAryControl(array)
+	?array.Count() > 0
+		?array[0] = 1
+			LilyLeave0.frame = 0
+		:
+			LilyLeave0.frame = 1
+		?array.Count() > 1
+			?array[1] = 1
+				LilyLeave1.frame = 0
+			:
+				LilyLeave1.frame = 1
+			?array.Count() > 2
+				?array[2] = 1
+					LilyLeave2.frame = 0
+				:
+					LilyLeave2.frame = 1
+				?array.Count() > 3
+					?array[3] = 1
+						LilyLeave3.frame = 0
+					:
+						LilyLeave3.frame = 1
+					?array.Count() > 4
+						?array[4] = 1
+							LilyLeave4.frame = 0
+						:
+							LilyLeave4.frame = 1
+						?array.Count() > 5
+							?array[5] = 1
+								LilyLeave5.frame = 0
+							:
+								LilyLeave5.frame = 1
+							?array.Count() > 6
+								?array[6] = 1
+									LilyLeave6.frame = 0
+								:
+									LilyLeave6.frame = 1
+								?array.Count() > 7
+									?array[7] = 1
+										LilyLeave7.frame = 0
+									:
+										LilyLeave7.frame = 1
+DisplayAryControl(LotuAry)
+
+func GenerateNewLily(array)
+	?staytime = 1
+		rngLD = rng % 64
+		var carry = rngLD
+		for i = 5..0
+			carry = carry - math.Pow(2, i)
+			?carry >= 0
+				EmAry[5-i] = 1
+			:
+				EmAry[5-i] = 0
+				carry = carry + math.Pow(2, i)
+		?startpos > 1 & presstime = -1
+			for i = 0..7
+				?i < 9 - startpos
+					LotuAry.Emplace(i, LotuAry[i + startpos - 1])
+				:?i < 7
+					LotuAry.Emplace(i, EmAry[i-2])
+				:?!(LotuAry[2] = 0 & LotuAry[3] = 0 & LotuAry[4] = 0 & LotuAry[5] = 0 & LotuAry[6] = 0)
+					LotuAry.Emplace(7, EmAry[5])
+				:
+					LotuAry.Emplace(7, 1)
+		:
+			for i = 0..7
+				?i < 8 - math.Clamp((presstime+11)/12, 1, 6)
+					LotuAry.Emplace(i, LotuAry[i + math.Clamp((presstime+11)/12, 1, 6)])
+				:?i < 7
+					LotuAry.Emplace(i, EmAry[i-2])
+				:?!(LotuAry[2] = 0 & LotuAry[3] = 0 & LotuAry[4] = 0 & LotuAry[5] = 0 & LotuAry[6] = 0)
+					LotuAry.Emplace(7, EmAry[5])
+				:
+					LotuAry.Emplace(7, 1)
+GenerateNewLily(LotuAry)
+
+?FrogJump.frame = 0 & croakonce = 0
+	play frog
+	croakonce = 1
+?FrogJump.frame ! 0
+	croakonce = 0
+
+?frogtime > 0 & eagle.visible = false
+	frogtime++
+?staytime > 0
+	staytime++
+
+?starttime > 0 & key = primaryEnd & frogtime = 0 & (input.x > Frog.absoluteX + 1 & input.x < Frog.absoluteX + Frog.w) & (input.y > Frog.absoluteY + 1 & input.y < Frog.absoluteY + Frog.h)
+	?starttime < 13
+		FrogJump.duration = 14
+	:?starttime < 25
+		FrogJump.duration = 20
+	:?starttime < 37
+		FrogJump.duration = 25
+	:?starttime < 49
+		FrogJump.duration = 28
+	:?starttime < 61
+		FrogJump.duration = 31
+	:
+		FrogJump.duration = 35
+	FrogEye.duration = FrogJump.duration
+	presstime = starttime
+	starttime = 0
+	staytime = 0
+	frogtime++
+	FrogJump.Play()
+	FrogEye.Play()
+:?key = primaryBegin & frogtime = 0 & (input.x > Frog.absoluteX + 1 & input.x < Frog.absoluteX + Frog.w) & (input.y > Frog.absoluteY + 1 & input.y < Frog.absoluteY + Frog.h)
+	starttime = 1
+:?starttime > 0 & key = primary & frogtime = 0 & (input.x > Frog.absoluteX + 1 & input.x < Frog.absoluteX + Frog.w) & (input.y > Frog.absoluteY + 1 & input.y < Frog.absoluteY + Frog.h)
+	starttime++
+:
+	starttime = 0
+
+?starttime > 0
+	JumpArrow.visible = true
+	?starttime < 13
+		JumpArrow.color = #02e5ff
+		JumpArrow.frame = 0
+	:?starttime < 25
+		JumpArrow.color = #ffff62
+		JumpArrow.frame = 1
+	:?starttime < 37
+		JumpArrow.color = #32da5a
+		JumpArrow.frame = 2
+	:?starttime < 49
+		JumpArrow.color = #0063ff
+		JumpArrow.frame = 3
+	:?starttime < 61
+		JumpArrow.color = #ff2222
+		JumpArrow.frame = 4
+	:
+		JumpArrow.color = #rainFF
+		JumpArrow.frame = 5
+:
+	JumpArrow.visible = false
+	JumpArrow.color = #02e5ff
+	JumpArrow.frame = 0
+
+func StartAnim()
+	GAMEOVER.visible = false
+	frogtime = 1
+	?eagle.visible = true
+		flytime = 1
+		FrogJump.loop = false
+		FrogEye.loop = false
+	:
+		FrogJump.duration = 20
+		FrogEye.duration = 20
+		FrogJump.Play()
+		FrogEye.Play()
+	Startbutton.visible = false
+
+?flytime = 1
+	play scout_arrives
+?flytime > 0
+	flytime++
+?flytime > 60
+	LOGO.visible = false
+	eagle.visible = false
+	flytime = 0
+	?frogtime = 1
+		FrogJump.duration = 20
+		FrogEye.duration = 20
+		FrogJump.Play()
+		FrogEye.Play()
+:?flytime > 30
+	eagle.pivotX = 60 - 2*flytime
+	eagle.pivotY = math.RoundToInt(5*math.Pow((flytime-30)*0.066, 2))
+	Frog.x = 9 - eagle.pivotX
+	Frog.y = 5 - eagle.pivotY
+:?flytime > 0
+	eagle.pivotX = 60 - 2*flytime
+	eagle.pivotY = math.RoundToInt(20 - 5*math.Pow(flytime*0.066, 2))
+	LOGO.pivotX = -3*flytime
+
+?presstime = -1
+	?frogtime > 0 & eagle.visible = false
+		for i = 1..7
+			?LotuAry[i] = 1
+				startpos = i
+				i = 8
+		Frog.x = math.RoundToInt(math.Sqrt(2*(startpos+1))*frogtime/2-11)
+		Frog.y = math.RoundToInt(((math.Sqrt(2*(startpos+1))*frogtime/2)*(math.Sqrt(2*(startpos+1))*frogtime/2-5-10*startpos))/(10*(startpos+1)))
+		?Frog.x >= 10*startpos - 1
+			frogtime = 0
+			?startpos > 1
+				staytime = 1
+	?frogtime = 0 & eagle.visible = false
+		Frog.x = 9
+		Frog.y = 5
+:?presstime < 13
+	Frog.x = math.RoundToInt(0.707*frogtime+9)
+	Frog.y = math.RoundToInt(0.1*(0.707*frogtime)*(0.707*frogtime-10)+5)
+	?Frog.x >= 19
+		frogtime = 0
+		staytime = 1
+:?presstime < 25
+	Frog.x = math.RoundToInt(frogtime+9)
+	Frog.y = math.RoundToInt(0.05*math.Pow(frogtime-10,2))
+	?Frog.x >= 29
+		frogtime = 0
+		staytime = 1
+:?presstime < 37
+	Frog.x = math.RoundToInt(1.2*frogtime+9)
+	Frog.y = math.RoundToInt(0.033*(1.225*frogtime)*(1.2*frogtime-30)+5)
+	?Frog.x >= 39
+		frogtime = 0
+		staytime = 1
+:?presstime < 49
+	Frog.x = math.RoundToInt(1.414*frogtime+9)
+	Frog.y = math.RoundToInt(0.025*(1.414*frogtime)*(1.414*frogtime-40)+5)
+	?Frog.x >= 49
+		frogtime = 0
+		staytime = 1
+:?presstime < 61
+	Frog.x = math.RoundToInt(1.6*frogtime+9)
+	Frog.y = math.RoundToInt(0.02*(1.581*frogtime)*(1.6*frogtime-50)+5)
+	?Frog.x >= 59
+		frogtime = 0
+		staytime = 1
+:
+	Frog.x = math.RoundToInt(1.71*frogtime+9)
+	Frog.y = math.RoundToInt(0.0167*(1.732*frogtime)*(1.71*frogtime-60)+5)
+	?Frog.x >= 69
+		frogtime = 0
+		staytime = 1
+
+River.pivotX = math.RoundToInt(totaltime*0.2) % screen.w
+
+?presstime ! - 1 & LotuAry[1] = 0 & staytime = 2
+	eagle.visible = true
+	GAMEOVER.visible = true
+	flytime = 1
+	frogtime = -1
+	starttime = 0
+	presstime = -1
+	staytime = 0
+?LotuAry[1] = 0 & flytime = 60
+	Startbutton.text = te.xt(Continue)
+	Startbutton.w = string.Size(Startbutton.text) + 6
+	Startbutton.visible = true
+
+>`0,10,frogtime @frogtime@ jump @math.Clamp((presstime+11)/12, 1, 6)@ flytime @flytime@
+>`0,11,starttime@starttime@ presstime@presstime@ staytime@staytime@
+>`0,12,@rngLD@ @EmAry[0]@ @EmAry[1]@ @EmAry[2]@ @EmAry[3]@ @EmAry[4]@ @EmAry[5]@

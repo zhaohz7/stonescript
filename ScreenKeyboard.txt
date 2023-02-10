@@ -1,0 +1,302 @@
+//ScreenKeyboard
+//Version: v1.1
+//Author: Okamiroy
+
+//This script is based on game version of 2.9.2
+
+//----------------------------------------------------------------------------------------------------//
+
+//Function Instructions
+
+///func Run()
+///Run the keyboard to draw and listen key input
+///Should run in every frame
+
+///func Initialize()
+///Initialize the params
+///You don't need to call this function manually unless you need
+
+///func Show()
+///Show the keyboard
+
+///func ShowAt(posX, posY)
+///Show the keyboard at a certain position
+///posX, posY: Position relative to the upper-left corner of the screen
+
+///func Hide()
+///Hide the keyboard
+
+//----------------------------------------------------------------------------------------------------//
+
+//Example
+
+//If you want to test the keyboard, just import this file directly, then press C key to show/hide the keyboard
+//import ScreenKeyboard
+
+//If you want to use this keyboard in your own programme, check the following example:
+//var keyboard = new ScreenKeyboard
+//keyboard.Run()
+//
+//var notDone = true
+//?notDone
+// keyboard.ShowAt(10, 5)
+// notDone = false
+// 
+//>@keyboard.SelectedChar@ @keyboard.Text@
+//
+//You can manually hide the keyboard by the function Hide().
+//And you can read keyboard.Text or keyboard.SelectedChar for the contents.
+//Initialize() will hide the keyboard, so better to hide the keyboard before you need to initialize manually
+//Here my code won't catch any custom input key when the keyboard is hiding.
+
+//----------------------------------------------------------------------------------------------------//
+
+///public
+///Input text
+var Text = ""
+
+///public
+///Current selected char
+var SelectedChar = ""
+
+///public
+///Whether the keyboard is showing
+var isShown = false
+
+///public
+///Whether the showing keyboard is uppercased
+var isUpperCase = false
+
+///private
+///Whether the keyboard is initialized
+var isInitialized = false
+
+///private
+///Lowercased keyboard data
+var keyboardLowerString = "1234567890-=qwertyuiop[]asdfghjkl;  zxcvbnm,./ `"
+var keyboardLower
+
+///private
+///Uppercased keyboard data
+var keyboardUpperString = "!@#$%^&*()_+QWERTYUIOP{}ASDFGHJKL:  ZXCVBNM<>? ~"
+var keyboardUpper
+
+///private
+///Keyboard position relative to the upper-left corner of the screen
+var posX = 0
+var posY = 0
+
+///private
+///Keyboard size
+var keyboardWidth = 27
+var keyboardHeight = 13
+
+///private
+///Keyboard char table size
+var rowCount = 4
+var colomnCount = 12
+
+///private
+///Selection index in table
+var rowIndex = 0
+var colomnIndex = 0
+
+//----------------------------------------------------------------------------------------------------//
+
+//Code for test when imported directly. C key to show/hide the keyboard
+Run()
+?key = bumpRBegin
+  isShown = !isShown
+  Text = ""
+  isUpperCase = false
+  rowIndex = 0
+  colomnIndex = 0
+
+//----------------------------------------------------------------------------------------------------//
+
+///public
+///Run the keyboard to draw and listen key input
+///Should run in every frame
+func Run()
+  ? !isInitialized
+    Initialize()
+    isInitialized = true
+
+  ?isShown
+    Draw()
+    
+    var screenCharPosX = 0
+    screenCharPosX = posX + colomnIndex * 2 + 2
+    var screenCharPosY = 0
+    screenCharPosY = posY + rowIndex * 2 + 4
+    SelectedChar = draw.GetSymbol(screenCharPosX, screenCharPosY)
+
+    ?key = leftBegin
+      colomnIndex--
+      ?colomnIndex < 0
+        colomnIndex = 0
+    ?key = rightBegin
+      colomnIndex++
+      ?colomnIndex > colomnCount - 1
+        colomnIndex = colomnCount - 1
+    ?key = upBegin
+      rowIndex--
+      ?rowIndex < 0
+        rowIndex = 0
+    ?key = downBegin
+      rowIndex++
+      ?rowIndex > rowCount - 1
+        rowIndex = rowCount - 1
+    ?key = ability1Begin
+      isUpperCase = !isUpperCase
+    ?key = bumpLBegin | key = primaryBegin
+      Text = Text + SelectedChar
+    var textLength = 0
+    ?key = backBegin
+      textLength = string.Size(Text)
+      ?textLength > 0
+        Text = string.Sub(Text, 0, textLength - 1)
+
+//----------------------------------------------------------------------------------------------------//
+
+///public
+///Initialize the params
+///You don't need to call this function manually unless you need
+func Initialize()
+  Text = ""
+  isShown = false
+  isUpperCase = false
+  posX = (screen.w - keyboardWidth) / 2
+  posY = (screen.h - keyboardHeight - 4) / 2
+  rowIndex = 0
+  colomnIndex = 0
+  keyboardLower = ParseKeyboard(keyboardLowerString)
+  keyboardUpper = ParseKeyboard(keyboardUpperString)
+
+//----------------------------------------------------------------------------------------------------//
+
+///private
+///Read the keyboard data from string
+func ParseKeyboard(keyboardString)
+  var keyboard = new LinkedList/LinkedList
+  var charIndex = 0
+  for i = 0 .. rowCount - 1
+    var oneRow
+    oneRow = new LinkedList/LinkedList
+    for j = 0 .. colomnCount - 1
+      var keyChar
+      keyChar = string.Sub(keyboardString, charIndex, 1)
+      oneRow.Add(keyChar)
+      charIndex++
+    keyboard.Add(oneRow)
+  return keyboard
+
+//----------------------------------------------------------------------------------------------------//
+
+///public
+///Show the keyboard
+func Show()
+  isShown = true
+
+//----------------------------------------------------------------------------------------------------//
+
+///public
+///Show the keyboard at a certain position
+///posX, posY: Position relative to the upper-left corner of the screen
+func ShowAt(posX, posY)
+  this.posX = posX
+  this.posY = posY
+  Show()
+
+//----------------------------------------------------------------------------------------------------//
+
+///public
+///Hide the keyboard
+func Hide()
+  isShown = false
+
+//----------------------------------------------------------------------------------------------------//
+
+///private
+///Draw all the element of the keyboard
+func Draw()
+  DrawKeyboardBox()
+  DrawSelectBox()
+  ?isUpperCase
+    DrawKeyboardChar(keyboardUpper)
+  :
+    DrawKeyboardChar(keyboardLower)
+  DrawText()
+  DrawInstructions()
+
+//----------------------------------------------------------------------------------------------------//
+
+///private
+///Draw the border of the keyboard
+func DrawKeyboardBox()
+  draw.Box(posX, posY, keyboardWidth, keyboardHeight, #white, 3)
+  var splitLine = ascii
+╠═════════════════════════╣
+asciiend
+  var splitLinePosX = posX
+  var splitLinePosY = posY + 2
+  >`@splitLinePosX@,@splitLinePosY@,#white,@splitLine@
+
+//----------------------------------------------------------------------------------------------------//
+
+///private
+///Draw the select box
+func DrawSelectBox()
+  var charBoxPosX = posX + colomnIndex * 2 + 1
+  var charBoxPosY = posY + rowIndex * 2 + 3
+  draw.Box(charBoxPosX, charBoxPosY, 3, 3, #white, 1)
+
+//----------------------------------------------------------------------------------------------------//
+
+///private
+///Draw all the keyboard char
+func DrawKeyboardChar(keyboard)
+  var keyBoardRow
+  var charPosX
+  var charPosY
+  var charValue = ""
+  keyboard.InitIterator()
+  for i = 0 .. rowCount - 1
+    keyBoardRow = keyboard.Next()
+    keyBoardRow.InitIterator()
+    for j = 0 .. colomnCount - 1
+      charPosX = posX + j * 2 + 2
+      charPosY = posY + i * 2 + 4
+      charValue = keyBoardRow.Next()
+      >`@charPosX@,@charPosY@,#white,@charValue@
+
+//----------------------------------------------------------------------------------------------------//
+
+///private
+///Draw the input text
+func DrawText()
+  var textToDraw  = ""
+  var textLength = string.Size(Text)
+  var textMaxLength = keyboardWidth - 2
+  var startIndex = 0
+  ?textLength > textMaxLength
+    startIndex = textLength - textMaxLength
+    textToDraw = string.Sub(Text, startIndex)
+  :
+    textToDraw = Text
+  var textPosX = posX + 1
+  var textPosY = posY + 1
+  >`@textPosX@,@textPosY@,#white,@textToDraw@
+
+///private
+///Draw the instructions
+func DrawInstructions()
+  var instructions = ascii
+Shift key : Change case
+Arrow or WASD key: Select
+Z or Enter key: Enter
+X key: Backspace
+asciiend
+  var insPosX = posX + 1
+  var insPosY = posY + keyboardHeight
+  >`@insPosX@,@insPosY@,#white,@instructions@

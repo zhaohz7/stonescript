@@ -1,0 +1,187 @@
+/*
+Mind Stone Thief
+v1.0
+Usage:
+var SF = new SmartFilter
+SF.DisplayEquipment(15,-2)
+
+functions that not used：
+
+func IndexSearchArray(a, criteria)
+	var Index = []
+	for i = 0 .. a.Count()-1
+		?string.IndexOf(a[i], criteria) ! -1
+			Index.Add(i)
+	return Index
+
+func IndexSearchDArray(a, b)
+	var Index = []
+	for i = 0 .. a.Count()-1
+		for j = 0 .. b.Count()-1
+			?string.IndexOf(a[i], b[j]) ! -1
+				Index.Add(i)
+	return Index
+
+func RemoveIndexOfAfterXth(Array,CriteriaArray,X)
+	var DeleteArray = []
+	?Array.Count() > 0 & CriteriaArray.Count() > 0
+		for i = 0 .. CriteriaArray.Count() - 1
+			for j = 0 .. Array.Count() - 1
+				?string.IndexOf("" + Array[j],"" + CriteriaArray[i]) ! -1
+					DeleteArray.Add(j)
+				?j = Array.Count() - 1
+					?DeleteArray.Count() < X + 1
+						DeleteArray.Clear()
+					:
+						for k = DeleteArray.Count() - 1 .. X
+							Array.RemoveAt(DeleteArray[k])
+						DeleteArray.Clear()
+	return Array
+
+func CountCriteriaNO(str, criteria, index)
+	var Count = 0
+	?index > string.Size(criteria)
+		for i = 0..index-string.Size(criteria)
+			?string.Equals(criteria, string.Sub(str, i, string.Size(criteria)))
+				Count = Count + 1
+	return Count
+
+func RemoveIndexOf(Array,CriteriaArray)
+	?Array.Count() > 0 & CriteriaArray.Count() > 0
+		for i = Array.Count() - 1 .. 0
+			for j = CriteriaArray.Count() - 1 .. 0
+				?string.IndexOf("" + Array[i],"" + CriteriaArray[j]) ! -1
+					Array.RemoveAt(i)
+					j = -1
+	return Array
+
+func CountIndexOfCriteriaArray(Array,CriteriaArray)
+	var Count = 0
+	?Array.Count() > 0 & CriteriaArray.Count() > 0
+		for i = 0 .. Array.Count() - 1
+			for j = CriteriaArray.Count() - 1 .. 0
+				?string.IndexOf("" + Array[i],"" + CriteriaArray[j]) ! -1
+					Count = Count + 1
+					j = -1
+	return Count
+*/
+
+var check = import UI\Toggler
+func Output(x, y, color, a)
+  ?check.toggler()
+    >`@x@,@y@,@color@,@a@
+
+func IndexSearchLast(Array,Criteria)
+	var index = -1
+	?Array.Count() > 0
+		for i = Array.Count() - 1 .. 0
+			?string.IndexOf("" + Array[i],"" + Criteria) ! -1
+				index = i
+				i = -1
+	return index
+
+func IndexSearchArrayLast(Array,CriteriaArray)
+	var index = -1
+	?Array.Count() > 0 & CriteriaArray.Count() > 0
+		for i = Array.Count() - 1 .. 0
+			for j = CriteriaArray.Count() - 1 .. 0
+				?string.IndexOf("" + Array[i],"" + CriteriaArray[j]) ! -1
+					index = i
+					j = -1
+					i = -1
+	return index
+
+func CountIndexOf(Array,value)
+	var Count = 0
+	?Array.Count() > 0
+		for i = 0 .. Array.Count() - 1
+			?string.IndexOf("" + Array[i],"" + value) ! -1
+				Count = Count + 1
+	return Count
+
+func IndexOf(Array,value)
+	var IndexArray = []
+	?Array.Count() > 0
+		for i = 0 .. Array.Count() - 1
+			?string.IndexOf("" + Array[i],"" + value) ! -1
+				IndexArray.Add(i)
+	return IndexArray
+
+func RemoveIndexOfLast(Array,CriteriaArray)
+	?Array.Count() > 0 & CriteriaArray.Count() > 0
+		for i = Array.Count() - 1 .. 0
+			for j = CriteriaArray.Count() - 1 .. 0
+				?string.IndexOf("" + Array[i],"" + CriteriaArray[j]) ! -1
+					Array.RemoveAt(i)
+					j = -1
+					i = -1
+	return Array
+
+var StoreL = ""
+var StoreR = ""
+var ArrayL
+var ArrayR
+var OutputL
+var OutputR
+func DisplayEquipment(X, Y)
+	?X < 0
+		X = screen.w + X
+	?Y < 0
+		Y = screen.h + Y
+	var ElementArray = ["Poison", "Vigor", "Æther", "Fire", "Ice"]
+	var FilterArray = ["_", "crossbow", "quarterstaff", "bardiche", "wand", "shield", "hammer", "sword", "runestone", "stones"]
+	var SuffixArray = ["D","A","dP","dp","aP","ap","dL","dh","aL","ah","dU","du","aU","au","dF","df","aF","af","dI","di","aI","ai"]
+	?!string.Equals(StoreL,item.left)
+		StoreL = item.left
+		?!string.Equals(StoreL, ＂＂)
+			ArrayL = string.Split(StoreL, true)
+			?IndexSearchLast(ArrayL,lost) = ArrayL.Count() - 1
+				ArrayL.RemoveAt(ArrayL.Count() - 1)
+			?CountIndexOf(ArrayL,shiny) > 1
+				ArrayL.RemoveAt(IndexOf(ArrayL,shiny)[IndexOf(ArrayL,shiny).Count() - 1])
+				ArrayL.Insert(0,Shiny)
+			:?CountIndexOf(ArrayL,shiny) > 0 & ArrayL.IndexOf(shiny) = ArrayL.Count() - 1
+				ArrayL.RemoveAt(ArrayL.IndexOf(shiny))
+				ArrayL.Insert(0,Shiny)
+			?IndexSearchArrayLast(ArrayL,ElementArray) ! -1 & IndexSearchArrayLast(ArrayL,ElementArray) > ArrayL.Count() - 6
+				ArrayL = RemoveIndexOfLast(ArrayL,ElementArray)
+				?IndexSearchArrayLast(ArrayL,SuffixArray) = ArrayL.Count() - 1
+					ArrayL.Insert(IndexSearchLast(ArrayL,"*"),ArrayL[IndexSearchArrayLast(ArrayL,SuffixArray)])
+					ArrayL = RemoveIndexOfLast(ArrayL,SuffixArray)
+			?CountIndexOf(ArrayL,Stone) > 1 & IndexSearchLast(ArrayL,Stone) = IndexSearchArrayLast(ArrayL,FilterArray) - 1
+				ArrayL.RemoveAt(IndexOf(ArrayL,Stone)[IndexOf(ArrayL,Stone).Count() - 1])
+			:?CountIndexOf(ArrayL,Stone) > 0 & ArrayL.IndexOf(Stone) = IndexSearchArrayLast(ArrayL,FilterArray) - 1
+				ArrayL.RemoveAt(ArrayL.IndexOf(Stone))
+			ArrayL = RemoveIndexOfLast(ArrayL,FilterArray)
+			OutputL = string.Join(" ", ArrayL)
+	?!string.Equals(StoreR,item.right)
+		StoreR = item.right
+		?!string.Equals(StoreR, ＂＂)
+			ArrayR = string.Split(StoreR, true)
+			?IndexSearchLast(ArrayR,lost) = ArrayR.Count() - 1
+				ArrayR.RemoveAt(ArrayR.Count() - 1)
+			?CountIndexOf(ArrayR,shiny) > 1
+				ArrayR.RemoveAt(IndexOf(ArrayR,shiny)[IndexOf(ArrayR,shiny).Count() - 1])
+				ArrayR.Insert(0,Shiny)
+			:?CountIndexOf(ArrayR,shiny) > 0 & ArrayR.IndexOf(shiny) = ArrayR.Count() - 1
+				ArrayR.RemoveAt(ArrayR.IndexOf(shiny))
+				ArrayR.Insert(0,Shiny)
+			?IndexSearchArrayLast(ArrayR,ElementArray) ! -1 & IndexSearchArrayLast(ArrayR,ElementArray) > ArrayR.Count() - 6
+				ArrayR = RemoveIndexOfLast(ArrayR,ElementArray)
+				?IndexSearchArrayLast(ArrayR,SuffixArray) = ArrayR.Count() - 1
+					ArrayR.Insert(IndexSearchLast(ArrayR,"*"),ArrayR[IndexSearchArrayLast(ArrayR,SuffixArray)])
+					ArrayR = RemoveIndexOfLast(ArrayR,SuffixArray)
+			?CountIndexOf(ArrayR,Stone) > 1 & IndexSearchLast(ArrayR,Stone) = IndexSearchArrayLast(ArrayR,FilterArray) - 1
+				ArrayR.RemoveAt(IndexOf(ArrayR,Stone)[IndexOf(ArrayR,Stone).Count() - 1])
+			:?CountIndexOf(ArrayR,Stone) > 0 & ArrayR.IndexOf(Stone) = IndexSearchArrayLast(ArrayR,FilterArray) - 1
+				ArrayR.RemoveAt(ArrayR.IndexOf(Stone))
+			ArrayR = RemoveIndexOfLast(ArrayR,FilterArray)
+			OutputR = string.Join(" ", ArrayR)
+
+	?!string.Equals(StoreL, ＂＂)
+		Output(X, Y, #white, OutputL)
+		?!string.Equals(StoreR, ＂＂)
+			Output(X, Y + 1, #white, OutputR)
+	:?!string.Equals(StoreR, ＂＂)
+		Output(X, Y, #white, OutputR)
+

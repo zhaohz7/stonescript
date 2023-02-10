@@ -1,0 +1,57 @@
+?loc=Boiling 
+	var foeStatus = new Status
+	foeStatus.Negative(foe.debuffs.string)
+	var playerStatus = new Status
+	playerStatus.Positive(buffs.string)
+	?foe!boss
+		?foe.distance < 13
+			?playerStatus.smiteCount < 8
+				equipL Big Aether Sword dU +20
+				equipR Aether Hammer au +20
+			:
+				equip Ice Staff dI +20
+		:?foe.distance < 30 & foe.distance > 19
+			equipL trisk
+			equipR Aether Shield A +15
+	?foe = bomb cart
+		?foe.distance > 11 & foe.distance < 30
+			equipL trisk
+			equipR Aether Shield A +15
+		:?foe.distance < 11 
+			equipR aether hammer au +20
+			equipL mind stone
+	?foe = guardian
+		?time = 660 & loc.stars > 13
+			activate potion
+		:?time = 865 & foe.hp > 0
+			equipL mind stone
+		:?time > 865 & time < 940
+			equipL trisk
+		:?time = 1495 & foe.hp > 0
+			equipL mind stone
+		:?time > 1495 & time < 1570
+			equipL trisk
+		:?time = 2125 & foe.hp > 0
+			equipL mind stone
+		:?time > 2125 & time < 2200
+			equipL trisk
+		:?foe.distance > 16 & foe.distance < 30
+			?foe.distance <= 20
+				?!foeStatus.burn
+					equip Fire Crossbow dF
+				:
+					equip Aether Crossbow D +21
+			:
+				equipL trisk
+				equipR Aether Shield A +15
+		?foe.distance < 10
+			?foe.armor > 0
+				loadout 3
+			:
+				equipL Aether d_sword D +20
+				equipR Aether d_sword D +21
+	?foe.distance > 29
+		equipL trisk
+		equipR Ouroboros stone
+	?hp < maxhp - 5
+		loc.Leave()

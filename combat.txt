@@ -1,0 +1,756 @@
+// Author : bubucaos
+// Thx to many people that helps me with ideas in the steam forum and discord.
+// Thx to the people that post videos of his runs. I took many ideas from them. In special a korean or japanese guy (sorry about my ignorance I can't distinghish kanjis). I can't spell his name here because characters. 
+// Has a Dog with a cat over his head like steam portrait.
+
+// Version 0.1 (it's the first time I put a number but the code has changed several times since almost a year and still changing)
+
+
+// Instructions:
+// You need to have in your inventory the items that the code equiped. In other case the code equips something random
+// I use 2 bardiches a +15 bardiche whith crytical (I use that one for activate the ability and a +14 bardiche with attack speed for killing mobs quick. I have in different levels to distinguish between them.
+// If you have only a bardiche remove the +14  and +15 in the code searching for the word "bardiche"
+
+// the functions cicbal(exceptions) and ciclar(exceptions) where exceptions is a number. That number must be a multiple of the item i don't want to use.
+// Easier with an example.
+//  2 Ice 3 Poison 5 Vigor 7 fire 11 aeter and 13 repeating crossbow in cicbal
+// The functions will cicle between weapons. If i don't want to use Ice (for example) the entry must be a multiple of 2. ciclar(2) will do.
+// If don't want to use Ice and aether. The entry must be a multiple of 2 and 11. So ciclar(22) will do. 22 = 2*11
+// If don't want exeptions use ciclar(1)
+
+// Use ENTER to activate/deactivate stats
+// There is a script copied from the game page that allows me to catch ascii characters in his position (x,y) using arrow keys. Very usefull.
+// In crypt if stars are lower than 10 the code does a speed run taking some damage using a vigor staff like a bardiche. In my case a +16 bardiche. The success of the run depends of the lvl of your equipment.
+// So if you die you can change that decreasing the stars number in line 541
+// Things to do:
+//     - Quit timers (need to wait to have better tools in stonescript)
+//     - Change the cicling function for other that see foe debuffs and mantain a number of debuffs of each type
+//     - Improve Disangelo's code to be quicker
+//     - Evade Xiloalgia's attacks 
+//     - Remove all timers in Bronze Guardian fight
+//     - Impove code/strategy for beating Palas last level
+//     - Improve code/strategy with the yeti
+//     - Do a code/strategy for Nagaraja the snake. Never did because if want to farm poison runes I use caves instead because is quicker and get clay too.
+//     - Use only an equip call at the end of the iteration instead all code plenty of equip calls that can cut the animations between them. For that I need this:
+//         right = shield
+//         left  = sword
+//         equipL left
+//         equipR right
+//       but the stonescript  don't supoort that
+//      I'm thinking on that:
+//         func equipar(left,right)
+//          ?left="sword"
+//           equipL sword
+//           ...  ...  ...  
+
+
+// But it's very ugly and silly. Needs to be done with all items in game in the left and right hand
+
+
+
+
+var mostrar
+var activa
+var st
+var ust
+var tmp
+var utmp
+var res
+var activaesq
+var esq
+var faltaesq
+var faltabar
+var aguanta
+var espera=90
+var activacamb
+var ciclocamb
+var faltacamb
+var modo=false
+var mele=true
+var ciclo=0
+var excep
+var cambesc
+var vuelta
+var resto
+var faltabash
+var faltablade
+var s
+var x = 20
+var y = 10
+var drawX
+
+
+
+
+faltablade=item.GetCooldown("blade")
+?faltablade<1
+ faltablade="LISTO"
+:
+ faltablade=faltablade/30+1
+ 
+faltabash=item.GetCooldown("bash")
+?faltabash<1
+ faltabash="LISTO"
+:
+ faltabash=faltabash/30+1
+
+faltabar=item.GetCooldown("bardiche")
+?faltabar<1
+ faltabar="LISTO"
+:
+ faltabar=faltabar/30+1
+
+
+//     excepciones 2 hielo   3 veneno    5 vigor    7 fuego    11 aether    13 ballesta repetidora. Multiplos para sumar excepciones. 1 no excepciones
+
+
+
+func cargar()
+ ?faltabash="LISTO"
+  equipR bashing shield
+ :
+  equipR dashing shield
+
+ 
+func cicbal(excep)
+ var cong=0
+ ?foe=ice
+  cong=13*debuffs.count
+ 
+ ?totaltime>ciclocamb
+  ?ciclo=0
+   ciclo=(ciclo+1)%6
+   ?excep%2!0   
+    equip ice crossbow    
+    ciclocamb=totaltime+27+cong   
+
+  :?ciclo=1
+    ciclo=(ciclo+1)%6
+    ?excep%3!0  
+     equip poison crossbow
+     ciclocamb=totaltime+27+cong      
+ 
+  :?ciclo=2
+    ciclo=(ciclo+1)%6
+    ?excep%5!0
+     equip vigor crossbow
+     ciclocamb=totaltime+27+cong
+      
+  :?ciclo=3
+    ciclo=(ciclo+1)%6
+    ?excep%7!0     
+     equip fire crossbow
+     ciclocamb=totaltime+27+cong     
+   
+  :?ciclo=4
+    ciclo=(ciclo+1)%6
+    ?excep%11!0
+     equip aether crossbow
+     ciclocamb=totaltime+27+cong
+     
+  :?ciclo=5
+    ciclo=(ciclo+1)%6
+    ?excep%13!0
+     equip repeating crossbow
+     ciclocamb=totaltime+27+cong
+
+
+func ciclar(excep)
+ 
+ ?totaltime>ciclocamb & ai.idle
+ 
+  ciclocamb=totaltime+11
+  
+  ?ciclo=0   
+   ?excep%2!0
+    ?foe.armor>0
+     equipL ice hammer
+  
+    :
+     equipL ice d_sword        
+
+  :?ciclo=1    
+    ?excep%3!0       
+     ?foe.armor>0
+      equipL poison hammer      
+     :
+      equipL poison d_sword 
+      
+  :?ciclo=2    
+    ?excep%5!0  
+     ?foe.armor>0
+      equipL vigor hammer  
+     :
+      ?hp<80
+       equipL vigor d_sword dL       
+      :
+       equipL vigor d_sword D      
+     
+  :?ciclo=3    
+    ?excep%7!0
+     ?foe.armor>0
+      equipL fire hammer       
+     :
+      equipL fire d_sword      
+   
+  :?ciclo=4    
+    ?excep%11!0
+     ?foe.armor>0
+      equipL aether hammer    
+     :
+      equipL aether d_sword    
+  
+  ciclo=(ciclo+1)%5
+
+
+func atacar() 
+ ?faltablade = "LISTO" & foe.hp < 85 & foe.hp > 0 & loc!crypt
+  equipR blade
+  activateR
+ :
+  ?foe.distance>7 & totaltime>activacamb & mele
+   cargar()
+   equipL ice d_sword
+  :
+   ?faltabar="LISTO" & (mele | (!mele & totaltime>activaesq))  & foe.hp >0
+    ?foe.distance>9
+     cargar()
+     equipL ice d_sword
+    : 
+     equip bardiche +15     
+     activate R    
+     ?loc=icy & debuffs.count>0
+      activacamb = totaltime+30
+     :
+      activacamb = totaltime+20 
+     
+   :?!mele & totaltime>activaesq & foe.distance<10 & totaltime>activacamb
+     equipR mind stone
+     activateR
+     activaesq=totaltime+360
+     esq++  
+    
+   :?totaltime>activacamb
+   
+    ?loc=icy
+    
+     ciclar(3)
+     equipR fire shield
+    
+  
+    ?loc=deadwood
+     equip repeating crossbow
+    
+    
+    ?loc=caves
+     ?foe=bat
+      ciclar(1)
+      equipR ice long sword
+     :
+      cicbal(385)
+     
+    ?loc=bronze
+     equipL aether hammer
+     ?foe.armor>0
+      equipR ice hammer
+     :
+      equipR aether sword
+    
+    
+    ?loc=fungus    
+     ciclar(1) 
+     ?totaltime>cambesc
+      ?armor>5
+       equipR poison long sword
+       //equipR moon stone//
+       cambesc=totaltime+24 
+      :     
+       equipR poison shield    
+    
+    
+   
+    ?loc=crypt
+     ?foe=phase2
+      equip repeating crossbow
+     :
+      equipR compound shield
+      ciclar(1)
+    
+    ?loc=temple
+     ?foe=acronian | debuffs.count>10
+      mele=true
+      equipL ice d_sword
+    
+      ?totaltime>cambesc
+       ?armor>10
+        //equipR fire sword//
+        equipR moon stone
+        cambesc=totaltime+24
+       :
+        equipR compound shield     
+     :
+      mele=false
+      cicbal(1155)
+     
+      
+   
+    ?loc=rocky
+     ?foe.name=acronian
+      ?armor>10
+       equip bardiche +14
+       activacamb=totaltime+30
+      :
+       equipR compound shield
+       ciclar(11)
+     :
+      ?foe=phase2
+       
+       ?foe=ice
+      
+        equipL fire d_sword
+        equipR fire shield
+       ?foe=fire
+        
+        equipL aether hammer
+        equipR aether d_sword
+       ?foe=vigor
+        
+        equipL poison d_sword
+        equipR poison shield
+       ?foe=poison
+       
+        equipL ice d_sword
+        equipR compound shield
+       ?foe=aether
+      
+        equipR vigor staff
+      :
+       equipR compound shield
+       ?foe=perfected
+        ciclar(11)
+       :
+        ciclar(11)
+   
+   
+
+?key = primaryBegin
+ 
+ ?mostrar = true
+
+  play unequip
+  mostrar = false
+ :
+ 
+  play equip
+  mostrar = true  
+  
+ 
+?loc = crypt & foe=boss
+ ?foe=tomb
+  modo=true
+ :
+  modo=false
+
+
+?foe.distance > 24 | foe.distance<0
+ 
+ equipL triskelion stone
+ //equip ouroboros stone//
+ ?pickup.distance<25 & pickup.distance>=0
+  
+  equipR star stone
+ :
+  equipR compound shield
+ 
+?hp<20 
+ activate potion
+ 
+?totaltime < 2
+ utmp=tmp
+
+?totaltime<10
+ activaesq=0
+ esq=0
+ 
+ 
+ activacamb=0
+ ciclocamb=0
+ cambesc=0
+tmp=totaltime
+
+
+
+?utmp!0 & utmp!null
+  res=loc.stars*108000/(utmp+150)
+
+?totaltime<activaesq
+ faltaesq=(activaesq-totaltime)/30+1
+:
+ faltaesq="LISTO"
+
+ 
+?totaltime<activacamb
+ faltacamb=(activacamb-totaltime)/30+1
+:
+ faltacamb="LISTO"
+
+ 
+?mostrar 
+ var trasto
+ trasto=item.GetCooldown("dash")
+ //>tiempo:@totaltime@ utmp:@utmp@// 
+ >`1,6,Evade   : @faltaesq@
+ >`1,7,Bardiche: @faltabar@
+ >`1,8,Change  : @faltacamb@
+ >`1,9,Bash    : @faltabash@
+ >`1,10,Blade   : @faltablade@
+ >`76,0,stars    @loc.stars@
+ 
+
+
+
+ ?key=leftBegin
+  x--
+ ?key=rightBegin
+  x++
+ ?key=upBegin
+  y--
+ ?key=downBegin
+  y++
+ s = draw.GetSymbol(x, y)
+ >`0,1,Symbol = @s@ x=@x@ y =@y@
+ drawX = x - 1
+ >`@drawX@,@y@,[#］
+ 
+ //>debuffs @debuffs.count@//
+
+ >@totaltime@   @time@
+ aguanta=foe.hp+foe.armor
+ >`1,24,@foe@ 
+ >`1,25,@foe.name@ distancia @foe.distance@ aguanta @aguanta@
+
+?foe.distance<8 & totaltime>activaesq & armor<1 & foe!boss
+ 
+ equipR mind stone
+ activateR
+ activaesq=totaltime+360
+ esq++
+ 
+ activacamb=totaltime+espera
+:?foe.distance>=0
+  ?foe.distance<10 & foe.count>10 & armor<3 & loc!crypt
+   equipR bardiche +14
+  ?item.GetCooldown("blade") <= 0 & foe.count >2 & foe.distance < 24  & loc!crypt
+   equipL blade
+   activateR
+ 
+   
+   
+  :?loc = bronze & foe.distance < 23 
+    espera=150
+    ?foe!boss
+    
+     ?totaltime>activacamb
+      ?foe.distance>11 
+       equipL aether hammer
+       cargar()
+      :
+       equip bardiche +14
+     :
+      equip aether crossbow 
+    :
+   
+     ?foe=cart
+      
+      ?foe.distance<7 & totaltime>activaesq
+       equipL mind stone
+       activate R
+       activaesq=totaltime+360
+       esq++
+      :
+    
+       equipR repeating crossbow
+     :?foe=guardian
+       var mt
+       var aqui=time
+       mt=time-aqui
+      
+      ?mt<655
+       
+       equip repeating crossbow
+       //cicbal(210)//
+      :?mt<660
+      
+       equipL aether hammer
+       equipR mental stone
+       activateR
+       activaesq=totaltime+360
+      :?mt<710
+      
+       equipL aether hammer
+       cargar()
+      :?mt<855
+       
+       atacar()
+      :?mt<1290
+      
+       equip repeating crossbow      
+       //cicbal(210)//
+      :?mt<1300
+      
+       equipL aether hammer
+       equipR mental stone
+       activateR
+       activaesq=totaltime+360
+      :?mt<1350    
+       equipL aether hammer
+       cargar()
+      :?mt<1480
+       atacar()
+      :?mt<1915    
+       equipR repeating crossbow 
+       //cicbal(210)//
+      :?mt<1935    
+       
+       equipL aether hammer
+       equipR mental stone
+       activateR
+       activaesq=totaltime+360
+      :?mt<1960
+       equipL aether hammer
+       cargar()
+      :?mt<2120    
+       atacar() 
+      :?mt>2120
+       equipR repeating crossbow 
+              
+       
+//                              CRIPTA  //
+
+
+  :?loc=crypt & foe.distance<24
+   
+    ?foe!boss
+     espera=20
+     ?modo
+      ?foe.distance>7
+       equip repeating crossbow
+      :
+       equip vigor staff
+     :
+      ?loc.stars<10
+       ?foe.distance>7
+        equipL vigor d_sword D         
+        cargar()
+       :
+        equip vigor staff
+      :  
+       ?totaltime>activacamb
+        ?foe.distance>7 & foe!immune_to_physical
+         ?totaltime>1500
+          equip vigor crossbow 
+         :
+          equip vigor crossbow 
+        :
+
+         equip vigor staff
+        
+       :
+        ?foe=immune_to_physical       
+         equip vigor staff
+        :
+         equip vigor crossbow 
+    :
+     mele=foe!phase2
+     atacar()
+     
+      
+//                                HIELO //
+     
+  :?loc=icy & foe.distance<23
+   
+    ?foe!boss 
+     ?totaltime>activacamb
+      ?foe.distance>11
+       equipL fire d_sword
+       cargar()
+      :
+       ?foe=pillar | foe=wall
+        
+        //equip bardiche +14//
+        
+        equipL fire long sword 
+        ?totaltime>cambesc
+         ?armor>6
+          equipR fire d_sword
+          cambesc=totaltime+24 
+         :     
+          
+          equipR fire shield 
+       :
+        equip bardiche +14
+     :
+      equip fire crossbow
+    :
+     
+     ?foe.armor>0
+      equipL fire d_sword
+      ?hp<80
+       equipR vigor d_sword dL
+      : 
+       equipR fire long sword
+     :
+      ?debuffs.count>1
+       equip repeating crossbow
+      :
+       atacar()
+      
+//                                  LAS CUEVAS//
+
+  :?loc=caves & foe.distance<25
+    ?foe!boss
+     espera=120
+     ?totaltime>activacamb
+      ?loc.stars<6
+       ?foe.distance>10
+        equipL ice d_sword
+        cargar()
+       :
+        equip bardiche +14      
+      :
+       ?foe.distance>9        
+        cicbal(1155)
+       :
+        equip bardiche +14
+     : 
+      equip repeating crossbow
+    :
+     ?foe=bat
+      mele=true
+      atacar()
+     :
+      mele=false
+      atacar()
+    
+   
+  
+//                                  FUNGUS//  
+ 
+  :?loc=fungus & foe.distance<23
+    ?foe!boss
+     ?totaltime>activacamb
+      ?foe.distance>10
+       //equipR poison crossbow//
+       equipL poison d_sword
+       cargar()
+      :
+       //equipL poison long sword//
+       //equipR poison shield  //
+       equip bardiche +14
+     :
+      ?foe.distance>13
+       equip poison crossbow
+      :
+       equip bardiche +14
+    :
+   
+     ?foe=Morel     
+       atacar()     
+     :?foe=snail 
+       ?hp<30 & foe.count>1
+        activate potion
+       ?foe.distance<8
+        atacar()
+       :
+        equip poison crossbow
+     :?foe=fluff & totaltime > activaesq    
+      ?foe.distance<6      
+       equipR mind stone
+       activate R
+       esq++
+       activaesq=totaltime+360
+      :
+       equip repeating crossbow
+     
+     :?foe=angry
+      ?foe.distance<7 & totaltime>activaesq
+       equipR mind stone
+       activateR     
+       esq++
+       activaesq=totaltime+360
+      :
+       //equip poison crossbow//
+       cicbal(5005)
+     :?foe=skinny
+      atacar()
+     :
+      ?foe.distance>6
+       equipR repeating crossbow
+      :
+       atacar()   
+
+       
+//                          TEMPLO              //
+
+
+
+  :?loc=temple & foe.distance < 23
+    ?foe!boss
+     ?totaltime>activacamb
+      ?foe.distance>10
+       equipL ice d_sword
+       cargar()
+      :
+       equip bardiche +14
+     :
+      equip ice crossbow
+     
+    :
+     atacar()
+     
+     
+     
+//                      DEADWOOD        //
+
+     
+  :?loc=deadwood & foe.distance<24
+    espera=40
+    ?foe=boss
+     mele=false
+     atacar()
+    :
+     ?totaltime>activacamb
+      ?foe=wasp
+       equip repeating crossbow
+      :
+       ?foe.distance>11
+        equipL ice d_sword
+        cargar()
+       :
+
+        equip bardiche +14
+     :
+      ?foe!immune_to_ranged
+       equip vigor crossbow +12
+      :
+       
+       ?foe.debuffs.count=0
+        equipL fire d_sword
+        equipR compound shield
+       :
+        equip bardiche +14        
+        
+        
+        
+        
+  :?loc=rocky & foe.distance<23
+   
+    ?foe=boss
+     ?foe=perfected & (draw.GetSymbol(40,7)="|" | draw.GetSymbol(57,10)="/")
+      equipL mind stone      
+     
+      activaesq=totaltime+360
+     
+     :
+      atacar()
+

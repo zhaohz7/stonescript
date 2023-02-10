@@ -1,0 +1,18 @@
+10100111001: FancyUI DamageFlash FreeChestTracker                3
+Bl: BetterInfo2 calculator                                       2
+Agerak: BetterInfo2 Borderclock StealMeter PetSnail              4
+Dr Abandonment: FaceHUD                                          1
+Okamiroy: OkamiroyUtils DigitsPuzzle StoneBoxman                 3
+Mind Stone Thief: RecordPlayer PetPanda PetBoo Knight            4
+Pef619: PefWindow                                                1
+LikesToast: GetawayDriver                                        1
+Fyda: BurgerRush SSRPGIdle PallasCrown ChefHat DiscoVisor        5
+xx: Snake PetPanda bear Knight                                   4
+xXAceShadowXx: SSRPGIdle                                         1
+Raeborga: SSRPGIdle StarCloak                                    2
+FlanBi: SwordGame                                                1
+electronic: WavyScarf                                            1
+Superfluous J: quips                                             1
+Newominus: PetSkully PetCranius SkullyHat                        3
+Metrocysh: PetFly                                                1
+link2_thepast: CozyCave Headphones SantaHat                      3

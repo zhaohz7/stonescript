@@ -1,0 +1,154 @@
+var Extract = import Extract
+var AdjustBFG = import UI/ActivationCenter
+var PotionTimer = import PotionFilter
+?loc.begin
+	var potionuse = 0
+	var armthresh = 0
+	var SAtime = 0
+	var DStime = 0
+	var swordtime = 0
+	var stafftime = 0
+?loc.begin
+	AdjustBFG.changeBFGthcurrentTo(10)
+	brew stone + bronze
+?armor >= 14
+	armthresh = 0
+?armor < 10
+	armthresh = 1
+?Extract.Lucky[2] > 4000
+	potionuse = 1
+?Extract.Lucky[2] < 2000
+	potionuse = 0
+?Extract.Lucky[0] & item.potion ! empty & potionuse = 0
+	activate potion
+?loc.loop
+	SAtime = 0
+	DStime = 0
+	swordtime = 0
+	stafftime = 0
+?ai.walking
+	SAtime = 0
+?foe!boss & foe! wasp
+	?foe.distance < 11
+		?SAtime < 4
+			equip Skeleton Arm +21
+			SAtime++
+		:
+			equip Shiny Repeating Crossbow +21
+			equip Skeleton Arm +21
+			SAtime = 1
+	:?potionuse = 1 & armor > 10
+		equipL Triskelion Stone
+		equipR Ice Shield ai *10* +21
+?foe = Wasp 
+	?foe.distance < 12
+		?foe = nest & foe.distance < 5
+			equipL Big Aether sword dU *10* +21
+			equipR Big Ice Sword dI *10* +20
+		:
+			equip Ice Staff dI +20
+	:?foe = nest & foe.distance < 17
+		equipL Triskelion Stone
+		equipR Dashing Shield
+?foe = phase1
+	?foe.distance < 10
+		?foe.state = 33 & foe.time = 0
+			equipL Vigor hammer ah *10* +21
+			equipR Shiny Fire Shield af *10* +21
+		:?Extract.FoeChill[1] < 6 | Extract.FoeChill[2] < 6
+			?swordtime % 8 < 4
+				?!Extract.FoeBurn[0]
+					equipL Fire d_sword dF +20
+					equipR Ice d_sword dI +20
+				:
+					equipL Ice d_sword dI +21
+					equipR Ice d_sword dI +20
+				swordtime++
+			:
+				?!Extract.FoePoison[0]
+					equipL Ice d_sword dI +20
+					equipR Poison d_sword dP +20
+				:
+					equipL Ice d_sword dI +20
+					equipR Ice d_sword dI +21
+				swordtime++
+		:?SAtime < 4
+			equip Skeleton Arm +21
+			SAtime++
+		:
+			equip Shiny Repeating Crossbow +21
+			equip Skeleton Arm +21
+			SAtime = 1
+?foe = phase2
+	?item.GetCooldown("bardiche") < 879
+		?foe.state ! 1
+			?foe.distance < 10
+				?foe.hp <= 0 & item.potion ! empty & item.potion = Lucky & potionuse = 0
+					activate potion
+				?foe.state = 32 & foe.time > 82 & !Extract.FoeStun[0]
+					equipL Vigor Hammer ah *10* +21
+					equipR Shiny Fire Shield af *10* +21
+				:?foe.state = 32 & foe.time > 12 & Extract.FoeChill[1] < 6
+					equip Ice Staff dI +20
+				:?foe.state = 32 & foe.time > 12 & !Extract.FoePoison[0]
+					equip Rattlesnake +20
+				:?foe.state = 32 & foe.time > 12 & !Extract.FoeBurn[0]
+					equip Fire Staff aF +21
+				:?foe.state = 32 & foe.time > 12 & !Extract.FoeStun[0]
+					equipL mind stone
+				:?Extract.Lucky[0]
+					?foe.hp < 697
+						?Extract.Smite[1] < 30 | foe.hp > 552
+							?SAtime < 4
+								equip Skeleton Arm +21
+								SAtime++
+							:
+								equip Shiny Repeating Crossbow +21
+								equip Skeleton Arm +21
+								SAtime = 1
+						:?!Extract.FoePoison[0] & stafftime < 2
+							equip Rattlesnake +20
+							stafftime++
+						:?!Extract.FoeChill[0]
+							equip Ice Staff dI +20
+					:?DStime % 24 < 12
+						?hp < maxhp
+							equipL Vigor d_sword dL +21
+							equipR Shiny Stone d_sword +21
+						:
+							equipL Stone d_sword +21 -shiny
+							equipR Shiny Stone d_sword +21
+						DStime++
+					:
+						?hp < maxhp
+							equipL Shiny Stone d_sword +21
+							equipR Vigor d_sword dL +21
+						:
+							equipL Shiny Stone d_sword +21
+							equipR Stone d_sword +21 -shiny
+						DStime++
+				:
+					?SAtime < 4
+						equip Skeleton Arm +21
+						SAtime++
+					:
+						equip Shiny Repeating Crossbow +21
+						equip Skeleton Arm +21
+						SAtime = 1
+			:
+				equipL trisk
+?foe.distance > 16
+	?loc.begin
+		equipL Triskelion Stone 
+		equipR Shiny Compound Shield *10* +21
+	:?item.GetCooldown("dash") > 0 & potionuse = 1 & foe ! wasp & armor > 10 & foe.distance < 25
+		equipL Triskelion Stone
+		equipR Ice Shield ai *10* +21
+	:?potionuse = 1 & armor < 14 & armthresh = 1
+		equipL Triskelion Stone
+		equipR Compound Shield -shiny *10* +21
+	:
+		equipL Triskelion Stone
+		equipR Cultist Mask
+?harvest = chest
+	activate potion

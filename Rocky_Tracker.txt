@@ -1,0 +1,125 @@
+/*------------------------------------------------
+
+Rocky_Tracker.txt
+
+Utility that logs best times for each phase of Rocky:
+1-Acronian Scout and Stones
+2-Phase 1 duration
+3-Phase 2 duration
+4-Phase 3 duration
+Variables are stored in permenant storage and each level is stored seperately
+
+Created by: Agerak
+v1.0 Basic Rocky Optimal Time Calculator
+
+import UI\Rocky_Tracker
+
+TO RESET YOUR STORAGE DATA
+you must copy the following two lines into your mindstone
+
+var clear = new UI\Rocky_Tracker
+clear.data([star])
+
+set [star] to the star level that you wish to reset
+begin a run at that star level and the data will be cleared
+terminate the run and remove the two lines from your mindstone
+
+------------------------------------------------*/
+
+var check = import UI\Toggler
+
+func Output(x, y, color, a)
+  ?check.toggler()
+    >`@x@,@y@,@color@,@a@
+
+func data(confirm)
+  ?loc.stars=confirm
+    storage.delete(loc.id + loc.stars + "1")
+    storage.delete(loc.id + loc.stars + "2")
+    storage.delete(loc.id + loc.stars + "3")
+    storage.delete(loc.id + loc.stars + "4")
+
+?loc=rocky
+  var prevTime1 = 0 // Tracks time and correlates when time resets to 0 to log
+  var prevTime2 = 0 // Tracks time and correlates when time resets to 0 to log
+  var prevTime3 = 0 // Tracks time and correlates when time resets to 0 to log
+  var prevTime4 = 0 // Tracks time and correlates when time resets to 0 to log
+  var gap1 = 0
+  var gap2 = 0
+  var gap3 = 0
+  var gap4 = 0
+  var index = 0 // Index for string name increment between phases
+  var storageString = loc.id + loc.stars // sets proper base string for storage variables
+  >`9,9,@storageString@
+
+  ?loc.loop
+    prevTime1 = 0
+    prevTime2 = 0
+    prevTime3 = 0
+    prevTime4 = 0
+    gap1 = 0
+    gap2 = 0
+    gap3 = 0
+    gap4 = 0
+    index = 0
+
+  ?time=0&totaltime>0 // split log
+    index++
+    ?index=1&storage.get(storageString+"1",99999)>prevTime1
+      storage.set(storageString+"1",prevTime1)
+    :?index=2&storage.get(storageString+"2",99999)>prevTime2
+      storage.set(storageString+"2",prevTime2)
+    :?index=3&storage.get(storageString+"3",99999)>prevTime3
+      storage.set(storageString+"3",prevTime3)
+
+  ?pickup=Treasure&index=3 // final split time (chest drop)
+    index++
+    ?storage.get(storageString+"4",99999)>prevTime4
+      storage.set(storageString+"4",prevTime4)
+
+  Output(10,10,#99FF99,storage.get(storageString+"1",99999))
+  Output(10,11,#99FF99,storage.get(storageString+"2",99999))
+  Output(10,12,#99FF99,storage.get(storageString+"3",99999))
+  Output(10,13,#99FF99,storage.get(storageString+"4",99999))
+
+  ?index=0
+    prevTime1=time
+  ?index=1
+    prevTime2=time
+  ?index=2
+    prevTime3=time
+  ?index=3
+    prevTime4=time
+
+  ?prevTime1<storage.get(storageString+"1",99999)
+    Output(15,10,#999999,prevTime1)
+  :?prevTime1=storage.get(storageString+"1",99999)
+    Output(15,10,#rainFF,prevTime1)
+  :
+    Output(15,10,#FF9999,prevTime1)
+    gap1=prevTime1-storage.get(storageString+"1",99999)
+    Output(20,10,#FF9999,gap1)
+  ?prevTime2<storage.get(storageString+"2",99999)
+    Output(15,11,#999999,prevTime2)
+  :?prevTime2=storage.get(storageString+"2",99999)
+    Output(15,11,#rainFF,prevTime2)
+  :
+    Output(15,11,#FF9999,prevTime2)
+    gap2=prevTime2-storage.get(storageString+"2",99999)
+    Output(20,11,#FF9999,gap2)
+  ?prevTime3<storage.get(storageString+"3",99999)
+    Output(15,12,#999999,prevTime3)
+  :?prevTime3=storage.get(storageString+"3",99999)
+    Output(15,12,#rainFF,prevTime3)
+  :
+    Output(15,12,#FF9999,prevTime3)
+    gap3=prevTime3-storage.get(storageString+"3",99999)
+    Output(20,12,#FF9999,gap3)
+  ?prevTime4<storage.get(storageString+"4",99999)
+    Output(15,13,#999999,prevTime4)
+  :?prevTime4=storage.get(storageString+"4",99999)
+    Output(15,13,#rainFF,prevTime4)
+  :
+    Output(15,13,#FF9999,prevTime4)
+    gap4=prevTime4-storage.get(storageString+"4",99999)
+    Output(20,13,#FF9999,gap4)

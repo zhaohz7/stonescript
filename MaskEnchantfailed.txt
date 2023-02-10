@@ -1,0 +1,35 @@
+/*
+A badge whose color is correlated with the enchantment's color of Cultist Mask
+v1.0.1 not working by Mind Stone Thief
+import MaskEnchant
+White: #FFFFFF Cyan: #02e5ff Yellow: #ffff62 Green: #32da5a Blue: #0063ff Red: #ff2222 Rainbow: #rainFF
+*/
+?loc.begin
+	var badgecolor = #000000
+	var EnchantIndex = 0
+	var EnchantLevel = 0
+	var MX = ""
+	var MY = ""
+?item.right.id = cult_mask
+	MX = screen.FromWorldX(pos.x)
+	MY = screen.FromWorldZ(pos.z - pos.y) - 2
+	?badgecolor = #000000
+		EnchantIndex = string.IndexOf(item.right,"* +") + 3
+		EnchantLevel = int.Parse(string.Sub(item.right, EnchantIndex, string.IndexOf(item.right, " ", EnchantIndex) - EnchantIndex))
+		?EnchantLevel = 0
+			badgecolor = #FFFFFF
+		:?EnchantLevel = 1
+			badgecolor = #02e5ff
+		:?EnchantLevel > 1 & EnchantLevel < 4
+			badgecolor = #ffff62
+		:?EnchantLevel > 3 & EnchantLevel < 7
+			badgecolor = #32da5a
+		:?EnchantLevel > 6 & EnchantLevel < 11
+			badgecolor = #0063ff
+		:?EnchantLevel > 10 & EnchantLevel < 16
+			badgecolor = #ff2222
+		:?EnchantLevel > 15
+			badgecolor = #rainFF
+	:?draw.GetSymbol(MX, MY) = "(" | draw.GetSymbol(MX, MY) = "}"
+		>o0,2,@badgecolor@,°
+//>`0,10,@EnchantLevel@ @draw.GetSymbol(MX, MY)@

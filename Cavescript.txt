@@ -1,0 +1,88 @@
+var Extract = import Extract
+var AdjustBFG = import UI/ActivationCenter
+var PotionTimer = import PotionFilter
+var swordtime = 0
+?loc.begin
+	AdjustBFG.changeBFGthcurrentTo(6)
+	?loc.stars = 15
+		brew stone + bronze
+?loc.loop
+	swordtime = 0
+//	?Extract.Poisoned[1] > 4 | Extract.Poisoned[2] > 1200
+//		loc.Leave()
+?Extract.Lucky[0] & Extract.Lucky[2] < 1800
+	activate potion
+?item.GetCooldown("bardiche") < 879
+	?foe!boss
+		?foe.distance < 12
+			?Extract.Smite[1] > 3
+				equip Ice Crossbow dI +21
+			:
+				equip Cave Dominator D +21
+	?foe = boss
+		?foe.distance > 10
+			equipL trisk
+		:?foe = ceiling decorator
+			?loc.stars = 15 & item.potion ! empty & item.potion = Lucky & item.potion = auto
+				activate potion
+			?swordtime % 8 < 4
+				?Extract.FoeChill[1] < 6
+					equipL Ice d_sword dI +20
+					equipR Ice d_sword dI +21
+				:?!Extract.FoeBurn[0]
+					equipL Fire d_sword dF +20
+					equipR Ice d_sword D +21
+				:
+					equipL Ice d_sword D +20
+					equipR Ice d_sword D +21
+				swordtime++
+			:
+				?Extract.FoeChill[1] < 6
+					equipL Ice d_sword dI +21
+					equipR Ice d_sword dI +20
+				:?!Extract.FoePoison[0]
+					equipL Ice d_sword D +21
+					equipR Poison d_sword dP +20
+				:
+					equipL Ice d_sword D +21
+					equipR Ice d_sword D +20
+				swordtime++
+		:?foe = phase1
+			?swordtime % 8 < 4
+				?Extract.FoeChill[1] < 6
+					equipL Ice d_sword dI +20
+					equipR Ice d_sword dI +21
+				:?!Extract.FoeBurn[0]
+					equipL Fire d_sword dF +20
+					equipR Ice d_sword D +21
+				:
+					equipL Ice d_sword D +20
+					equipR Ice d_sword D +21
+				swordtime++
+			:
+				?Extract.FoeChill[1] < 6
+					equipL Ice d_sword dI +21
+					equipR Ice d_sword dI +20
+				:?!Extract.FoePoison[0]
+					equipL Ice d_sword D +21
+					equipR Poison d_sword dP +20
+				:
+					equipL Ice d_sword D +21
+					equipR Ice d_sword D +20
+				swordtime++
+	?loc.begin
+		equipL quest
+		equipR Shiny Compound Shield +21
+	:?foe.distance > 29 & pickup ! treasure
+		equipL trisk
+		equipR Cultist Mask
+	:?(foe.distance > 11 & foe.distance < 30) | ai.walking
+		?foe = phase1
+			equipL trisk
+			equipR Cultist Mask
+		:?armor > 60 & Extract.Smite[1] < 10 | foe.distance < 20
+			equipL trisk
+			equipR Ice Shield ai *10 +21
+		:
+			equipL trisk
+			equipR Ice Shield A *10 +21

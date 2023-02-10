@@ -1,0 +1,410 @@
+
+debug(0)
+// 0=draw.clear and no debugging
+// 1=draw.clear and debugging info
+// 2=NO draw.clear and debugging info
+// 3=NO draw.clear and no debugging
+
+// Mud Mod
+// by: Agerak & Bl with input from DarkLucifer69
+// v1.0 converts all game actions to text. Blanks screen and all you see is the text
+// v1.1 added attack/hit messages, added enemy callouts as well as rough number indicators
+// v1.2 added kill messages, tweaked attack messages, added armor hit and knockback messages
+// v1.3 made adjustments for ai off after boss kills, added boss area message
+// v1.4 added rough enemy debuff status updates, tweaked kills for splash
+// v1.5 added enemy names to debuff status
+
+// Current idea is to have text output starting at 1,1
+// As each subsequent line is output it will push the previous line down
+// Each lower line will be dimmer so that the active message is easily seen
+// Highlighter function scans for keywords to add color (dimmed based on which line it's on)
+
+var lair=0 // when entering boss area
+
+var px=0		//previous x pos
+var parmor=0	//previous armor
+var parmorf=0	//previous armor frac
+var php=0		//previous hp
+var pfcount=0	//previous foe count
+var pfname=0	//previous foe name
+var pfhp=0		//previous foe hp
+var pfarmor=0	//previous foe armor
+var pfboss=0	//previous foe was boss
+var pfdist=0	//previous foe distance
+var pfdebuffs=0	//previous foe debuffs count
+var status=""	//status for preventing multiple messages [hit dodge dash charge]
+
+var L00T=""
+var L01T=""
+var L02T=""
+var L03T=""
+var L04T=""
+var L05T=""
+var L06T=""
+var L07T=""
+var L08T=""
+var L09T=""
+var L10T=""
+var L11T=""
+var L12T=""
+var L13T=""
+var L14T=""
+var L15T=""
+var L16T=""
+var L17T=""
+var L18T=""
+var L19T=""
+
+func Line(filter) // filter determines how many lines to check against, 1 or 2 being normal. 0 is a forced output regardless
+  ?L00T!null
+    ?filter=0|filter=1&string.Size(L00T)!string.Size(L01T)|filter=2&string.Size(L00T)!string.Size(L01T)&string.Size(L00T)!string.Size(L02T) // If the new line exists and is different than the previous line, push the sequence
+      L19T=L18T
+      L18T=L17T
+      L17T=L16T
+      L16T=L15T
+      L15T=L14T
+      L14T=L13T
+      L13T=L12T
+      L12T=L11T
+      L11T=L10T
+      L10T=L09T
+      L09T=L08T
+      L08T=L07T
+      L07T=L06T
+      L06T=L05T
+      L05T=L04T
+      L04T=L03T
+      L03T=L02T
+      L02T=L01T
+      L01T=L00T
+      L00T=null
+
+?loc.begin
+  L00T="You begin your journey"
+  Line(0)
+  status=""
+  px=pos.x
+  parmor=armor
+  parmorf=armor.f
+  php=hp
+
+?loc.loop
+  lair=0
+  L00T=" "
+  Line(0)
+  L00T="-=+=-=+=-=+=-=+=-=+=-=+=-=+=-=+=-=+=-=+=-=+=-=+=-"
+  Line(0)
+  L00T=" "
+  Line(0)
+  L00T="Whoa, deja-vu"
+  Line(0)
+  status=""
+  px=pos.x
+  parmor=armor
+  parmorf=armor.f
+  php=hp
+
+>`1,00,#080808,@L00T@
+
+>`1,01,#FFFFFF,@L01T@
+>`1,02,#888888,@L02T@
+>`1,03,#808080,@L03T@
+>`1,04,#787878,@L04T@
+>`1,05,#707070,@L05T@
+>`1,06,#686868,@L06T@
+>`1,07,#606060,@L07T@
+>`1,08,#585858,@L08T@
+>`1,09,#505050,@L09T@
+>`1,10,#484848,@L10T@
+>`1,11,#404040,@L11T@
+>`1,12,#383838,@L12T@
+>`1,13,#303030,@L13T@
+>`1,14,#282828,@L14T@
+>`1,15,#202020,@L15T@
+>`1,16,#181818,@L16T@
+>`1,17,#101010,@L17T@
+>`1,18,#080808,@L18T@
+>`1,19,#000000,@L19T@
+
+
+// Beginning of output conditions
+
+?loc=boss&lair=0 // entered boss lair
+  lair=1
+  L00T=" "
+  Line(0)
+  L00T="You have entered the bosses lair"
+  Line(0)
+
+?pfcount>foe.count // killed enemies
+  var x
+  x=pfcount-foe.count
+  ?foe.name!pfname|foe.count=0|foe.distance!pfdist
+  L00T="You killed "
+    ?pfboss
+      L00T=L00T+pfname
+    :?"AEIOU"=string.Sub(pfname,0,1)
+      L00T=L00T+"an "+pfname
+    :
+      L00T=L00T+"a "+pfname
+  ?x>1
+    var y
+    y=x-1
+    ?y>1
+      L00T=L00T+" and "+y+" other enemies"
+    :
+      L00T=L00T+" and "+y+" other enemy"
+  Line(0)
+
+?pfname="Angry Shroom"&pfhp>0&foe.hp<1 // Exception for Angry Shroom 'kill'
+  L00T="You killed Angry Shroom"
+  Line (0)
+
+?pfdebuffs<foe.debuffs.count // debuffed the enemy, different tiers
+  L00T="The enemy "+foe.name
+  ?foe.debuffs.count>6
+    L00T=L00T+" is extremely weakened"
+  :?foe.debuffs.count>3
+    L00T=L00T+" is more weakened"
+  :
+    L00T=L00T+" is weakened"
+  Line(2)
+
+?10*parmor+parmorf>10*armor+armor.f+1 // it's a hit, not degredation
+  status="hit"
+  ?px>pos.x
+    var x=px-pos.x
+    ?x>6
+       L00T="You are hit and knocked very far back but your armor managed to absorb the damage"
+    :?x>3
+       L00T="You are hit and knocked way back but your armor managed to absorb the damage"
+    :
+       L00T="You are hit and knocked back but your armor managed to absorb the damage"
+  :
+    L00T="You are hit but your armor absorbed the damage"
+  Line(2)
+
+?php>hp // it's a hit
+  status="hit"
+  ?px>pos.x
+    var x=px-pos.x
+    ?x>6
+       L00T="You are hit and knocked very far back"
+    :?x>3
+       L00T="You are hit and knocked way back"
+    :
+       L00T="You are hit and knocked back"
+  :
+    L00T="You are hit"
+  Line(1)
+
+?px>pos.x&status!"hit"&px-pos.x<=20&ai.enabled&item.getcooldown("mind")<360 // You moved back without taking damage and without dodging
+  status="hit"
+  L00T="You are pushed backwards"
+  Line(2)
+
+?item.getcooldown("bardiche")>=899
+  L00T="You bring down your bardiche forcefully onto "
+  ?foe.name!null
+    ?foe=boss
+      L00T=L00T+foe.name
+    :?"AEIOU"=string.Sub(foe.name,0,1)
+      L00T=L00T+"an "+foe.name
+    :
+      L00T=L00T+"a "+foe.name
+  Line(1)
+
+?item.getcooldown("bash")>=269|item.getcooldown("dash")>=44
+  status="charge"
+  L00T="You charge into "
+  ?foe.name!null
+    ?foe=boss
+      L00T=L00T+foe.name
+    :?"AEIOU"=string.Sub(foe.name,0,1)
+      L00T=L00T+"an "+foe.name
+    :
+      L00T=L00T+"a "+foe.name
+    ?item.getcooldown("bash")=270&foe!" immune_to_stun"
+      L00T=L00T+" stunning them"
+  Line(1)
+
+?10*parmor+parmorf<10*armor+armor.f-10&status!charge // gained more than 1 pt armor, not from bashing shield
+  L00T="You draw power from your enemies, armor is boosted"
+  Line(2)
+
+?item.getcooldown("mind")>=359
+  L00T="You swiftly dodge backwards"
+  Line(1)
+
+?item.getcooldown("quarterstaff")>=149
+  L00T="You dash forward"
+  ?pfdist<10
+    L00T=L00T+" into "
+    ?foe.name!null
+      ?foe=boss
+        L00T=L00T+foe.name
+      :?"AEIOU"=string.Sub(foe.name,0,1)
+        L00T=L00T+"an "+foe.name
+      :
+        L00T=L00T+"a "+foe.name
+      ?foe!" immune_to_stun"
+        L00T=L00T+" stunning them"
+  Line(1)
+
+?ai.idle|ai.walking
+:?foe.hp>0
+  L00T="You are attacking "
+  ?foe.name!null
+    ?foe=boss
+      L00T=L00T+foe.name
+    :?"AEIOU"=string.Sub(foe.name,0,1)
+      L00T=L00T+"an "+foe.name
+    :
+      L00T=L00T+"a "+foe.name
+
+?ai.idle&ai.enabled&foe.distance<24
+  L00T="You are attacking "
+  ?foe.name!null
+    ?foe=boss
+      L00T=L00T+foe.name
+    :?"AEIOU"=string.Sub(foe.name,0,1)
+      L00T=L00T+"an "+foe.name
+    :
+      L00T=L00T+"a "+foe.name
+
+?ai.walking&ai.enabled
+  L00T="You are walking"
+  ?foe.distance<9999
+    ?foe.count=1
+      L00T=L00T+" towards "
+      ?foe=boss
+        L00T=L00T+foe.name
+      :?"AEIOU"=string.Sub(foe.name,0,1)
+        L00T=L00T+"an "+foe.name
+      :
+        L00T=L00T+"a "+foe.name
+      ?L00T=L01T
+        L01T=L00T
+    :?foe.count=2
+      L00T=L00T+" towards "
+      ?foe=boss
+        L00T=L00T+foe.name
+      :?"AEIOU"=string.Sub(foe.name,0,1)
+        L00T=L00T+"an "+foe.name
+      :
+        L00T=L00T+"a "+foe.name
+      ?L01T=L00T
+        L00T=L00T+" and its friend"
+        L01T=L00T
+      :
+        L00T=L00T+" and its friend"
+    :?foe.count>2&foe.count<5
+      L00T=L00T+" towards "
+      ?foe=boss
+        L00T=L00T+foe.name
+      :?"AEIOU"=string.Sub(foe.name,0,1)
+        L00T=L00T+"an "+foe.name
+      :
+        L00T=L00T+"a "+foe.name
+      ?L01T=L00T
+        L00T=L00T+" and its crew"
+        L01T=L00T
+      :
+        L00T=L00T+" and its crew"
+    :?foe.count>=5
+      L00T=L00T+" towards "
+      ?foe=boss
+        L00T=L00T+foe.name
+      :?"AEIOU"=string.Sub(foe.name,0,1)
+        L00T=L00T+"an "+foe.name
+      :
+        L00T=L00T+"a "+foe.name
+      ?L01T=L00T
+        L00T=L00T+" and its horde"
+        L01T=L00T
+      :
+        L00T=L00T+" and its horde"
+Line(2)
+
+?foe=boss
+  pfboss=1
+:
+  pfboss=0
+status=""
+px=pos.x
+parmor=armor
+parmorf=armor.f
+php=hp
+pfcount=foe.count
+pfname=foe.name
+pfhp=foe.hp
+pfarmor=foe.armor
+pfdebuffs=foe.debuffs.count
+pfdist=foe.distance
+
+func debug(z)
+  var dx=0			//delta previous x pos
+  var darmor=0		//delta previous armor
+  var darmorf=0		//delta previous armor frac
+  var dhp=0			//delta previous hp
+  var dfcount=0		//delta previous foe count
+  var dfhp=0		//delta previous foe hp
+  var dfarmor=0		//delta previous foe armor
+  var dfboss=0		//delta previous foe was boss
+  var dfdist=0		//delta previous foe distance
+  var dfdebuffs=0	//delta previous foe debuffs count
+
+  dx=pos.x-px
+  darmor=armor-parmor
+  darmorf=armor.f-parmorf
+  dhp=hp-php
+  dfcount=foe.count-pfcount
+  dfhp=foe.hp-pfhp
+  dfarmor=foe.armor-pfarmor
+  ?foe=boss&pfboss=1
+    dfboss=0
+  :?foe!boss&pfboss=0
+    dfboss=0
+  :
+    dfboss=1
+  dfdist=foe.distance-pfdist
+  dfdebuffs=foe.debuffs.count-pfdebuffs
+
+  ?z=0
+    Draw.Clear()
+  :?z=1
+    Draw.Clear()
+    var x
+    ?foe=boss
+      x=1
+    :
+      x=0
+    >`60,0,boss:  @pfboss@ @x@
+    >`60,1,posx:  @px@ @pos.x@
+    >`60,2,armor: @parmor@ @armor@
+    >`60,3,arm.f: @parmorf@ @armor.f@
+    >`60,4,hp:    @php@ @hp@
+    >`60,5,f.c:   @pfcount@ @foe.count@
+    >`60,6,f.n:   @pfname@ @foe.name@
+    >`60,7,f.hp:  @pfhp@ @foe.hp@
+    >`60,8,f.arm: @pfarmor@ @foe.armor@
+    >`60,9,f.deb: @pfdebuffs@ @foe.debuffs.count@
+    >`60,10,f.dis: @pfdist@ @foe.distance@
+  :?z=2
+    var x
+    ?foe=boss
+      x=1
+    :
+      x=0
+    >`60,0,boss:  @pfboss@ @x@
+    >`60,1,posx:  @px@ @pos.x@
+    >`60,2,armor: @parmor@ @armor@
+    >`60,3,arm.f: @parmorf@ @armor.f@
+    >`60,4,hp:    @php@ @hp@
+    >`60,5,f.c:   @pfcount@ @foe.count@
+    >`60,6,f.n:   @pfname@ @foe.name@
+    >`60,7,f.hp:  @pfhp@ @foe.hp@
+    >`60,8,f.arm: @pfarmor@ @foe.armor@
+    >`60,9,f.deb: @pfdebuffs@ @foe.debuffs.count@
+    >`60,10,f.dis: @pfdist@ @foe.distance@
+  :?z=3

@@ -1,0 +1,307 @@
+/*
+-没有hp blocking(闪一下双符文380血）!!
++更好的双冰剑ice debuff 策略
+可以躲激光和stun(100%)；
+6冰半途bard或6.13/14自动吃药；
+phase1和2的2dot，第一击必中之后都dodge
+phase3除3以外第一击必中fire hammer df之后都dodge:vigor ah shield
+quest+compound+冲刺盾+火双A叠甲54
+AAC所有
+*/
+var FoeStatus = import FoeStatus
+var AC = import UI/ActivationCenter
+var PotionTimer = import PotionFilter
+var counted = 0
+var count = 0
+var unmadeonce = 0
+var hammertime = 0
+var swordtime = 0
+var SAtime = 0
+?loc.begin
+	brew stone + bronze
+?loc.loop
+	counted = 0
+	count = 0
+	hammertime = 0
+	swordtime = 0
+	SAtime = 0
+	unmadeonce = 0
+?item.GetCooldown("bardiche") < 879
+	?foe = acronian scout 
+		?foe.distance <= 10
+			?SAtime < 4
+				equip Skeleton Arm +21
+				SAtime++
+			:
+				equip Shiny Repeating Crossbow +21
+				equip Skeleton Arm +21
+				SAtime = 1
+	?foe = phase1 
+		?foe.distance <= 10
+			?foe.state = 32 & foe.time = 64
+				?!FoeStatus.burn2
+					equipR Fire Shield af -shiny +21
+				:
+					equipR Shiny Vigor Shield ah +21
+			:?swordtime % 8 < 4
+				?FoeStatus.chillDuration < 6 | FoeStatus.chillCount < 6
+					equipL Ice d_sword dI +21
+					equipR Ice d_sword dI +20
+				:?!FoeStatus.poison & foe.state = 32 & foe.time > 55 
+					equipL Fire d_sword D +20
+					equipR Poison d_sword dP +20
+				:?!FoeStatus.burn
+					equipL Fire d_sword D +20
+					equipR Fire d_sword dF +20
+				:?hp < maxhp
+					equipL Fire d_sword D +20
+					equipR Vigor d_sword dL +20
+				:
+					equipL Fire d_sword D +20
+					equipR Fire d_sword D +21
+				swordtime++
+			:
+				?FoeStatus.chillDuration < 6 | FoeStatus.chillCount < 6
+					equipL Ice d_sword dI +20
+					equipR Ice d_sword dI +21
+				:?!FoeStatus.poison & foe.state = 32 & foe.time > 55
+					equipL Poison d_sword dP +20
+					equipR Fire d_sword D +20
+				:?!FoeStatus.burn
+					equipL Fire d_sword dF +20
+					equipR Fire d_sword D +20
+				:?hp < maxhp
+					equipL Vigor d_sword dL +20
+					equipR Fire d_sword D +20
+				:
+					equipL Fire d_sword D +21
+					equipR Fire d_sword D +20
+				swordtime++
+	?foe = phase2
+		?foe.distance <= 10
+			?foe = Vigor
+				?foe.state = 32 & foe.time = 59
+					equipR Shiny Vigor Shield ah +21
+				:
+					?swordtime % 8 < 4
+						?!FoeStatus.burn & !FoeStatus.buffProtec
+							equipL Fire d_sword dF +20
+							equipR Poison d_sword D +21
+						:?foe.state = 32 & foe.time > 49 & !FoeStatus.poison & !FoeStatus.buffProtec
+							equipL Poison d_sword dP +20
+							equipR Poison d_sword D +21
+						:
+							equipL Poison d_sword D +20
+							equipR Poison d_sword D +21
+						swordtime++
+					:
+						?!FoeStatus.burn & !FoeStatus.buffProtec
+							equipL Poison d_sword D +21
+							equipR Fire d_sword dF +20
+						:?foe.state = 32 & foe.time > 49 & !FoeStatus.poison & !FoeStatus.buffProtec
+							equipL Poison d_sword D +21
+							equipR Poison d_sword dP +20
+						:
+							equipL Poison d_sword D +21
+							equipR Poison d_sword D +20
+						swordtime++
+			:?foe = Poison
+				?foe.state = 32 & foe.time = 59
+					?!FoeStatus.burn2 & !FoeStatus.buffProtec
+						equipR Fire Shield af -shiny +21
+					:?!FoeStatus.poison
+						equipR Shiny Vigor Shield ah +21
+				:
+					?swordtime % 8 < 4
+						?!FoeStatus.burn & !FoeStatus.buffProtec
+							equipL Fire d_sword dF +20
+							equipR Ice d_sword D +21
+						:?foe.state = 32 & foe.time > 49 & !FoeStatus.poison & !FoeStatus.buffProtec
+							equipL Poison d_sword dP +20
+							equipR Ice d_sword D +21
+						:
+							equipL Ice d_sword D +20
+							equipR Ice d_sword D +21
+						swordtime++
+					:
+						?!FoeStatus.burn & !FoeStatus.buffProtec
+							equipL Ice d_sword D +21
+							equipR Fire d_sword dF +20
+						:?foe.state = 32 & foe.time > 49 & !FoeStatus.poison & !FoeStatus.buffProtec
+							equipL Ice d_sword D +21
+							equipR Poison d_sword dP +20
+						:
+							equipL Ice d_sword D +21
+							equipR Ice d_sword D +20
+						swordtime++
+			:?foe = Aether
+				?foe.state = 32 & foe.time = 59
+					?!FoeStatus.burn2 & !FoeStatus.buffProtec
+						equipR Fire Shield af -shiny +21
+					:?!FoeStatus.poison
+						equipR Shiny Vigor Shield ah +21
+				:
+					?swordtime % 8 < 4
+						?!FoeStatus.burn & !FoeStatus.buffProtec
+							equipL Fire d_sword dF +20
+							equipR Vigor d_sword D +21
+						:?foe.state = 32 & foe.time > 49 & !FoeStatus.poison & !FoeStatus.buffProtec
+							equipL Poison d_sword dP +20
+							equipR Vigor d_sword D +21
+						:
+							equipL Vigor d_sword D +20
+							equipR Vigor d_sword D +21
+						swordtime++
+					:
+						?!FoeStatus.burn & !FoeStatus.buffProtec
+							equipL Vigor d_sword D +21
+							equipR Fire d_sword dF +20
+						:?foe.state = 32 & foe.time > 49 & !FoeStatus.poison & !FoeStatus.buffProtec
+							equipL Vigor d_sword D +21
+							equipR Poison d_sword dP +20
+						:
+							equipL Vigor d_sword D +21
+							equipR Vigor d_sword D +20
+						swordtime++
+			:?foe = Ice
+				?foe.state = 32 & foe.time = 59
+					?!FoeStatus.burn2 & !FoeStatus.buffProtec
+						equipR Fire Shield af -shiny +21
+					:?!FoeStatus.poison
+						equipR Shiny Vigor Shield ah +21
+				:
+					?swordtime % 8 < 4
+						?!FoeStatus.burn & !FoeStatus.buffProtec
+							equipL Fire d_sword dF +20
+							equipR Fire d_sword D +21
+						:?foe.state = 32 & foe.time > 49 & !FoeStatus.poison & !FoeStatus.buffProtec
+							equipL Poison d_sword dP +20
+							equipR Fire d_sword D +21
+						:
+							equipL Fire d_sword D +20
+							equipR Fire d_sword D +21
+						swordtime++
+					:
+						?!FoeStatus.burn & !FoeStatus.buffProtec
+							equipL Fire d_sword D +21
+							equipR Fire d_sword dF +20
+						:?foe.state = 32 & foe.time > 49 & !FoeStatus.poison & !FoeStatus.buffProtec
+							equipL Fire d_sword D +21
+							equipR Poison d_sword dP +20
+						:
+							equipL Fire d_sword D +21
+							equipR Fire d_sword D +20
+						swordtime++
+			:?foe = Fire
+				?unmadeonce = 0 & foe.state = 32 & foe.time = 59
+					equipR Aether Shield au +21
+					unmadeonce = 1
+				:
+					?swordtime % 8 < 4
+						?!FoeStatus.burn & !FoeStatus.buffProtec
+							equipL Fire d_sword dF +20
+							equipR Aether d_sword D +21
+						:
+							equipL Aether d_sword D +20
+							equipR Aether d_sword D +21
+						swordtime++
+					:
+						?!FoeStatus.burn & !FoeStatus.buffProtec
+							equipL Aether d_sword D +21
+							equipR Fire d_sword dF +20
+						:
+							equipL Aether d_sword D +21
+							equipR Aether d_sword D +20
+						swordtime++
+	?foe = phase3
+		?foe.state = 32 & counted = 0
+			count = count + 1
+			counted = 1
+		?foe.state = 33
+			counted = 0
+		?foe.distance <= 10
+			?time.year = 2020 & time.month = 6 & (time.day = 13 | time.day = 14) & item.potion ! empty & item.potion = Lucky & item.potion = auto//time more accurate, 13 after 12:00, 14 before 12:00
+				activate potion
+			:?foe.state = 115 & foe.time = 76
+				equipR Mind Stone
+			:?count % 5 = 3 & foe.state = 32 & foe.time > 67
+				equipR Mind Stone
+			:?count % 5 ! 3 & foe.state = 32 & foe.time > 87
+				?count % 5 = 1 & !FoeStatus.burn2
+					equipL Vigor Hammer ah +21
+					equipR Fire Shield af -shiny +21
+				:
+					equipL Vigor Hammer ah +21
+					equipR Shiny Vigor Shield ah +21
+			:?foe.armor > 0
+				?hammertime % 34 < 17
+					equipL Fire Hammer D +21
+					equipR shiny Fire Hammer D +21
+					hammertime++
+				:
+					equipL shiny Fire Hammer D +21
+					equipR Fire Hammer D +21
+					hammertime++
+			:?swordtime % 8 < 4
+				?FoeStatus.chillDuration < 6 | FoeStatus.chillCount < 6
+					equipL Ice d_sword dI +21
+					equipR Ice d_sword dI +20
+				:?foe.state = 32 & foe.time > 60 & count % 5 ! 3 & !FoeStatus.poison 
+					equipL Fire d_sword D +20
+					equipR Poison d_sword dP +20
+				:?!FoeStatus.burn
+					equipL Fire d_sword D +20
+					equipR Fire d_sword dF +20
+				:?hp < maxhp
+					equipL Fire d_sword D +20
+					equipR Vigor d_sword dL +20
+				:
+					equipL Fire d_sword D +20
+					equipR Fire d_sword D +21
+				swordtime++
+			:
+				?FoeStatus.chillDuration < 6 | FoeStatus.chillCount < 6
+					equipL Ice d_sword dI +20
+					equipR Ice d_sword dI +21
+				:?foe.state = 32 & foe.time > 60 & count % 5 ! 3 & !FoeStatus.poison 
+					equipL Poison d_sword dP +20
+					equipR Fire d_sword D +20
+				:?!FoeStatus.burn
+					equipL Fire d_sword dF +20
+					equipR Fire d_sword D +20
+				:?hp < maxhp
+					equipL Vigor d_sword dL +20
+					equipR Fire d_sword D +20
+				:
+					equipL Fire d_sword D +21
+					equipR Fire d_sword D +20
+				swordtime++
+	?foe.distance > 10
+		?!ai.enabled | (foe.hp = foe.maxhp & (foe.state = 127 | foe.state = 124 | foe.state = 107))
+			swordtime = 0
+			?foe = phase1 & foe.state = 118 & foe.time = 29
+				equipL Fire Hammer aF +21
+				equipR Fire Shield A +21
+			:?ai.walking
+				equipL trisk
+				equipR Shiny Compound shield +21			
+			:?armor < 14
+				equipL quest
+				equipR Compound shield -shiny +21
+			:
+				equipL quest
+				equipR Shiny Compound shield +21
+		:
+			?foe.distance > 16
+				?armor >= 14 | loc.begin | loc.loop
+					equipL trisk
+					equipR Shiny Compound shield +21
+				:
+					equipL trisk
+					equipR Compound shield -shiny +21
+			:
+				equipL trisk
+				equipR hatchet
+:?item.GetCooldown("bardiche") < 881
+	?foe = phase3 & FoeStatus.chillCount = 6 & item.potion ! empty & item.potion = Lucky & item.potion = auto & PotionTimer.PotionFilter(90)
+		activate potion

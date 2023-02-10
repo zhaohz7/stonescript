@@ -1,0 +1,859 @@
+// Bsquare Equip and AAC utilities methods.
+//
+// Usage:
+// var equip_utils = import Bsquare/Core/Equip
+//
+// Very important: initializes equip_utils, once for all
+// ?loc.begin | loc.loop
+//   equip_utils.init(stage_utils)
+//
+// Then use any function, for instance:
+// equip_utils.equip_weapon("right", "", Compound Shield, "")
+// equip_utils.equip_weapon("left", weakness, Sword, "D")
+//
+// var farest_range_distance = 22 // 22 is the range of the repeating, which is the greater one (20 for crossbow and wand)
+// equip_utils.auto_heal_armor_pickup()
+//
+// To apply debuff:
+// ?!equip_utils.apply_debuff(weakness, ice_off_count, fire_off, poison_off, stun_off)
+//   // all debuffs applied, do something else
+
+// Optimal Bardiche with potion (optional) usage:
+// ?!equip_utils.optimal_bardiche_with_potion()
+//   // Bardiche not available, do something else.
+// :
+//   // Bardiche available and/or used, timing running, tracks effect.
+//   equip_utils.track_bardiche_effect()
+//  - Bardiche : Good explanation about Bardiche (and the need to check cooldown > 870 allowing to keep it equipped during the animation, which is mandatory):
+//               https://stonestoryrpg.com/stonescript/
+//               Distance is <=10, because weapon range is 9 AND because it is dual handed, it count as right hand => range+1; so 10!
+
+var inventory = import Bsquare/Core/MyInventory
+
+// Constants you can adapt to your needs.
+//  - Debuff configuration
+//      debuff_timing_threshold is the count <= it is considered one debuff is going to disappear and thus need to be reapplied/refreshed
+var debuff_timing_threshold = 2 * inventory.min_sword_timing()
+
+//  - Shiny toggle to use when requesting equip
+var add_shiny_tag = false
+
+//  - AAC configuration
+var aac_message_position_x = 6
+var aac_message_position_y = 16
+var aac_inform_enabled = false
+var aac_inform_damage_threshold = 64
+var aac_inform_success_count = 32
+var aac_inform_success_only_boss = false // true
+
+// Defines needed variables.
+//  - bsquare_utils
+var bsquare_utils
+var farest_range_distance
+var speed_run
+
+//  - fine tuning bardiche system
+var bardiche_current_fine_timing
+var bardiche_current_potion
+bardiche_current_fine_timing = 0
+bardiche_current_potion = ""
+
+//  - AAC system
+var aac_swap_time
+var aac_greatest_on_left
+var aac_previous_weapon_name
+var aac_previous_second_weapon_name
+var aac_previous_foe_id
+var aac_previous_foe_distance
+
+var aac_debuff_auto_ice
+var aac_debuff_auto_fire
+var aac_debuff_auto_poison
+
+var aac_foe_armor
+var aac_foe_hp
+var aac_success_reported
+
+// Special toggle allowing requester to allow AAC break when switching to another weakness
+// For instance, it is mandatory to manage Rocky Plateau boss.
+var aac_allow_break_by_weakness_change
+
+// This special variable should only be used for testing purpose (in the Waterfall)
+var aac_test_mode
+
+
+// ***** General Equip utilities *****
+func init(stage_utils)
+  // Initializes track utils.
+  bsquare_utils = stage_utils.bsquare_utils
+  inventory.init_track_utils(stage_utils.bsquare_utils)
+
+  // Initializes some variables, once for all.
+  farest_range_distance = stage_utils.farest_range_distance
+  aac_inform_enabled = !stage_utils.video_record_mode
+  aac_allow_break_by_weakness_change = false
+  speed_run = stage_utils.speed_run
+
+  // Re-init AAC system.
+  reset_aac()
+
+  // Builds armor as quickly as possible, at beginning of location.
+  init_armor()
+
+
+
+func equip_stone(left_or_right, stone_name)
+  ?left_or_right = "left"
+    equipL @stone_name@
+  :
+    equipR @stone_name@
+
+
+func equip_weapon(left_or_right, weakness, weapon_name, suffix)
+  // IMPORTANT: for unknown reason, in French, this method does not work with aether staff, with an upper case for Staff (ok all in lowercased).
+
+  // Defines the greatest enchant of the equip request.
+  var greatest_enchant
+  ?suffix = "stone"
+    greatest_enchant = 0
+  :
+    greatest_enchant = inventory.get_greatest_enchant(weakness, weapon_name, suffix)
+
+  // TODO: add a safe-guard or counter to check how many equip is requested during the same time! Once should be enough ...
+
+  // Safe-guard: check if it will break current AAC
+  ?is_aac_running()
+    var aac_first_complete_weapon_name = define_aac_complete_weapon_name(weakness, weapon_name, greatest_enchant, suffix, false)
+    ?!string.Equals(aac_previous_weapon_name, aac_first_complete_weapon_name)
+      ?aac_inform_enabled
+        bsquare_utils.register_tracker_message("Warn. AAC run.[" + aac_swap_time + "] pp: " + weakness + " " + weapon_name + " " + suffix)
+      return
+
+  // Special management with Stones.
+  ?suffix = "stone"
+    return equip_stone(left_or_right, weapon_name)
+
+  // Defines the complete name of the weapon/gear to equip.
+  var complete_weapon_name
+
+  // Ensures enchant has been properly defined.
+  ?!greatest_enchant
+    complete_weapon_name = string.Join(" ", [weakness, weapon_name, "*10", suffix])
+
+  // Manages special fake enchant (usually for unique item)
+  ?greatest_enchant = inventory.fake_enchant
+    complete_weapon_name = string.Join(" ", [weakness, weapon_name])
+
+  // Manages Compound Shield request.
+  :?weapon_name = Compound
+    var item_parts = [weakness, weapon_name, "*10", "+" + greatest_enchant]
+    ?suffix = "armor" & add_shiny_tag
+      item_parts.Add("shiny")
+
+    // Special management for shield (where suffix is a fake trick just to identify various of them)
+    complete_weapon_name = string.Join(" ", item_parts)
+
+  // Manages all others weapons request.
+  :
+    complete_weapon_name = string.Join(" ", [weakness, weapon_name, "*10", "+" + greatest_enchant, suffix])
+
+  // Disabled usage of item.GetCount which is not reliable because not exact match.
+  //?!item.GetCount(complete_weapon_name)
+    // Uses the same name without the suffix (system should use the best item)
+  //  complete_weapon_name = weapon_name
+
+  // Equips the item left/right according to request.
+  ?inventory.two_handed_weapons.Contains(weapon_name)
+    equip @complete_weapon_name@
+  :?left_or_right = "left"
+    equipL @complete_weapon_name@
+  :
+    equipR @complete_weapon_name@
+
+
+// Manages bash/dash according to situation.
+func _do_manage_bash_dash(stun_allowed, ignore_distance, left_weapon_weakness, left_weapon_name, left_suffix)
+  // Safe-guard: ensures it is possible to enable item ability.
+  ?!item.CanActivate()
+    return false
+
+  var action_done = false
+
+  ?foe.count & foe.distance > 16 & item.getcooldown("quarterstaff") <= 0
+    // Tips: uses the quarterstaff only if in a bigger range which prevents to use bash or dash shield.
+
+    // Uses Quarterstaff to dash quickly.
+    equip_weapon("right", "", quarterstaff, "")
+    activate R
+
+    action_done = true
+  :?ignore_distance | (foe.distance >=11 & foe.distance <=16) // Agerak info: dash/bash are autoactivate IF conditions are true, range<=16&range>=11
+    // If foe is close enough, but not too near, uses the Hammer with A effect, and with weakness elemental.
+    equip_weapon("left", left_weapon_weakness, left_weapon_name, left_suffix)
+
+    // Uses one of the several items allowing to dash quickly to the foe.
+    ?stun_allowed & item.getcooldown("bash") <= 0
+      // Uses the bashing_shield if cooldown is ready.
+      equip_weapon("right", "", "bashing shield", "")
+      action_done = true
+    :?item.getcooldown("dash") <= 0
+      // Uses the dash shield if cooldown is ready.
+      equip_weapon("right", "", "dashing shield", "")
+      action_done = true
+    :?item.getcooldown("quarterstaff") <= 0
+      // Here, we use quarterstaff only if all other forward dash methods are not available.
+      equip_weapon("right", "", quarterstaff, "")
+      activate R
+      action_done = true
+
+  return action_done
+
+
+func manage_bash_dash(weakness, stun_allowed)
+  return _do_manage_bash_dash(stun_allowed, false, weakness, Hammer, "A")
+
+
+func manage_bash_dash_equipped(left_weapon_weakness, left_weapon_name, left_suffix)
+  return _do_manage_bash_dash(true, false, left_weapon_weakness, left_weapon_name, left_suffix)
+
+
+func force_bash_dash(left_weapon_weakness, left_weapon_name, left_suffix)
+  return _do_manage_bash_dash(true, true, left_weapon_weakness, left_weapon_name, left_suffix)
+
+
+func init_armor()
+  // Intended to be used under ?loc.begin
+  equip_weapon("left", "", quest, stone)
+  equip_weapon("right", "", Compound Shield, "armor")
+
+
+func build_armor()
+  ?armor >= 14
+    equip_weapon("right", "", Compound Shield, "armor")
+  :?armor < 14
+    equip_weapon("right", "", Compound Shield, "regen")
+
+
+func _do_auto_heal_armor_pickup(manage_move, manage_healing)
+  // This function is mainly dedicated with speed run and/or ki farming.
+  // Idea of this function is to manage:
+  //  - move quickly (using triskelion) if needed.
+  //  - auto-healing (using ouroboros) if needed.
+  //  - pickup (using star) if needed.
+  //  - build armor if needed.
+
+  // Manages pickup if needed, in speed run mode, whatever the health/armor situation (which could be retrieved facing the boss, with vigor sword dL).
+  ?pickup.distance < 12
+    // Uses star stone to pickup quickly things.
+    equip_weapon("left", "", star, stone)
+
+  :?manage_move & foe.distance > 16 & ai.walking
+    // Uses triskelion to move quicker.
+    equip_weapon("left", "", triskelion, stone)
+
+  // Checks if healing is needed.
+  //  - if we are not at 100% HP
+  //  - if we do NOT suffer from 'puff' debuff preventing healing
+  //  - if we are not in KI farming mode (TODO: challenge that)
+  :?manage_healing & hp < maxhp & debuffs.string ! puff & (foe.count = 0 | foe.distance > 50)
+    // Auto-heal
+    equip_weapon("left", "", ouroboros, stone)
+
+  :
+    // Checks if we have max possible armor, including quest stone (+2).
+    // Tips: the +1 is just to avoid intensive swapping/blinking when we reaches the max armor (using next condition, then back to this one ...).
+    ?armor < inventory.shield_compound_armor_max + 2 + 1
+      equip_weapon("left", "", quest, stone)
+    :
+      // TODO: adds this as a parameter
+      // TODO: At least uses this only if under smite.
+      equip_weapon("left", Ice, Hammer, ai)
+
+  build_armor()
+
+
+func auto_heal_armor_pickup()
+  return _do_auto_heal_armor_pickup(true, true)
+
+
+func auto_heal_armor_static()
+  // This function is mainly dedicated to static (no walk) phase where we can rebuild health and/or armor.
+  // For instance during Icy Ridge final boss fight.
+  return _do_auto_heal_armor_pickup(false, true)
+
+
+func auto_armor_static_no_healing()
+  // This function is mainly dedicated to static (no walk) phase where we can rebuild armor.
+  // Does not use healing stone here, because it will be managed thanks to vigor sword dL AAC.
+  // For instance during Rocky Plateau.
+  return _do_auto_heal_armor_pickup(false, false)
+
+
+// ***** Debuffs (equip) utilities *****
+
+func equip_left_weapon_dmg_according_distance(weakness)
+  ?foe.distance > 6
+    equip_weapon("left", weakness, Wand, D)
+  :
+    equip_weapon("left", weakness, sword, D)
+
+
+func apply_debuff(weakness, ice_off_count, fire_off, poison_off, stun_off)
+  // TODO: remove stun_off here ...
+  // Very interesting and important information, according to some of my exchanges under Discord:
+  //  - there is no way to make distinction between poison off/def (same for stun off/def)
+  //  - there is no boss where you can apply the offensive fire debuff but not the defensive one (or vice versa) either
+  //  - thus choice is about:
+  //    * how much it helps you speed up your run
+  //    * there are some "window" where we can apply (passive) debuff on Boss during which we can't attack them
+  //    * sometimes a defensive one takes too much time because they attack rarely/intermittently. So whip out your debuff attack weapon instead.
+  //    * defensive Ice debuff is **on engage**, others defensive are **on hit**
+  //    * currently ice and poison are broken and enchanting effect has no actual effect in game
+
+  // Very important: passive debuff are ONLY when attaced (or on engage for ice), so there is NO sense to manage them here,
+  //  they must be managed "manually" in corresponding Stage script.
+
+  // Possible debuff, offensives, and defensives.
+  // Ice x6 (max 1 def)
+  // Fire x1 def
+  // Fire x1 off
+  // Poison x1 (def/off)
+  // Stun x1 (def/off)
+
+  // Safe_guard: when Dysangelos phase 2 gets 'buff_protection' buff, it is no more possible to debuff it.
+  // Although it may be the only one to have this buff, it is safe to check it here, as a generic code.
+  ?bsquare_utils.get_foe_buff_count(buff_protection)
+    // Informs there is nothing more this function can do atm.
+    return false
+
+  // Defines left and right weapon to use, according to situation and request.
+  var left_weapon = []
+  var right_weapon = []
+
+  // Defines which debuffs are (still) needed.
+  //  - checks ice off debuff because it is generally the most effective/important
+  ?ice_off_count & !bsquare_utils.check_foe_debuff_count_and_expiration(ice, ice_off_count, debuff_timing_threshold)
+    // Checks foe distance.
+    ?foe.distance > 6
+      // Special situation; need ice debuff, and distance does not allow to use dual sword, uses dual ice staves dI.
+      equip_aac_weapon_with_suffix(ice, staff, dI,  ice, "Big Sword", dI)
+      return true
+
+    // Defines only one sword to be used otherwise.
+    left_weapon = [ice, sword, dI]
+
+  //  - checks fire off debuff
+  ?fire_off & !bsquare_utils.check_foe_debuff_count_and_expiration(fire, fire_off, debuff_timing_threshold)
+    // Checks foe distance.
+    ?foe.distance > 6
+      right_weapon = [fire, wand, dF]
+    :
+      right_weapon = [fire, sword, dF]
+
+  //  - checks poison off debuff
+  ?poison_off & !bsquare_utils.check_foe_debuff_count_and_expiration(poison, poison_off, debuff_timing_threshold)
+    // In ideal situation, should checks foe distance, and uses a range dP weapon if needed (but not crafted).
+    ?!left_weapon.Count()
+      left_weapon = [poison, sword, dP]
+    :?!right_weapon.Count()
+      right_weapon = [poison, sword, dP]
+
+  // Checks if at least one weapon has been configured to be used.
+  ?!left_weapon.Count() & !right_weapon.Count()
+    // Informs all requested (and supported) debuffs, have been applies.
+    return false
+
+  // Adds damage weapon if one weapon is not defined.
+  ?!left_weapon.Count()
+    ?foe.distance > 6
+      left_weapon = [weakness, wand, D]
+    :
+      left_weapon = [weakness, sword, D]
+  :?!right_weapon.Count()
+    ?foe.distance > 6
+      right_weapon = [weakness, wand, D]
+    :
+      right_weapon = [weakness, sword, D]
+
+  // Requests AAC with configured weapons.
+  equip_dual_aac_weapon(left_weapon[0], left_weapon[1], left_weapon[2], right_weapon[0], right_weapon[1], right_weapon[2], weakness, sword, D)
+
+  // Informs there is still some debuffs to apply.
+  return true
+
+
+func is_under_potion_effect()
+  // TODO: add other potion buff, like berserk
+  return bsquare_utils.get_player_buff_count(lucky_crit)
+
+
+// ***** Bardiche and Blade of God utilities *****
+
+
+func strategic_blade_of_god(screen_x, screen_i)
+  // Inspired from Mindflower help.
+  // P.S. the formula for the screen.x i use goes as follows:
+  // every screen has a sum of 69 (no kiddin),
+  // so 69 for the 1st screen, 138 for the second, ... and so on..
+  // THEN i subtract 10 from that number to do it during a screen transition in the most efficient way possible (at least that i found).
+  // so i input numbers like
+  // 128, 197, 266, ... and see which one works best.
+
+  var should_activate_bog = false
+
+  ?item.getcooldown("blade") <= 0 & item.CanActivate() & foe.count
+    // Checks time is totaltime (thus, we are sure we are NOT against boss).
+    ?time = totaltime
+      // Checks if screen_x (very precise) is specified.
+      ?screen_x
+        // Checks/moves to the specified screen x, if needed.
+        ?screen.x < screen_x & screen.x > (screen_x - 69) // & (screen_i & screen.i = bog_first_screen_allowed)
+          screen.Next()
+
+        // Defines BoG must be used if on the good position.
+        ?screen.x >= screen_x
+          should_activate_bog = true
+
+      // Checks if screen_i (less precise) is specified.
+      :?(!screen_i | screen.i = screen_i) & foe.count >=4 & foe.distance < 16
+        should_activate_bog = true
+
+  // Checks if the Blade of God should be activated.
+  ?!should_activate_bog
+    return false
+
+  // If current potion is the experience and Ki one, use it just before!
+  ?item.potion = experience
+    activate potion
+
+  // Activates Blade of God :)
+  //bsquare_utils.register_tracker_message("BoG: config=" + screen_x + "; current=" + screen.x)
+  equip_weapon("right", "", blade, "")
+  activate R
+  return true
+
+
+// Function allowing to use Bardiche with optimal timing (with AAC), and optional potion (if available).
+func _bardiche_with_strategic_timing(fine_timing, potion)
+  // Initially inspired from Mindflower idea.
+
+  // Checks if there is not already a current fine timing bardiche.
+  // N.B.: reminder: once potion is consumed, item.potion is empty !
+  // So the idea of these variables, is to allow caller to do something like:
+  // ?!equip_utils.lucky_bardiche() | !equip_utils.normal_bardiche()
+  //   ...
+  // Or simply to use equip_utils.optimal_bardiche_with_potion()
+  ?!bardiche_current_fine_timing
+    // It is not the case, so initializes it now.
+    bardiche_current_fine_timing = fine_timing
+    bardiche_current_potion = potion
+
+  // Equipped the bardiche:
+  //  - if foe close enough
+  //  - if bardiche cooldown enable
+  //  - if bardiche cooldown triggered (> 870)
+  //  - BUT in reality, attack effect of the bardiche is before reaching CD 870,
+  //     so it can be AAC (earn between 12 and 17 frames :)), and thus we can earn some time/frame :)
+  ?(foe.distance <= 10 & item.GetCooldown("bardiche") <= 0) & item.CanActivate()
+  ^|item.GetCooldown("bardiche") >= bardiche_current_fine_timing
+    equip_weapon("right", "", bardiche, "")
+    activate R
+
+    // Activates the potion at a very strategic timing, just before Bardiche attack effectiveness.
+    // This way the potion effect will be available longer for next attacks :)
+    ?potion & item.GetCooldown("bardiche") = bardiche_current_fine_timing + 1 & item.potion = bardiche_current_potion
+      activate potion
+
+    return true
+
+  // Resets current fine timing bardiche.
+  bardiche_current_fine_timing = 0
+  bardiche_current_potion = ""
+
+  return false
+
+
+func normal_bardiche()
+  // The Bardiche hit is effective when its cooldown is 887, saving 17 frame/time :)
+  return _bardiche_with_strategic_timing(882, "")
+
+
+func lucky_bardiche()
+  // The Bardiche hit is effective when its cooldown is 882, saving 12 frame/time :)
+  // Tested against the Guardian ... before tune timing: hit him about 570,
+  //  and then about 780 with the same bardiche :)
+  return _bardiche_with_strategic_timing(882, lucky)
+
+
+func berserk_bardiche()
+  // TODO: confirm that The Bardiche hit is effective when its cooldown is 887.
+  return _bardiche_with_strategic_timing(887, berserk)
+
+
+func optimal_bardiche_with_potion()
+  // Idea of this function, is:
+  //  - try lucky bardiche if possible
+  //  - try berserk bardiche if possible, otherwise
+  //  - perform normal bardiche otherwise
+  ?!lucky_bardiche()
+    ?!berserk_bardiche()
+      return normal_bardiche()
+
+  // Here thats menas either lucky_bardiche() or berserk_bardiche() returns True.
+  return true
+
+
+func track_bardiche_effect()
+  // Function with debug purposes, allowing to track effect of bardiche with/out potion.
+
+  // Checks if it is an interesting situation to register track message.
+  ?item.GetCooldown("bardiche") <= 0 | item.GetCooldown("bardiche") > bardiche_current_fine_timing + 2
+    return
+
+  // Creates a nice tracking message and register it.
+  var msg
+  msg = "B.CD=" + item.GetCooldown("bardiche") + "; Foe A=" + foe.armor + ";H=" + foe.hp
+  ?bardiche_current_potion & buffs.string = bardiche_current_potion
+    msg = msg + ";[OK]" + bardiche_current_potion
+  bsquare_utils.register_tracker_message_with_prefix(msg)
+
+
+
+// ***** Attack Animation Cancellation (AAC) utilities *****
+
+// Function allowing to reset AAC variables.
+func reset_aac()
+  aac_swap_time = 0
+  aac_greatest_on_left = true
+  aac_previous_weapon_name = "none"
+  aac_previous_second_weapon_name = "none"
+  aac_previous_foe_id = 0
+  aac_previous_foe_distance = 0
+
+  aac_debuff_auto_ice = 0
+  aac_debuff_auto_fire = 0
+  aac_debuff_auto_poison = 0
+
+  aac_foe_armor = 0
+  aac_foe_hp = 0
+  aac_success_reported = 0
+
+  aac_test_mode = false
+
+
+func update()
+  // Manages timing avoiding obligation to call equip_aac_weapon each time/frame.
+  ?is_aac_running()
+    aac_swap_time--
+  :
+    // Reinits AAC timer (if any) in case the foe died during attacks (e.g. splash attack ...).
+    aac_swap_time = 0
+
+
+func break_aac_if_any()
+  // This function must be called if an equip must absolutely be done, even if an AAC was "running"
+  //  (e.g. mind stone usage, or repeating on Guardian).
+  ?is_aac_running()
+    var aac_break_msg = "Break AAC: t=" + aac_swap_time + ";w=" + aac_previous_weapon_name + "/" + aac_previous_second_weapon_name
+    ?foe = boss
+      bsquare_utils.register_tracker_message_with_prefix(aac_break_msg)
+    :
+      bsquare_utils.register_tracker_message(aac_break_msg)
+
+    // Tips: resets some AAC values to avoid lost hp/armor check, and an useless "AAC Fail" message.
+    aac_swap_time = 0
+    aac_foe_armor = -1
+    aac_foe_hp = -1
+
+
+func is_aac_running()
+  // Defines if there is a running aac, if:
+  //  - there is still *living* foe (the previous could be dead)
+  //  - there is a running AAC timer
+  //  - the current foe id and distance, is the same than those when starting AAC
+  return ((foe.count & foe.hp > 0) | aac_test_mode) & aac_swap_time > 0 & aac_previous_foe_id = foe.id & aac_previous_foe_distance = foe.distance
+
+
+func define_aac_complete_weapon_name(weakness, weapon_name, enchant_level, suffix, shiny)
+  var complete_name_parts = [weakness, weapon_name, "10*", "+" + enchant_level, suffix]
+
+  // Safe-guard: avoids using big sword instead of small one.
+  ?weapon_name = sword & weapon_name ! big
+    // Specifies explicitly we want small sword.
+    complete_name_parts.Add("d_sword")
+
+  // Adds shiny tag if needed.
+  ?shiny & add_shiny_tag
+    complete_name_parts.Add("shiny")
+  :
+    complete_name_parts.Add("-shiny")
+
+  return string.Join(" ", complete_name_parts)
+
+
+// Bardiche AAC timing (not enchanted on Attack Speed but raw damage).
+var aac_bardiche_timing_enchant_0 = 10    // 24 under uncancelled conditions, 30 frames / 1.25
+
+// Hammer AAC timing (not enchanted on Attack Speed).
+var aac_hammer_timing_enchant_0 = 17 // 22 under uncancelled conditions, 30 frames / 1.36
+
+// Swords AAC timing, each array index correspond to enchant.
+var aac_sword_timing_enchant_0 = 11 // 14 under uncancelled conditions, 30 frames / 2.14
+var aac_sword_timing_enchant_9 = 7  // Confirmed in HauntedHalls :)
+var aac_sword_timing_enchant_13 = 6 //  7 under uncancelled conditions, 30 frames / 4.29
+var aac_sword_timing_enchant_16 = 5 //  6 under uncancelled conditions, 30 frames / 5
+var aac_sword_timing_enchant_20 = 4 //  5 under uncancelled conditions, 30 frames / 6
+var aac_sword_timing = [11, 11, 11, 11, 11, 11, 10, 10, 10, aac_sword_timing_enchant_9, aac_sword_timing_enchant_9, aac_sword_timing_enchant_9, aac_sword_timing_enchant_9, aac_sword_timing_enchant_13, aac_sword_timing_enchant_13, aac_sword_timing_enchant_13, aac_sword_timing_enchant_16, aac_sword_timing_enchant_16, aac_sword_timing_enchant_16, aac_sword_timing_enchant_16, aac_sword_timing_enchant_20, aac_sword_timing_enchant_20]
+
+// Staves AAC timing, each array index correspond to enchant.
+var aac_staff_timing_enchant_0  = 12 // 14 under uncancelled conditions, 30 frames / 2.14
+var aac_staff_timing_enchant_11 =  6 // Confirmed, seems to work
+var aac_staff_timing_enchant_13 =  5 // TBC
+var aac_staff_timing_enchant_15 =  4 // TBC
+var aac_staff_timing_enchant_18 =  3 // TBC
+var aac_staff_timing_enchant_20 =  2 //  3 under uncancelled conditions, 30 frames / 10
+var aac_staff_timing = [aac_staff_timing_enchant_0, aac_staff_timing_enchant_0, aac_staff_timing_enchant_0, aac_staff_timing_enchant_0, aac_staff_timing_enchant_0, aac_staff_timing_enchant_0, aac_staff_timing_enchant_0, aac_staff_timing_enchant_0, aac_staff_timing_enchant_0, aac_staff_timing_enchant_0, aac_staff_timing_enchant_0, aac_staff_timing_enchant_11, aac_staff_timing_enchant_11, aac_staff_timing_enchant_13, aac_staff_timing_enchant_13, aac_staff_timing_enchant_15, aac_staff_timing_enchant_15, aac_staff_timing_enchant_15, aac_staff_timing_enchant_18, aac_staff_timing_enchant_18, aac_staff_timing_enchant_20, aac_staff_timing_enchant_20]
+
+
+// Functions allowing to setup AAC.
+func equip_aac_weapon(weakness, weapon_name, alt_weapon_name)
+  // Simplified function for highest possible damages.
+  return equip_dual_aac_weapon(weakness, weapon_name, D, weakness, weapon_name, D, weakness, alt_weapon_name, D)
+
+
+func equip_aac_weapon_with_suffix(weakness, weapon_name, weapon_suffix, alt_weakness, alt_weapon_name, alt_suffix)
+  // Simplified function with another suffix (e.g. dU).
+  return equip_dual_aac_weapon(weakness, weapon_name, weapon_suffix, weakness, weapon_name, weapon_suffix, alt_weakness, alt_weapon_name, alt_suffix)
+
+
+func equip_aac_hammer_damage()
+  // TODO: craft 2 aether Hammer D, and 1 poison Hammer D.
+  // Atm I crafter 1 fire Hammer D, and 1 ice Hammer D
+  return equip_dual_aac_weapon(fire, hammer, D, ice, hammer, D, fire, hammer, D)
+
+
+func equip_aac_bardiche()
+  return equip_dual_aac_weapon("", bardiche, "", "", bardiche, "", "", bardiche, "")
+
+
+func aac_configure_debuff_auto(ice_off_count, fire_off)
+  aac_debuff_auto_ice = ice_off_count
+  aac_debuff_auto_fire = fire_off
+
+
+func aac_configure_debuff_auto_one_shot_poison()
+  aac_debuff_auto_poison = 1
+
+
+func define_dual_aac_second_weapon_name(second_weakness, second_weapon_name, second_enchant_level, second_suffix, shiny)
+  // Intelligent function allowing to adapt secondary AAC weapon, if sword, to auto debuff and auto heal if needed.
+
+  // Resets poison debuff option if needed.
+  ?aac_debuff_auto_poison & bsquare_utils.get_foe_debuff_count(poison) >= aac_debuff_auto_poison
+    // Resets poison auto debuff config, because it is one time only (and need to be requested each time by Stage script).
+    aac_debuff_auto_poison = 0
+
+  // Very important: do NOT change secondary weapon if an AAC is currently running.
+  ?is_aac_running()
+    return aac_previous_second_weapon_name
+
+  // Adapts secondary weapon only if it is a sword.
+  ?second_weapon_name ! sword
+    return define_aac_complete_weapon_name(second_weakness, second_weapon_name, second_enchant_level, second_suffix, shiny)
+
+  // Manages auto debuff if configured.
+  // Safe_guard: when Dysangelos phase 2 gets 'buff_protection' buff, it is no more possible to debuff it.
+  // Although it may be the only one to have this buff, it is safe to check it here, as a generic code.
+  ?!bsquare_utils.get_foe_buff_count(buff_protection)
+    //  - if well timed by Stage, if poison is configured, it should be used asap to support incoming attack (even before Ice debuff).
+    ?aac_debuff_auto_poison & !bsquare_utils.check_foe_debuff_count_and_expiration(poison, aac_debuff_auto_poison, debuff_timing_threshold) &
+    ^second_enchant_level = inventory.sword_poison_dP_enchant
+      // TODO: need to improve things like second_enchant_level = inventory.sword_poison_dP_enchant with a new match_enchant function (for +/- 1 and all equivalent like 9/10/11/12 and 13/14/15 ...)
+      return define_aac_complete_weapon_name(poison, second_weapon_name, second_enchant_level, dP, shiny)
+
+    //  - the most important is usually Ice debuff which should be kept in some situation on foe/boss
+    :?aac_debuff_auto_ice & !bsquare_utils.check_foe_debuff_count_and_expiration(ice, aac_debuff_auto_ice, debuff_timing_threshold) &
+    ^second_enchant_level = inventory.sword_ice_dI_enchant
+      return define_aac_complete_weapon_name(ice, second_weapon_name, second_enchant_level, dI, shiny)
+
+    //  - fire offensive debuff
+    :?aac_debuff_auto_fire & !bsquare_utils.check_foe_debuff_count_and_expiration(fire, aac_debuff_auto_fire, debuff_timing_threshold) &
+    ^second_enchant_level = inventory.sword_fire_dF_enchant
+      return define_aac_complete_weapon_name(fire, second_weapon_name, second_enchant_level, dF, shiny)
+
+  // Manages auto healing, which is needed if:
+  //    * need hp
+  //    * in aac test mode (only in Waterfall)
+  //    * if secondary (alt) enchant_level is not the same than inventory.sword_vigor_dL_enchant
+  ?(hp < maxhp | aac_test_mode) &
+  ^second_enchant_level = inventory.sword_vigor_dL_enchant
+    return define_aac_complete_weapon_name(vigor, second_weapon_name, second_enchant_level, dL, shiny)
+
+  // Returns the default secondary weapon which was intended by requester.
+  return define_aac_complete_weapon_name(second_weakness, second_weapon_name, second_enchant_level, second_suffix, shiny)
+
+
+func equip_dual_aac_weapon(weakness, weapon_name, suffix, second_weakness, second_weapon_name, second_suffix, alt_weakness, alt_weapon_name, alt_suffix)
+  var greatest_enchant_level = inventory.get_greatest_enchant(weakness, weapon_name, suffix)
+  var second_enchant_level = inventory.get_greatest_second_enchant(second_weakness, second_weapon_name, second_suffix)
+
+  // Defines first weapon.
+  var first_complete_weapon_name = define_aac_complete_weapon_name(weakness, weapon_name, greatest_enchant_level, suffix, false)
+
+  // Safe-guard: if there is a running AAC, ensures first complete weapon is the same.
+  ?is_aac_running() & !aac_allow_break_by_weakness_change
+    // Prevents AAC weapon change, to avoid breaking it, but if option set to allow it.
+    ?!string.Equals(first_complete_weapon_name, aac_previous_weapon_name)
+      bsquare_utils.register_tracker_message("Warn. AAC change prev.: " + aac_previous_weapon_name + " => " + first_complete_weapon_name)
+      return
+
+  // Defines second weapon:
+  var shiny = (weapon_name = second_weapon_name & suffix = second_suffix & greatest_enchant_level = second_enchant_level)
+  var second_complete_weapon_name = define_dual_aac_second_weapon_name(second_weakness, second_weapon_name, second_enchant_level, second_suffix, shiny)
+
+  // Safe-guard/optimization: if there is a running AAC, and both weapons are the same, does nothing more while the AAC timer is still running.
+  ?is_aac_running()
+    // Does not request equip, if the weapons are exactly the same, and AAC is still running.
+    ?string.Equals(first_complete_weapon_name, aac_previous_weapon_name) &
+    ^string.Equals(second_complete_weapon_name, aac_previous_second_weapon_name)
+      return
+
+  // BUG: item.GetCount does NOT work, because it returns "best match" if it does NOT find exact match ... so this function can NOT relay on it :/
+  // I'm forced to manually define if it is possible or not :/ And I'll be forced to update my script each time, I change my gears ...
+  //var first_weapon_availability = item.GetCount(first_complete_weapon_name)
+  //var second_weapon_availability = item.GetCount(second_complete_weapon_name)
+
+  // Defines availability of first and second weapons.
+  var first_weapon_availability = inventory.is_aac_enable(weakness, weapon_name, suffix)
+  var second_weapon_availability = inventory.is_aac_enable(second_weakness, second_weapon_name, second_suffix)
+
+  ?!first_weapon_availability | !second_weapon_availability
+    // Unable to find 2 weapons corresponding to request.
+    var acc_error_msg = "Err. AAC unavailable " + first_complete_weapon_name + "/" + second_complete_weapon_name
+    ?foe = boss
+      bsquare_utils.register_tracker_message_with_prefix(acc_error_msg)
+    :
+      bsquare_utils.register_tracker_message(acc_error_msg)
+
+    // Equips weapons.
+    //  - manages two-handed weapon.
+    ?inventory.two_handed_weapons.Contains(weapon_name)
+      equip_weapon("right", weakness, weapon_name, suffix)
+
+    //  - manages one-handed weapons.
+    :
+      // Equips left the alt weapon, and right the first one (to get +1 range).
+      equip_weapon("left", alt_weakness, alt_weapon_name, alt_suffix)
+      equip_weapon("right", weakness, weapon_name, suffix)
+  :
+    var aac_swap_time_init
+    var aac_weapon_range
+    ?weapon_name = sword
+      aac_swap_time_init = aac_sword_timing[greatest_enchant_level]
+      aac_weapon_range = 6
+    :?weapon_name = staff
+      aac_swap_time_init = aac_staff_timing[greatest_enchant_level]
+      aac_weapon_range = 20
+    :?weapon_name = bardiche
+      aac_swap_time_init = aac_bardiche_timing_enchant_0
+      aac_weapon_range = 9
+    :?weapon_name = hammer
+      aac_swap_time_init = aac_hammer_timing_enchant_0
+      aac_weapon_range = 8
+
+    :
+      aac_swap_time_init = 12
+      aac_weapon_range = 6
+      bsquare_utils.register_tracker_message_with_prefix("Warn. AAC not supported yet for weapon " + weapon_name)
+
+    // Checks if we got ice debuff on us, reducing attack speed.
+    ?bsquare_utils.get_player_debuff_count(chill)
+      aac_swap_time_init = aac_swap_time_init + 10 * bsquare_utils.get_player_debuff_count(chill) // TODO: find how many speed attack loss we got ...
+
+    // Checks if it is the current AAC (or if foe changed !).
+    ?aac_previous_weapon_name ! first_complete_weapon_name |
+    ^aac_previous_second_weapon_name ! second_complete_weapon_name |
+    ^aac_previous_foe_id ! foe.id |
+    ^aac_previous_foe_distance ! foe.distance
+      // It is a new AAC request, initializes it.
+      aac_swap_time = aac_swap_time_init
+      aac_greatest_on_left = true
+      aac_previous_weapon_name = first_complete_weapon_name
+      aac_previous_second_weapon_name = second_complete_weapon_name
+      aac_previous_foe_id = foe.id // would be nice to have an unique ID instead ...
+      aac_previous_foe_distance = foe.distance
+      aac_foe_armor = foe.armor
+      aac_foe_hp = foe.hp
+
+      // Equips for the first time for this AAC.
+      //  - manages two-handed weapon.
+      ?inventory.two_handed_weapons.Contains(weapon_name)
+        equip @first_complete_weapon_name@
+
+      //  - manages one-handed weapons.
+      :
+        equipL @first_complete_weapon_name@
+        equipR @second_complete_weapon_name@
+    :
+      // Manages weapon swapping.
+      ?aac_swap_time = 0
+        aac_swap_time = aac_swap_time_init
+        aac_greatest_on_left = !aac_greatest_on_left
+
+        //  - manages two-handed weapon.
+        ?inventory.two_handed_weapons.Contains(weapon_name)
+          ?aac_greatest_on_left
+            equip @first_complete_weapon_name@
+          :
+            equip @second_complete_weapon_name@
+
+        //  - manages one-handed weapons.
+        :
+          ?aac_greatest_on_left
+            equipL @first_complete_weapon_name@
+            equipR @second_complete_weapon_name@
+          :
+            equipL @second_complete_weapon_name@
+            equipR @first_complete_weapon_name@
+
+        // Safe-guard: ensures foe has been hit.
+        // Tips: if aac_foe_armor & aac_foe_hp = -1it means the previous AAC has been manually broken, so no need to report failure.
+        ?foe.count >= 1 & foe.distance <= aac_weapon_range &
+        ^aac_foe_armor ! -1 & aac_foe_hp ! -1
+          var foe_lost_armor = aac_foe_armor - foe.armor
+          var foe_lost_hp = aac_foe_hp - foe.hp
+
+          ?foe_lost_armor <= 0 & foe_lost_hp <= 0
+            var msg = "AAC fail"
+
+            // Safe-guard checks if we are under stun.
+            ?bsquare_utils.get_player_debuff_count(stun)
+              msg = msg + "(stun)"
+            :
+              // Informs about Chill debuff if any.
+              ?bsquare_utils.get_player_debuff_count(chill)
+                msg = msg + "(chill)"
+
+              // Informs about Armor/HP.
+              ?(foe.armor > 0 & foe_lost_armor <=0)
+                msg = msg + " A=" + foe.armor + "/" + aac_foe_armor
+              ?foe_lost_hp <= 0
+                msg = msg + " H=" + foe.hp + "/" + aac_foe_hp
+
+            bsquare_utils.register_tracker_message(msg)
+            loc.pause()
+          :?(!aac_inform_success_only_boss | foe = boss) & aac_success_reported < aac_inform_success_count &
+          ^((foe.armor > 0 & foe_lost_armor > aac_inform_damage_threshold) | foe_lost_hp > aac_inform_damage_threshold)
+            // Adds a success message according to configuration, if there is remaining reporting to do.
+            aac_success_reported++
+            var msg = "AAC OK (r" + aac_success_reported + "/" + aac_inform_success_count + ")"
+            ?(foe.armor > 0 & foe_lost_armor > 0)
+              msg = msg + " -" + foe_lost_armor + "A"
+            ?foe_lost_hp > 0
+              msg = msg + " -" + foe_lost_hp + "H"
+
+            bsquare_utils.register_tracker_message_with_prefix(msg)
+
+        // Re-init safe-guard variables.
+        aac_foe_armor = foe.armor
+        aac_foe_hp = foe.hp

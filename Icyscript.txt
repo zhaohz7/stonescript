@@ -1,0 +1,158 @@
+?loc = Icy Ridge
+	var Extract = import Extract
+	var AdjustBFG = import UI/ActivationCenter
+	var swordtime = 0
+	var wandtime = 0
+	var stafftime = 0
+	var bigswordtime = 0
+	var hammertime = 0
+	?loc.begin
+		brew stone + bronze
+		AdjustBFG.changeBFGthcurrentTo(10)
+	?loc.loop | ai.walking
+		swordtime = 0
+		wandtime = 0
+		stafftime = 0
+		bigswordtime = 0
+		hammertime = 0
+	?item.GetCooldown("bardiche") < 879
+		?foe = phase1
+			?foe.distance <= 10
+				?foe.armor > 0
+					?hammertime % 34 < 17
+						equipL Fire Hammer D +21
+						equipR shiny Fire Hammer D +21
+						hammertime++
+					:
+						equipL shiny Fire Hammer D +21
+						equipR Fire Hammer D +21
+						hammertime++
+				:?swordtime % 8 < 4
+					?Extract.FoeChill[2] < 6 | Extract.FoeChill[1] < 6
+						equipL Ice d_sword dI +21
+						equipR Ice d_sword dI +20
+					:?!Extract.FoeBurn[0]
+						equipL Fire d_sword D +20
+						equipR Fire d_sword dF +20
+					:?hp < maxhp
+						equipL Fire d_sword D +20
+						equipR Vigor d_sword dL +20
+					:
+						equipL Fire d_sword D +20
+						equipR Fire d_sword D +21
+					swordtime++
+				:
+					?Extract.FoeChill[2] < 6 | Extract.FoeChill[1] < 6
+						equipL Ice d_sword dI +20
+						equipR Ice d_sword dI +21
+					:?hp < maxhp
+						equipL Vigor d_sword dL +20
+						equipR Fire d_sword D +20
+					:
+						equipL Fire d_sword D +21
+						equipR Fire d_sword D +20
+					swordtime++
+		?foe = boss & foe = ice_elemental_elite
+			?foe.distance < 10
+				?loc.stars = 15 & item.potion ! empty & item.potion = Lucky & item.potion = auto
+					activate potion
+				?swordtime % 8 < 4
+					?!Extract.FoePoison[0]
+						equipL Fire d_sword D +20
+						equipR Poison d_sword dP +20
+					:?!Extract.FoeBurn[0]
+						equipL Fire d_sword D +20
+						equipR Fire d_sword dF +20
+					:
+						equipL Fire d_sword D +20
+						equipR Fire d_sword D +21
+					swordtime++
+				:
+					?!Extract.FoePoison[0]
+						equipL Poison d_sword dP +20
+						equipR Fire d_sword D +20
+					:?!Extract.FoeBurn[0]
+						equipL Fire d_sword dF +20
+						equipR Fire d_sword D +20
+					:
+						equipL Fire d_sword D +21
+						equipR Fire d_sword D +20
+					swordtime++
+		?foe!boss 
+			?foe.distance < 12
+				?foe = Ice Pillar
+					?foe.count > 1
+						?Extract.FoeChill[1] < 6 & Extract.Smite[1] > 19
+							?wandtime % 10 < 5
+								equipL Ice Wand dI +20 -shiny
+								equipR Shiny Ice Wand dI +21
+								wandtime++
+							:
+								equipL Shiny Ice Wand dI +21
+								equipR Ice Wand dI +20 -shiny
+								wandtime++
+						:
+							?bigswordtime % 36 < 18
+								equipL Aether Big Sword dU +21 -shiny
+								equipR Shiny Aether Big Sword dU +21
+								bigswordtime++
+							:
+								equipL Shiny Aether Big Sword dU +21
+								equipR Aether Big Sword dU +21 -shiny
+								bigswordtime++
+					:
+						?Extract.FoeChill[1] < 6 & Extract.Smite[1] > 19
+							?stafftime % 4 < 2
+								equip Shiny Ice Staff dI +20
+								stafftime++
+							:
+								equip Ice Staff dI +20 -shiny
+								stafftime++
+						:
+							?stafftime % 4 < 2
+								equip Shiny Aether Staff dU +21
+								stafftime++
+							:
+								equip Aether Staff dU +20 -shiny
+								stafftime++
+				:?foe.count > 2
+					?Extract.FoeChill[1] < 6 & Extract.Smite[1] > 10
+						?wandtime % 10 < 5
+							equipL Ice Wand dI +20 -shiny
+							equipR Shiny Ice Wand dI +21
+							wandtime++
+						:
+							equipL Shiny Ice Wand dI +21
+							equipR Ice Wand dI +20 -shiny
+							wandtime++
+					:
+						equipL Aether Big Sword dU +21 -shiny
+						equipR Shiny Aether Big Sword dU +21
+				:
+					?Extract.FoeChill[1] < 6 & Extract.Smite[1] > 10
+						?stafftime % 4 < 2
+							equip Shiny Ice Staff dI +20
+							stafftime++
+						:
+							equip Ice Staff dI +20 -shiny
+							stafftime++
+					:
+						?stafftime % 4 < 2
+							equip Shiny Aether Staff dU +21
+							stafftime++
+						:
+							equip Aether Staff dU +20 -shiny
+							stafftime++
+		?foe.distance > 29 | ai.paused
+			?armor > 35
+				equipL trisk
+				equipR Cultist Mask
+			:?loc.begin | loc.loop | armor >= 14
+				equipL trisk
+				equipR Shiny Compound Shield +21
+			:
+				equipL trisk
+				equipR Compound Shield -shiny +21
+		:?foe.distance > 16 
+			equipL trisk
+			equipR Fire Shield A +21

@@ -1,0 +1,132 @@
+// 2-20 2-58 32-1 32weak
+var FoeStatus = import FoeStatus
+var PlayerStatus = import PlayerStatus
+var AdjustBFG = import UI/ActivationCenter
+var PotionTimer = import PotionFilter
+?loc.begin
+	AdjustBFG.changeBFGthcurrentTo(10)
+var nestStatus = false
+var SAtime = 0
+var DStime = 0
+var swordtime = 0
+?loc.loop
+	nestStatus = false
+	SAtime = 0
+	DStime = 0
+	swordtime = 0
+?foe!boss & foe! wasp
+	?foe.distance < 10
+		?SAtime < 4
+			equip Skeleton Arm +21
+			SAtime++
+		:
+			equip Shiny Repeating Crossbow +21
+			equip Skeleton Arm +21
+			SAtime = 1
+?foe = Wasp 
+	?foe = nest
+		?foe.distance > 30
+			equipL Triskelion Stone
+			equipR Shiny Compound Shield *10* +21
+		:?foe.distance > 16
+			equipR Shiny Compound Shield *10* +21
+		:
+			nestStatus = true
+			?foe.distance < 12
+				equipL Big Aether sword dU *10* +21
+				equipR Big Ice Sword dI *10* +20
+			:?item.GetCooldown("dash") <= 0
+				equipL Triskelion Stone
+				equipR Dashing Shield *10* +21
+			:
+				equipL Triskelion Stone
+				equipR Hatchet
+	:?foe.distance > 16
+		equipL Triskelion Stone
+		equipR Shiny Compound Shield *10* +21 
+	:?foe.distance = 16 & item.GetCooldown("dash") <= 0
+		equipL Triskelion Stone
+		equipR Dashing Shield *10* +21 
+	:?nestStatus
+		equipL Big Aether sword dU *10* +21
+		equipR Big Ice Sword dI *10* +20
+	:
+		equip Ice staff dI *10* +20 
+?foe = phase1
+	?foe.distance < 10
+		?foe.state = 33 & foe.time = 0
+			equipL Fire Hammer df *10* +21
+			equipR Vigor Shield ah *10* +21
+		:?FoeStatus.chillCount < 6 | FoeStatus.chillDuration < 6
+			?swordtime % 8 < 4
+				?!FoeStatus.burn
+					equipL Fire d_sword dF +20
+					equipR Ice d_sword dI +20
+				:
+					equipL Ice d_sword dI +21
+					equipR Ice d_sword dI +20
+				swordtime++
+			:
+				?!FoeStatus.poison
+					equipL Ice d_sword dI +20
+					equipR Poison d_sword dP +20
+				:
+					equipL Ice d_sword dI +20
+					equipR Ice d_sword dI +21
+				swordtime++
+		:?SAtime < 4
+			equip Skeleton Arm +21
+			SAtime++
+		:
+			equip Shiny Repeating Crossbow +21
+			equip Skeleton Arm +21
+			SAtime = 1
+?foe = phase2
+	?item.GetCooldown("bardiche") < 879
+		?foe.state ! 1
+			?foe.distance < 10
+				?foe.state = 32 & foe.time > 82 & !FoeStatus.stun
+					equipL Vigor Hammer ah shiny +21
+					equipR Vigor Shield ah shiny +21
+				:?foe.state = 32 & foe.time > 12 & FoeStatus.chillCount < 6
+					equip Ice Staff dI +20
+				:?foe.state = 32 & foe.time > 12 & !FoeStatus.poison
+					equip Rattlesnake +20
+				:?foe.state = 32 & foe.time > 12 & !FoeStatus.burn
+					equip Fire Staff aF +21
+				:?foe.state = 32 & foe.time > 12 & !FoeStatus.stun
+					equipL mind stone
+				:?PlayerStatus.luckyCrit
+					?DStime % 24 < 12
+						equipL Vigor d_sword dL +21
+						equipR Poison d_sword dP +21
+						DStime++
+					:
+						equipL Poison d_sword dP +21
+						equipR Vigor d_sword dL +21
+						DStime++
+				:
+					?SAtime < 4
+						equip Skeleton Arm +21
+						SAtime++
+					:
+						equip Shiny Repeating Crossbow +21
+						equip Skeleton Arm +21
+						SAtime = 1
+			:
+				equipL trisk
+?foe.distance > 16
+	?foe.distance < 25 & ((item.GetCooldown("dash") > 10 & item.GetCooldown("bash") > 10) | PlayerStatus.smiteCount < 9) & (foe ! boss & foe ! wasp | armor > 35)
+		equipL Triskelion Stone
+		equipR Ice Shield ai *10* +21 
+	:?armor > 35
+		equipL trisk
+		equipR Cultist Mask
+	:?armor >= 14 | loc.begin | loc.loop
+		equipL Triskelion Stone 
+		equipR Shiny Compound Shield *10* +21 
+	:
+		equipL Triskelion Stone
+		equipR Compound Shield -shiny *10* +21
+?item.potion = empty & hp < maxhp
+	loc.Leave()

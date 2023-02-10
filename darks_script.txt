@@ -1,0 +1,113 @@
+?loc = deadwood
+ var activeControl = new Utility\ActiveControl
+ var aac = 0
+ var nestCQC = 0
+ var loopCount = 0
+ var phaseTimerCumulative = 0
+ var phaseTimerAverage = 0
+ var phaseTimer = 0
+ var count = 0
+ var countTest = 0
+ 
+ var qstaffAverage = 0
+ var waste = 0
+ var wasteAverage = 0
+ 
+ ?activeControl.qstaffCooldown = 0
+  waste++
+ 
+ activeControl.Run()
+ //>@phaseTimer@, @phaseTimerAverage@, @nestCQC@, @aac@, @count@, @countTest@
+ //>`1,20,#rainFF,Staff Use:@activeControl.qstaffUseCount@\nAverage  :@qstaffAverage@\ncooldown :@activeControl.qstaffCooldown@\nwaste avg:@wasteAverage@
+
+ ?loc.loop
+  aac = 0
+  nestCQC = 0
+  phaseTimerCumulative = phaseTimerCumulative + phaseTimer
+  loopCount++
+  phaseTimerAverage = phaseTimerCumulative / loopCount
+  phaseTimer = 0
+  ?countTest > 0
+   count++
+   countTest = 0
+  qstaffAverage = activeControl.qstaffUseCount / loopCount
+  wasteAverage = waste / loopCount
+ 
+ ?pos.x < 310
+   phaseTimer++
+  
+ equipL poison sword +19
+ equipR compound
+ ?foe.distance < 7
+  equipL poison sword +19
+  equipR ether sword +19
+  ?foe.debuffs.count = 1
+   //dual big sword dU
+   loadout 5
+
+ ?foe = wasp
+  equip ether staff dU
+  ?foe.distance > 10
+   equipL ether sword dU +19
+   equipR compound
+  ?foe = nest & foe.distance < 11 | nestCQC = 1
+   //unmake big sword x2
+   equipL ether sword dU +19
+   equipR ether sword dU +20
+   nestCQC = 1
+
+
+ ?foe = boss & foe.hp > 0
+  ?activeControl.WhenReady("staff", true)
+   equip quarterstaff
+  :?foe.debuffs.count < 6
+   //ice sword +18 x2
+   ?aac = 0
+    equipL ice d_sword +19
+    equipR ice d_sword +18
+   ?aac = 1
+    equipL ice d_sword +18
+    equipR ice d_sword +19
+   ?time % 4 = 0
+    aac = 1 - aac
+   ?foe.distance < 6
+    
+  :?foe.debuffs.count = 6
+   equipL ice d_sword dI
+   equipR poison d_sword dP
+  
+  :?hp < maxhp
+   //vigor sword +18 x2
+   ?aac = 0
+    equipL vigor d_sword +19
+    equipR vigor d_sword +18
+   ?aac = 1
+    equipL vigor d_sword +18
+    equipR vigor d_sword +19
+   ?time % 4 = 0
+    aac = 1 - aac
+  
+  :?activeControl.WhenReady("bard", true)
+   equip bardiche
+  :
+   ?aac = 0
+    equip bardiche +21
+   ?aac = 1
+    equip bardiche +20
+   ?time % 10 = 0
+    aac = 1 - aac
+   
+  ?foe.distance > 10
+   equipL vigor d_sword +18
+   equipR compound
+ 
+ ?foe.distance > 10 & foe.distance < 17
+  equipR dashing
+  
+ ?foe.distance > 10
+  equipL trisk
+ 
+ ?pos.x < 540
+  ?foe.distance > 8 & foe.distance < 11 | foe.distance > 16 
+   
+   activeControl.WhenReady("staff", false)

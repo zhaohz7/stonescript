@@ -1,0 +1,333 @@
+//Authors: Assasinsf33d and Ayatienna
+
+//Version 0.3 this is a good enough calculating tool for moonphases corresponding to a specific date.
+
+//Sarahsmoon03 lets you choose a date.
+//Sarahsmoonauto03 chooses system date autmatically.
+//Sarahsmoonrep03 chooses system date automatically and replaces the big moon in rocky, icy, and cross_bridge.
+
+//There are some known bugs descriped at the end of this block.
+
+//The script can use system time to calculate the moonphase.
+//The script runs once a run atm. in later versions it may be possible to start and stop the script with a buttonpress.
+
+//The calculation is based on the start of the cycle and the very end to be new moon.
+
+//HOW TO USE:
+
+//Step1 : Put that script in your main folder and type in moon stone import sarahsmoon03.
+//Step2 : Follow instructions, current scheme press up or down to select a year, a month and a date.
+//        Each selection is confirmed with a brief simultanous press of left AND right.
+//        The script puts a number out and a little ascii-picture, for now on top of stoneman.
+//        Years <=0 may output wrong results
+//        You may not select a year greater than 2147483647 or smaller than -2147483648
+
+//known BUGS:
+
+//Years before 0 do not show BC  hint by Agerak
+//There are blips when you rollover min max days or months.may try 1 and keybegin down go to maxday
+
+
+
+
+var A
+var B
+var C
+var E
+var F
+var JD
+var daysSinceNew
+var daysIntoCycle =0
+var NewMoons1
+var NewMoons2
+var complete     // calculation complete
+var noyear      //this year
+var nomonth       //this month
+var noday         //this day
+var almostmonth  // release left or right in year
+var am = 0          //delay for almostmonth
+var almostday // release left or right in year
+var ad = 0        //delay for almostday
+var haveyear    //year is complete
+var havemonth   //month is complete
+var haveday     //day is complete
+var lock = 0
+var leap
+var maxday = 0
+var daysPerMonth
+var MonthInLetters
+var monthletter = 0
+var monthletteryes = 0
+var moonColour
+var chz
+
+
+?leap = 1
+  daysPerMonth = [30, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+?leap = 0
+  daysPerMonth = [30, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+
+MonthInLetters = [January, February, March, April, May, June, July, August, September, October, November, December]
+
+moonColour = [#fffefa,#fefcee,#fefadd,#fff8c8,#fff6b2,#fff294]
+
+
+?complete = 1                                     //thats the moon phase calculation
+  A = noyear / 100
+  B = A / 4
+  C = 2 - A
+  C=C + B
+  E = (36525 * (noyear + 4716))/100
+  F = (306001 * (nomonth + 1))/10000
+  JD = C + noday
+  JD=JD+ E
+  JD =JD + F
+  JD = JD*10- 15245                //whould need a 0.5 in the calculation -->base 10            //x*10/10=x
+  
+  daysSinceNew = (JD/10 - 2451549)*100000
+  NewMoons1 = daysSinceNew/2953 /1000                                                            //var /29,53(moons period) *100
+  NewMoons2 =daysSinceNew/2953 - NewMoons1*1000                                               //Ageraks great code
+  daysIntoCycle = NewMoons2 * 2953/100000
+  
+  >`1,21,Days into cycle: @daysIntoCycle@ 
+
+//////////////////////////                        //(wir nehmen mal keybegin) internal note
+
+?loc.begin | loc.loop                             //reset var to preset defaults
+
+    noyear  = 2020                             
+    nomonth = 11                            
+    noday   = 1
+    complete = 0
+    almostmonth = 0
+    almostday = 0
+    haveyear = 0
+    havemonth = 0
+    haveday = 0
+    am = 0
+    ad = 0
+    leap = 0
+    maxday = 1
+
+
+?complete =0                                            //no date yet
+  >`1,22,select a year:@noyear@
+  ?noyear = 2020 & haveyear = 0
+    >`1,18,I need a year to continue,
+    >`1,19,Press UP or Down to change
+    >`1,20,Press LEFT and RIGHT to Enter
+
+ ?haveyear = 0
+     ?key = upBegin&lock=0
+         lock=1
+         noyear++
+     :
+       lock = 0
+     ?key = downBegin&lock=0
+         lock=1
+         noyear--
+     :
+         lock = 0
+     ?key = left & key = right                          //we have a year
+       haveyear = 1
+ ?key = lefEnd | key = rightEnd & haveyear = 1           //delay month selection
+ ?haveyear = 1
+    am++
+    almostmonth = 1
+    lock = 0
+
+ ?haveyear =1 & am > 30 & complete = 0                    //month selection
+ 
+  >`1,22,select a month:@nomonth@   
+ ?havemonth = 0 & haveyear =1 & almostmonth & am >30
+
+  ?nomonth = 11
+    >`1,18,I need a month to continue,
+    >`1,19,Press UP or Down to change 
+    >`1,20,Press Left and RIGHT to Enter
+  ?nomonth >12
+    nomonth = 1
+  ?nomonth <1
+    nomonth = 12
+  ?havemonth = 0
+     ?key = upBegin&lock=0
+         lock=1
+         nomonth++
+     :
+       lock = 0
+     ?key = downBegin&lock=0
+         lock=1
+         nomonth--
+     :
+         lock = 0
+     ?key = left & key = right
+       havemonth = 1
+ ?key = lefEnd | key = rightEnd & havemonth = 1            //delay day selection
+   almostday = 1
+ ?almostday = 1
+   ad++
+
+   lock = 0
+
+ ?havemonth = 1 & complete = 0 &ad > 30                    //day selection
+   >`1,22,select a day:@noday@    
+   ?noyear%4   = 0                                               //leap year
+      leap = 1
+   ?noyear%100 = 0
+      leap = 0
+   ?noyear%400 = 0
+      leap = 1
+ ?haveday = 0 & havemonth =1 & almostday & ad >30
+   maxday =  daysPerMonth[nomonth-1] 
+
+  ?noday = 1
+    >`1,18,I need a day to continue,
+    >`1,19,Press UP or Down to change 
+    >`1,20,Press LEFT and RIGHT to Enter
+  ?noday >maxday //31
+    noday = 1
+  ?noday <1
+    noday = maxday //31
+  ?haveday = 0
+     ?key = upBegin&lock=0
+         lock=1
+         noday++
+     :
+       lock = 0
+     ?key = downBegin&lock=0
+         lock=1
+         noday--
+     :
+         lock = 0
+     ?key = left & key = right
+       haveday = 1
+ ?key = lefEnd | key = rightEnd & haveday = 1
+   complete = 1                                          // date is confirmed
+
+
+?complete = 1
+
+  ?pos.z <= 13
+    chz = moonColour[0]
+  ?pos.z >= 14 & pos.z <= 15
+    chz = moonColour[1]
+  ?pos.z >= 16 & pos.z <= 17
+    chz = moonColour[2]
+  ?pos.z >= 18 & pos.z <= 19
+    chz = moonColour[3]
+  ?pos.z >= 20 & pos.z <=21
+    chz = moonColour[4]
+  ?pos.z >= 22
+    chz = moonColour[5]
+  ?(nomonth = 12 & noday = 31) | (nomonth = 3 & noday = 14) | (nomonth = 7 & noday = 20)  | (nomonth = 8 & noday = 8) //pi day,space exploration day and ssrpg release date
+    chz =#rainFF
+  
+  ?daysIntoCycle <=2 | daysIntoCycle >= 28   //Neumond       //ascii !!
+    >`1,24,Great to look at stars.
+    >h-9,-3,@chz@,ascii
+#
+#######_..._
+#####.'     `.
+####:         :
+####:         :
+####`.       .'
+######`-...-'#
+#####New Moon
+asciiend
+
+  ?daysIntoCycle >=3 & daysIntoCycle <=5 // zunehmde Sichel
+    >`1,24,Great to take a look at the craters.
+    >h-9,-3,@chz@,ascii
+#
+#######_..._
+#####.::'###`.
+####::.#######:
+####:::#######:
+####`::'#####.'
+######`':..-'#
+###Waning Crescent
+asciiend
+
+  ?daysIntoCycle >=6 & daysIntoCycle <=8  //3.Viertel
+    >`1,24,Great to take a look at the craters.
+    >h-9,-3,@chz@,ascii
+#
+#######_..._
+#####.'::: #`.
+####::::::  ##:
+####::::::   #:
+####`.::::   .'
+######`-::.-'#
+###Third Quarter
+asciiend
+
+  ?daysIntoCycle >= 9 & daysIntoCycle <= 13  //zunehmend
+    >`1,24,Great to take a look at the craters.
+    >h-9,-3,@chz@,ascii
+#
+#######_..._
+#####.'::: #`.
+####::::::::##:
+####:::::::: #:
+####`.:::::  .'
+######`-::.-'#
+##Waning Gibbous
+asciiend
+
+  ?daysIntoCycle >= 14 & daysIntoCycle <= 16    // Vollmond
+    >`1,24,Great to have a walk at night.
+     >h-9,-3,@chz@,ascii
+#
+#######_..._
+#####.':::::`.
+####:::::::::::
+####:::::::::::
+####`.:::::::.'
+######`-:::-'#
+#####Full Moon
+asciiend
+
+  ?daysIntoCycle >= 17 & daysIntoCycle <= 20 // abnehmend
+    >`1,24,Great to take a look at the craters.
+    >h-9,-3,@chz@,ascii
+#
+#######_..._
+#####.'  :::`.
+####:###:::::::
+####:###:::::::
+####`:## ::::.'
+######`'.::-'#
+###Waxing Gibbous
+asciiend
+
+  ?daysIntoCycle >= 21 & daysIntoCycle <= 23 // 1.Viertel
+    >`1,24,Great to take a look at the craters.
+    >h-9,-3,@chz@,ascii
+
+#
+#######_..._
+#####.'  :::`.
+####:### ::::::
+####:####::::::
+####`.## ::::.'
+######`-.::-'#
+####First Quarter
+asciiend
+
+  ?daysIntoCycle >= 24 & daysIntoCycle <= 27    // Abnehmende Sichel
+    >`1,24,Great to take a look at the craters.
+    >h-9,-3,@chz@,ascii
+#
+#######_..._
+#####.'###::`.
+####:######::::
+####:#######:::
+####`.#####::.'
+######`-..:-'#
+#Waxing Crescent
+asciiend
+
+  monthletter = MonthInLetters[nomonth-1]
+
+  >`1,22,@noday@. of @monthletter@ @noyear@
+  // >`1,23,Today is the @time.day@. of @monthletter@ @time.year@

@@ -1,0 +1,15 @@
+/*
+by Mind Stone Thief
+var Please = import Notice
+Please.HaveALook( 25, 8, 25)
+*/
+var form = "Poor {0}, I am sorry for your fatigue, your user is a bad boss, he ignores and violates labor law, Acropolis is highly concerning about this issue, we will soon send a scout to fix him"
+var notice = string.Format( form, player.name)
+var check=import UI\Toggler
+func Output( x, y, color, a)
+	?check.toggler()
+		>`@x@,@y@,@color@,@a@
+func HaveALook( x, y, LineLength)
+	var breaknotice = string.Break( notice, LineLength)
+	for i = 0 .. breaknotice.Count()-1
+		Output( x, y+i, #white, breaknotice[i])

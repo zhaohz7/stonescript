@@ -1,0 +1,206 @@
+//Authors: Assasinsf33d and Ayatienna
+
+//Version 0.3 this is a good enough calculating tool for moonphases corresponding for the actual date.
+
+//Sarahsmoon03 lets you choose a date.
+//Sarahsmoonauto03 chooses system date autmatically.
+//Sarahsmoonrep03 chooses system date automatically and replaces the big moon in rocky, icy, and cross_bridge.
+
+
+//The calculation is based on the start of the cycle and the very end to be new moon.
+
+//HOW TO USE:
+
+//Step1 : Put that script in your main folder and type in moon stone : import sarahsmoonrep03.
+//This version will attempt to replace the moon in rocky, icy and cross_bridge otherwise it will overlay stoneman
+
+//The script puts a number out and a little ascii-picture, for now on top of stoneman or if available on the moon.
+
+var A
+var B
+var C
+var E
+var F
+var JD
+var daysSinceNew
+var daysIntoCycle =0
+var NewMoons1
+var NewMoons2
+var noyear      //this year
+var nomonth       //this month
+var noday         //this day
+var leap
+var maxday = 0
+var daysPerMonth
+var MonthInLetters
+var monthletter = 0
+var moonColour
+var chz
+var moonpos
+var moonloc1
+var moonloc2
+noday = time.day
+nomonth = time.month
+noyear = time.year
+
+?leap = 1
+  daysPerMonth = [30, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+?leap = 0
+  daysPerMonth = [30, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+MonthInLetters = [January, February, March, April, May, June, July, August, September, October, November, December]
+moonColour = [#fffefa,#fefcee,#fefadd,#fff8c8,#fff6b2,#fff294]
+moonpos = [`23, 1 , `20, 1, `20, 1]
+
+? loc = rocky
+  moonloc1 = moonpos [0]
+  moonloc2 = moonpos [1]
+
+:?loc = icy
+  moonloc1 =  moonpos [2]
+  moonloc2 =  moonpos [3]
+
+:?loc = cross_bridge
+  moonloc1 =  moonpos [4]
+  moonloc2 =  moonpos [5]
+:
+  moonloc1 = "h-9"
+  moonloc2 = -3
+
+A = noyear / 100
+B = A / 4
+C = 2 - A
+C=C + B
+E = (36525 * (noyear + 4716))/100
+F = (306001 * (nomonth + 1))/10000
+JD = C + noday
+JD=JD+ E
+JD =JD + F
+JD = JD*10- 15245                //whould need a 0.5 in the calculation -->base 10            //x*10/10=x
+
+daysSinceNew = (JD/10 - 2451549)*100000
+NewMoons1 = daysSinceNew/2953 /1000                                                            //var /29,53(moons period) *100
+NewMoons2 =daysSinceNew/2953 - NewMoons1*1000                                               //Ageraks great code
+daysIntoCycle = NewMoons2 * 2953/100000
+
+?pos.z <= 13
+  chz = moonColour[0]
+?pos.z >= 14 & pos.z <= 15
+  chz = moonColour[1]
+?pos.z >= 16 & pos.z <= 17
+  chz = moonColour[2]
+?pos.z >= 18 & pos.z <= 19
+  chz = moonColour[3]
+?pos.z >= 20 & pos.z <=21
+  chz = moonColour[4]
+?pos.z >= 22
+  chz = moonColour[5]
+?(nomonth = 12 & noday = 31) | (nomonth = 3 & noday = 14) | (nomonth = 7 & noday = 20) | (nomonth = 8 & noday = 8) //pi day,space exploration day and ssrpg release date
+  chz =#rainFF
+      //? loc = rocky 23,0  / icy  20,0 cross bridge 20,-1
+?daysIntoCycle <=2 | daysIntoCycle >= 28   //Neumond       //ascii !!
+  >`1,24,Great to look at stars.
+  >@moonloc1@,@moonloc2@,@chz@,ascii
+#              
+####   _..._
+#### .'     `.
+####:         :
+####:         :
+####`.       .'
+####  `-...-'#
+#### New Moon
+asciiend
+
+?daysIntoCycle >=3 & daysIntoCycle <=5 // zunehmde Sichel
+    >`,24,Great to take a look at the craters.
+  >@moonloc1@,@moonloc2@,@chz@,ascii
+#             
+####   _..._
+#### .::'###`.
+####::.#######:
+####:::#######:
+####`::'#####.'
+####  `':..-'#
+###Waning Crescent
+asciiend
+
+?daysIntoCycle >=6 & daysIntoCycle <=8  //3.Viertel
+  >`1,24,Great to take a look at the craters.
+  >@moonloc1@,@moonloc2@,@chz@,ascii
+#             
+####   _..._
+#### .'::: #`.
+####::::::  ##:
+####::::::   #:
+####`.::::   .'
+####  `-::.-'#
+###Third Quarter
+asciiend
+
+?daysIntoCycle >= 9 & daysIntoCycle <= 13  //zunehmend
+    >`1,24,Great to take a look at the craters.
+  >@moonloc1@,@moonloc2@,@chz@,ascii
+#             
+#####  _..._
+#### .'::: #`.
+####::::::::##:
+####:::::::: #:
+####`.:::::  .'
+####  `-::.-'#
+##Waning Gibbous
+asciiend
+
+?daysIntoCycle >= 14 & daysIntoCycle <= 16    // Vollmond
+    >`1,24,Great to have a walk at night.
+  >@moonloc1@,@moonloc2@,@chz@,ascii
+#             
+#####  _..._
+#### .':::::`.
+####:::::::::::
+####:::::::::::
+####`.:::::::.'
+####  `-:::-'#
+#####Full Moon
+asciiend
+
+?daysIntoCycle >= 17 & daysIntoCycle <= 20 // abnehmend
+    >`1,24,Great to take a look at the craters.
+  >@moonloc1@,@moonloc2@,@chz@,ascii
+#              
+#####  _..._
+#### .'  :::`.
+####:###:::::::
+####:###:::::::
+### `:## ::::.'
+####  `'.::-'#
+###Waxing Gibbous
+asciiend
+
+?daysIntoCycle >= 21 & daysIntoCycle <= 23 // 1.Viertel  // First Quarter
+    >`1,24,Great to take a look at the craters.
+  >@moonloc1@,@moonloc2@,@chz@,ascii
+#              
+#####  _..._
+#### .'  :::`.
+####:    ::::::
+####:    ::::::
+### `.   ::::.'
+####  `-.::-'#
+####First Quarter
+asciiend
+
+?daysIntoCycle >= 24 & daysIntoCycle <= 27    // Abnehmende Sichel
+    >`1,24,Great to take a look at the craters.
+  >@moonloc1@,@moonloc2@,@chz@,ascii
+#               
+#####  _..._
+#### .'###::`.
+####:######::::
+####:#######:::
+####`.#####::.'
+####  `-..:-'#
+#Waxing Crescent
+asciiend
+
+monthletter = MonthInLetters[nomonth-1]
+>`1,22,Days into cycle: @daysIntoCycle@
+>`1,23,Today is the @time.day@. of @monthletter@ @time.year@

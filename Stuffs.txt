@@ -1,0 +1,121 @@
+######## .###,
+#######'. '.  \  \
+######._ '-.'. `\  \
+######  '-._; .'; `-.'. 
+###### `~-.; '.       '.
+########'--,`           '.
+###########-='.          ;
+#.--=~~=-,####-.;        ;
+ .-=`;    `~,_.;        /
+`  ,-`'    .-;         |
+###.-~`.    .;         ;
+####.;.-   .-;         ,\
+######`.'   ,=;     .-'  `~.-._
+#######.';   .';  .'      .'   '-.
+#########.\  ;  ;        ,.' _  o',
+########.'~";-`   ;      ;"~` `'-=.)
+######.' .'   . _;  ;',  ;
+######'-.._`~`.'###\  ;; :
+###########`~'######'\\_\\_
+#####################/`("/`)-.
+
+##################/I
+#################/ |#__
+################I   / /##_
+#########/T#####|  I  |.-~/
+########I l##T\#l  |  T  /
+#__##| \l  \#l ‾  `  _. |
+#\ ~-l  `\  ‾ \         |
+##\   ~-. "-\_ "-_      |
+.--~-._  ~- _-"   -___  |
+##\    ~-.       ^~"  \_|
+####^-._                /`~.-._
+########‾‾-_        .-'Y      o'.
+############-.__ ;.'    \_.-~-.=.)
+################/_;       ;
+###############(_/_\  ;; :
+###############(_/_/'\\_\\_
+#####################/`("/`)-
+
+#.--~-.___        '.---.
+##.--~-.__\         '.---;
+###'.-.____\         ;----,
+#.-.'_______\..      ;----|
+#'.._______.   '.   /-----/
+###'._____.  /   '.|-----.
+####'.______ (     ;----/
+######'..____ '.    \  /`~.-._
+#########'.__.-\     -Y      o'.
+############-.  \ .'   \_.-~-.=.)
+#############_.-´      ;"
+##########.-´   .;  ;  ;
+#########(_//_;  .; ;; :
+###########(_/_;_-‾\\_\\_
+############(_/####/`("/`)-.
+
+#(`'~-.,_#########'.`'-.
+(`'-~-.,_`.#########':--.;
+(`'-~-.____\#########;--: \
+#(-.'_______`.,######;--:`|
+##(._______.   '.###/--:``/
+###'._____.  /   '.|--:``;
+######'.____ (     ;._ `/
+########'..__ '.    \ ,`'~.-._
+###########`._.\     -:      o'.
+#############`-.\ .'   \_.-~-.=.)
+##############/  `     ;´
+##########_.-´  .;  ;  ;
+#########(_.´ ;  .; ;; :
+##########(_.´ ;_-‾\\_\\_
+############'-´####/`("/`)-..
+PFf add rocky
+blade change
+filter off
+ | (foe.hp = foe.maxhp & foe.state = 127)
+also phase2
+debuffs output
+	:?item.GetCooldown("bardiche") < 881
+		?loc.stars > 12 & item.potion ! empty & item.potion = Lucky & item.potion = auto & PotionTimer.PotionFilter(80)
+			activate potion
+
+	:?item.GetCooldown("dash") > 0 & potionuse = 1 & foe ! boss & armor > 10 & foe.distance < 25
+		equipL Triskelion Stone
+		equipR Ice Shield ai *10* +21
+	:?armor > 35 | pos.x > 300
+		equipL trisk
+		equipR Cultist Mask
+	:?armor >= 14 | loc.begin | loc.loop
+		equipL Triskelion Stone 
+		equipR Shiny Compound Shield *10* +21 
+	:
+		equipL Triskelion Stone
+		equipR Compound Shield -shiny *10* +21
+		
+?foe = ghost_tomb & foe.state = 0 & !Extract.FoeChill[0]
+	equipL trisk
+	equipR Ice Shield ai *10 +21
+
+
+var x
+var y
+x = screen.FromWorldX(pos.x)
+y = screen.FromWorldZ(pos.z - pos.y)
+>`0,1,Player position on screen: @x@,@y@
+
+var sx
+var sy
+var wx
+var wz
+sx = input.x
+sy = input.y
+>`0,2,Screen position of cursor: @sx@,@sy@
+
+wx = screen.ToWorldX(input.x)
+wz = screen.ToWorldZ(input.y)
+>`0,3,World position of cursor: @wx@,@wz@
+
+var x
+var y
+x = screen.FromWorldX(pos.x)
+y = screen.FromWorldZ(pos.z - pos.y)
+>`0,4,@draw.GetSymbol(x, y)@

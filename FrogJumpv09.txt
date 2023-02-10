@@ -1,0 +1,1552 @@
+/*
+FrogJump by @Mind Stone Thief
+v0.9.1 unfinished prototype
+put into the game folder then:
+import Games/FrogJump
+
+Art by Joan Stark
+
+         .   ,
+       '. '.  \  \
+      ._ '-.'. `\  \
+        '-._; .'; `-.'. 
+       `~-.; '.       '.
+        '--,`           '.
+           -='.          ;
+ .--=~~=-,    -.;        ;
+ .-=`;    `~,_.;        /
+`  ,-`'    .-;         |
+   .-~`.    .;         ;
+    .;.-   .-;         ,\
+      `.'   ,=;     .-'  `~.-._
+       .';   .';  .'      .'   '-.
+         .\  ;  ;        ,.' _  a',
+        .'~";-`   ;      ;"~` `'-=.)
+      .' .'   . _;  ;',  ;
+      '-.._`~`.'  \  ; ; :
+           `~'    _'\\_ \\_ 
+                 /=`^^=`""/`)-.
+            jgs  \ =  _ =     =\
+                  `""` `~-. =   ;
+
+>c-7,5,#ffd700,@coin@
+*/
+ui.root.visible = true
+ui.root.style = 0
+
+var RPconcealButton
+var RPpanel
+var PowerButton
+var PreviousButton
+var PlayStopButton
+var NextButton
+var Textbg
+var MusicAlbum
+var MusicName
+var RProll
+var RPswitch
+var CDframe = 0
+var album = ""
+var LocationList = [
+"Boiling Mine",
+"Caves of Fear",
+"Deadwood Canyon",
+"Haunted Halls",
+"Icy Ridge",
+"Mushroom Forest",
+"Rocky Plateau",
+"Temple",
+["Events",
+"Eventos",
+"活动",
+"活動",
+"Événements",
+"Evenementen",
+"События",
+"Eventos",
+"Eventos",
+"イベント",
+"이벤트",
+"Olaylar"],
+["Other",
+"De outros",
+"其他",
+"其他",
+"Autre",
+"Ander",
+"Другой",
+"Otro",
+"Otro",
+"他の",
+"다른",
+"Başka"]
+]
+var MusicList = [
+["bronze_guardian_3",
+"bronze_guardian_4",
+"bronze_guardian_5",
+"bronze_guardian_cyan",
+"bronze_mine_0",
+"bronze_mine_1",
+"bronze_mine_2",
+"bronze_mine_3",
+"bronze_mine_4",
+"bronze_mine_5",
+"bronze_mine_cyan",
+"slave_outro_climb",
+"slave_outro_loop"],
+["caustic_caves",
+"spider_boss"],
+["cross_deadwood_river",
+"cross_deadwood_wind",
+"deadwood_0",
+"deadwood_1",
+"deadwood_2",
+"deadwood_3",
+"deadwood_4",
+"deadwood_5",
+"deadwood_cyan",
+"tree_boss",
+"waterfall_descent"],
+["skeleton_boss",
+"undead_crypt_0",
+"undead_crypt_1",
+"undead_crypt_2",
+"undead_crypt_3",
+"undead_crypt_4",
+"undead_crypt_5",
+"undead_crypt_cyan",
+"undead_crypt_intro"],
+["bridge_broken",
+"bridge_crossing",
+"icy_ridge_0",
+"icy_ridge_1",
+"icy_ridge_2",
+"icy_ridge_3",
+"icy_ridge_4",
+"icy_ridge_5",
+"icy_ridge_cyan",
+"yeti"],
+["fire_loop",
+"fungus_forest_0",
+"fungus_forest_1",
+"fungus_forest_2",
+"fungus_forest_3",
+"fungus_forest_4",
+"fungus_forest_5",
+"fungus_forest_cyan",
+"mushroom_boss",
+"mushroom_boss_cyan",
+"shop"],
+["rocky_plateau_0",
+"rocky_plateau_1",
+"rocky_plateau_2",
+"rocky_plateau_3",
+"rocky_plateau_4",
+"rocky_plateau_5",
+"rocky_plateau_epilogue",
+"rocky_plateau_fight",
+"rocky_plateau_talk"],
+["nagaraja",
+"temple_0",
+"temple_1",
+"temple_2",
+"temple_3",
+"temple_4",
+"temple_5",
+"temple_cyan"],
+["event_fall",
+"event_hamartia",
+"event_spring",
+"event_stonejam",
+"event_summer",
+"event_winter"],
+["credits",
+"main_menu",
+"bone_factory",
+"osteophone",
+"uulaa"]
+]
+var LangArray = ["EN", "PT-BR", "ZH-CN", "ZH-TW", "FR", "DE", "RU", "ES-LA", "ES-EU", "JP", "KR", "TK"]
+var MusicListX = storage.Get("MusicIndexX", 0)
+var MusicListY = storage.Get("MusicIndexY", 0)
+storage.Set("MusicIndexX", MusicListX)
+storage.Set("MusicIndexY", MusicListY)
+var RP = false
+var RPStop = true
+
+var LotuAry = [0,1,1,1,1,1,1,1]
+
+var coin = ascii
+ _
+($)
+ ‾
+asciiend
+
+var LOGO
+var River
+var edge
+var LilyPod0
+var LilyPod1
+var LilyPod2
+var LilyPod3
+var LilyPod4
+var LilyPod5
+var LilyPod6
+var LilyPod7
+var Startbutton
+var Modebutton
+var Easybutton
+var Hardbutton
+var GAMEOVER
+var eagle
+var transtyle
+var Frog
+var FrogJump
+var FrogEye
+var JumpArrow
+
+var croakonce = 0
+var startpos = 1
+var flytime = 0
+var staytime = 0
+var frogtime = -1
+var starttime = 0
+var presstime = -1
+var tranphase = 12.0
+
+var rngLD = 1
+var EmAry = [0,0,0,0,0,1]
+
+?loc.begin
+	ambient.Stop()
+	LOGO = ui.AddAnim(ascii
+    __
+   / _)              _          _
+ _/ /_ _ __  ___   _( )       _( )_   _  _ _  _ __
+|_   _| '__|/ _ \ / _ \      |_  | | | |'_'_'| '_ \
+  | | | |  | (_) | |_) |    _  | | |_| || | || |_) |
+  | | |_|   \___/ \__. |   | | | |\___/|| | || .__/
+  |_|              __/ /   | \_/ |     ‾‾ ‾ ‾| |
+                  |___/     \___/            |_|
+asciiend)
+	LOGO.x = 7
+	LOGO.y = -8
+	LOGO.w = 54
+	LOGO.h = 8
+	LOGO.anchor = center_center
+	LOGO.dock = center_center
+	LOGO.pivotX = 0
+	LOGO.pivotY = 0
+	LOGO.color = #32da5a
+	LOGO.duration = 0
+	LOGO.frame = 0
+	LOGO.loop = false
+	LOGO.flipX = false
+	LOGO.flipY = false
+	LOGO.playOnStart = false
+	LOGO.Stop()
+
+	River = ui.AddAnim(ascii
+-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~
+~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -
+ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~
+  ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~- 
+-   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  -
+  -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~  
+ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~
+~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   
+  ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~  
+    ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   - 
+~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~
+   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -
+  ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     - 
+ -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~   
+%%
+~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-
+- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~
+~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ 
+ ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-  
+   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --
+ -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~   
+~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ 
+ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~
+ ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~   
+   ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -  
+  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~
+  ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     - 
+ ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -  
+-    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    
+%%
+ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~
+ -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~-
+-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~
+~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   
+  - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  -- 
+-~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    
+ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~
+-   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ 
+~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    
+  ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -   
+ -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~ 
+ ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -  
+~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   
+    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -
+%%
+~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ 
+-~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- 
+  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-
+ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~
+ - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --  
+~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -
+-     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ 
+   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -
+  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~
+ ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -    
+-     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  
+~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   
+     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~
+   ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    - 
+%%
+- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~
+~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -
+ ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~- 
+~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ 
+- ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   
+-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~
+     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -
+  ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ - 
+ - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~ 
+~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     
+     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -
+     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~
+    -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~ 
+  ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -  
+%%
+ -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~-
+-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~
+~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  
+  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~
+ ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   -
+  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-
+    ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ - 
+ ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -  
+- ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  
+   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~
+    ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  - 
+    -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~ 
+   -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~  
+ ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -   
+%%
+-~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- 
+~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-
+  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~
+ ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~ 
+~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - 
+ ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~- 
+   ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -  
+~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   
+ ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  -
+  -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~ 
+   ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -  
+   -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~  
+  -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~   
+~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    
+%%
+~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -
+- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~
+ -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~ 
+~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  
+  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~
+~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  
+  ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -   
+   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~
+~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - 
+ -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~  
+  ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -   
+  -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~   
+ -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~    
+    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~
+%%
+^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~
+ -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~-
+-~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  
+-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~
+ --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~ 
+    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~
+ ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -    
+  ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~ 
+    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~
+-     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   
+ ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -    
+ -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~    
+-   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     
+   -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~ 
+%%
+~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^~-~ ~- -~^
+-~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- -~- -~-~- 
+~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -~ ~-  ~  -
+   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-   ~ ~  ~-
+--   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  --   - ~  
+   -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~    -~-  ~ 
+~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     ~ ~ -     
+ ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~   ~ -   ~  
+   ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~    ~  - ~ 
+     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -     ~   -
+~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     ~~  -     
+-   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     
+   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -   ~     -
+  -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~    -    ~  
+asciiend)
+	River.x = 0
+	River.y = screen.h/2 - 5
+	River.anchor = center_left
+	River.dock = center_left
+	River.color = #323232
+	River.duration = 50
+	River.frame = 0
+	River.loop = true
+	River.flipX = false
+	River.flipY = false
+	River.playOnStart = true
+	River.pivotX = 0
+	River.pivotY = 0
+	River.Play()
+
+	edge = ui.AddAnim(ascii
+-,-^-,_,- -._-,__,^-_,-,^-_,-,^--,-^-,_,- -._-,__,^-_,-,^-_,-,^--,-^-,_,-^-._-,__,^-_,-,^--,-^-,^
+ | '||  | '|'|  '|  | '|  |'|  | | '||  | '|'|  '|  | '|  |'|  | | '||  | '|'|  '|  | '| ' | | '|
+asciiend)
+	edge.x = 0
+	edge.y = 0
+	edge.anchor = center_left
+	edge.dock = center_left
+	edge.color = #323232
+	edge.duration = 0
+	edge.frame = 0
+	edge.loop = false
+	edge.flipX = false
+	edge.flipY = false
+	edge.playOnStart = false
+	edge.pivotX = 0
+	edge.pivotY = 0
+	edge.Stop()
+
+	LilyPod0 = ui.AddAnim(ascii
+####_
+#,´   `.
+/       \
+\       /
+#\/|..-´
+%%
+#
+asciiend)
+	LilyPod0.anchor = center_left
+	LilyPod0.dock = center_left
+	LilyPod0.x = 0
+	LilyPod0.y = 6
+	LilyPod0.w = 10
+	LilyPod0.h = 5
+	LilyPod0.pivotX = 0
+	LilyPod0.pivotY = 0
+	LilyPod0.color = #618a3d
+	LilyPod0.duration = 0
+	LilyPod0.frame = 1
+	LilyPod0.loop = false
+	LilyPod0.flipX = false
+	LilyPod0.flipY = false
+	LilyPod0.playOnStart = false
+	LilyPod0.Stop()
+
+	LilyPod1 = ui.AddAnim(ascii
+####_
+#,´   `.
+/       \
+\       /
+#\/|..-´
+%%
+#
+asciiend)
+	LilyPod1.anchor = center_left
+	LilyPod1.dock = center_left
+	LilyPod1.x = 10
+	LilyPod1.y = 6
+	LilyPod1.w = 10
+	LilyPod1.h = 5
+	LilyPod1.pivotX = 0
+	LilyPod1.pivotY = 0
+	LilyPod1.color = #618a3d
+	LilyPod1.duration = 0
+	LilyPod1.frame = 0
+	LilyPod1.loop = false
+	LilyPod1.flipX = false
+	LilyPod1.flipY = false
+	LilyPod1.playOnStart = false
+	LilyPod1.Stop()
+
+	LilyPod2 = ui.AddAnim(ascii
+####_
+#,´   `.
+/       \
+\       /
+#\/|..-´
+%%
+#
+asciiend)
+	LilyPod2.anchor = center_left
+	LilyPod2.dock = center_left
+	LilyPod2.x = 20
+	LilyPod2.y = 6
+	LilyPod2.w = 10
+	LilyPod2.h = 5
+	LilyPod2.pivotX = 0
+	LilyPod2.pivotY = 0
+	LilyPod2.color = #618a3d
+	LilyPod2.duration = 0
+	LilyPod2.frame = 0
+	LilyPod2.loop = false
+	LilyPod2.flipX = false
+	LilyPod2.flipY = false
+	LilyPod2.playOnStart = false
+	LilyPod2.Stop()
+
+	LilyPod3 = ui.AddAnim(ascii
+####_
+#,´   `.
+/       \
+\       /
+#\/|..-´
+%%
+#
+asciiend)
+	LilyPod3.anchor = center_left
+	LilyPod3.dock = center_left
+	LilyPod3.x = 30
+	LilyPod3.y = 6
+	LilyPod3.w = 10
+	LilyPod3.h = 5
+	LilyPod3.pivotX = 0
+	LilyPod3.pivotY = 0
+	LilyPod3.color = #618a3d
+	LilyPod3.duration = 0
+	LilyPod3.frame = 0
+	LilyPod3.loop = false
+	LilyPod3.flipX = false
+	LilyPod3.flipY = false
+	LilyPod3.playOnStart = false
+	LilyPod3.Stop()
+
+	LilyPod4 = ui.AddAnim(ascii
+####_
+#,´   `.
+/       \
+\       /
+#\/|..-´
+%%
+#
+asciiend)
+	LilyPod4.anchor = center_left
+	LilyPod4.dock = center_left
+	LilyPod4.x = 40
+	LilyPod4.y = 6
+	LilyPod4.w = 10
+	LilyPod4.h = 5
+	LilyPod4.pivotX = 0
+	LilyPod4.pivotY = 0
+	LilyPod4.color = #618a3d
+	LilyPod4.duration = 0
+	LilyPod4.frame = 0
+	LilyPod4.loop = false
+	LilyPod4.flipX = false
+	LilyPod4.flipY = false
+	LilyPod4.playOnStart = false
+	LilyPod4.Stop()
+
+	LilyPod5 = ui.AddAnim(ascii
+####_
+#,´   `.
+/       \
+\       /
+#\/|..-´
+%%
+#
+asciiend)
+	LilyPod5.anchor = center_left
+	LilyPod5.dock = center_left
+	LilyPod5.x = 50
+	LilyPod5.y = 6
+	LilyPod5.w = 10
+	LilyPod5.h = 5
+	LilyPod5.pivotX = 0
+	LilyPod5.pivotY = 0
+	LilyPod5.color = #618a3d
+	LilyPod5.duration = 0
+	LilyPod5.frame = 0
+	LilyPod5.loop = false
+	LilyPod5.flipX = false
+	LilyPod5.flipY = false
+	LilyPod5.playOnStart = false
+	LilyPod5.Stop()
+
+	LilyPod6 = ui.AddAnim(ascii
+####_
+#,´   `.
+/       \
+\       /
+#\/|..-´
+%%
+#
+asciiend)
+	LilyPod6.anchor = center_left
+	LilyPod6.dock = center_left
+	LilyPod6.x = 60
+	LilyPod6.y = 6
+	LilyPod6.w = 10
+	LilyPod6.h = 5
+	LilyPod6.pivotX = 0
+	LilyPod6.pivotY = 0
+	LilyPod6.color = #618a3d
+	LilyPod6.duration = 0
+	LilyPod6.frame = 0
+	LilyPod6.loop = false
+	LilyPod6.flipX = false
+	LilyPod6.flipY = false
+	LilyPod6.playOnStart = false
+	LilyPod6.Stop()
+
+	LilyPod7 = ui.AddAnim(ascii
+####_
+#,´   `.
+/       \
+\       /
+#\/|..-´
+%%
+#
+asciiend)
+	LilyPod7.anchor = center_left
+	LilyPod7.dock = center_left
+	LilyPod7.x = 70
+	LilyPod7.y = 6
+	LilyPod7.w = 10
+	LilyPod7.h = 5
+	LilyPod7.pivotX = 0
+	LilyPod7.pivotY = 0
+	LilyPod7.color = #618a3d
+	LilyPod7.duration = 0
+	LilyPod7.frame = 0
+	LilyPod7.loop = false
+	LilyPod7.flipX = false
+	LilyPod7.flipY = false
+	LilyPod7.playOnStart = false
+	LilyPod7.Stop()
+
+	Modebutton = ui.AddButton()
+	Modebutton.x = 0
+	Modebutton.y = -3
+	Modebutton.text = te.xt(Mode)
+	Modebutton.w = string.Size(Modebutton.text) + 2
+	Modebutton.h = 3
+	Modebutton.anchor = center_center
+	Modebutton.dock = center_center
+	Modebutton.tcolor = #EEEEEE
+	Modebutton.bcolor = #666666
+	Modebutton.hcolor = #999999
+	Modebutton.sound = confirm
+	Modebutton.style = 1
+	Modebutton.SetPressed(ModeSelect)
+
+	Easybutton = ui.AddButton()
+	Easybutton.x = string.Size(Modebutton.text) + 2
+	Easybutton.y = -3
+	Easybutton.text = te.xt(Easy)
+	Easybutton.w = string.Size(Easybutton.text) + 2
+	Easybutton.h = 3
+	Easybutton.anchor = center_center
+	Easybutton.dock = center_center
+	Easybutton.tcolor = #232323
+	Easybutton.bcolor = #666666
+	Easybutton.hcolor = #999999
+	Easybutton.sound = bronze_guardian_attack1
+	Easybutton.style = 1
+	Easybutton.visible = false
+	Easybutton.SetPressed(SelectEasy)
+
+	Hardbutton = ui.AddButton()
+	Hardbutton.x = string.Size(Modebutton.text) + string.Size(Easybutton.text) + 4
+	Hardbutton.y = -3
+	Hardbutton.text = te.xt(Hard)
+	Hardbutton.w = string.Size(Hardbutton.text) + 2
+	Hardbutton.h = 3
+	Hardbutton.anchor = center_center
+	Hardbutton.dock = center_center
+	Hardbutton.tcolor = #232323
+	Hardbutton.bcolor = #666666
+	Hardbutton.hcolor = #999999
+	Hardbutton.sound = bronze_guardian_helmet
+	Hardbutton.style = 1
+	Hardbutton.visible = false
+	Hardbutton.SetPressed(SelectHard)
+
+	Startbutton = ui.AddButton()
+	Startbutton.x = 0
+	Startbutton.y = 0
+	Startbutton.text = te.xt(Play)
+	Startbutton.w = string.Size(Startbutton.text) + 6
+	Startbutton.h = 3
+	Startbutton.anchor = center_center
+	Startbutton.dock = center_center
+	Startbutton.tcolor = #EEEEEE
+	Startbutton.bcolor = #666666
+	Startbutton.hcolor = #999999
+	Startbutton.sound = confirm
+	Startbutton.style = 1
+	Startbutton.SetPressed(StartAnim)
+
+	GAMEOVER = ui.AddText()
+	GAMEOVER.x = 0
+	GAMEOVER.y = -3
+	GAMEOVER.w = 9
+	GAMEOVER.h = 1
+	GAMEOVER.anchor = center_center
+	GAMEOVER.dock = center_center
+	GAMEOVER.visible = false
+	GAMEOVER.align = "center"
+	GAMEOVER.text = "GAME OVER"
+	GAMEOVER.color = #ff2222
+
+	eagle = ui.AddAnim(ascii
+######## .###,
+#######'. '.  \  \
+######._ '-.'. `\  \
+######  '-._; .'; `-.'. 
+###### `~-.; '.       '.
+########'--,`           '.
+###########-='.          ;
+ .--=~~=-,####-.;        ;
+ .-=`;    `~,_.;        /
+`  ,-`'    .-;         |
+###.-~`.    .;         ;
+####.;.-   .-;         ,\
+######`.'   ,=;     .-'  `~.-._
+#######.';   .';  .'      .'   '-.
+#########.\  ;  ;        ,.' _  o',
+########.'~";-`   ;      ;"~` `'-=.)
+######.' .'   . _;  ;',  ;
+######'-.._`~`.'###\  ;; :
+###########`~'######'\\_\\_
+#####################/`("/`)-.
+asciiend)
+	eagle.anchor = center_left
+	eagle.dock = center_left
+	eagle.x = -10
+	eagle.y = -4
+	eagle.w = 36
+	eagle.h = 20
+	eagle.pivotX = 60
+	eagle.pivotY = 20
+	eagle.color = #9f9f9f
+	eagle.duration = 0
+	eagle.frame = 0
+	eagle.loop = false
+	eagle.flipX = false
+	eagle.flipY = false
+	eagle.playOnStart = false
+	eagle.visible = true
+	eagle.Stop()
+
+	transtyle = ui.AddStyle("#########")
+
+	Frog = ui.AddPanel()
+	Frog.x = 9
+	Frog.y = 5
+	Frog.w = 9
+	Frog.h = 5
+	Frog.anchor = center_left
+	Frog.dock = center_left
+	Frog.clip = false
+	Frog.color = #white
+	Frog.style = transtyle
+
+	FrogJump = ui.AddAnim(ascii
+#
+#
+#####,--
+###(! .-)
+###'·-((
+%%
+#
+#####,--
+####/ .-)
+##_(;-//
+###`
+%%
+#####.=-
+### / .-)
+##_(/-)´`
+#-´‾
+#
+%%
+#####.O-
+###,´ .-)
+#_(/--‾´‾
+-´‾
+#
+%%
+#####.Oo
+###,´ .-)
+-´-`--‾´‾
+#
+#
+%%
+#
+#####.Oo
+-´-`´ .-)
+####`-‾´‾
+#
+%%
+#
+#
+##_##.Oo
+#/-`´ .-)
+###`--\´\
+%%
+#
+#
+#####,Oo
+##(\/ .-)
+##´ ·-\´\
+asciiend)
+	FrogJump.anchor = center_left
+	FrogJump.dock = center_left
+	FrogJump.x = 0
+	FrogJump.y = 0
+	FrogJump.w = 9
+	FrogJump.h = 5
+	FrogJump.pivotX = 0
+	FrogJump.pivotY = 0
+	FrogJump.color = #32da5a
+	FrogJump.duration = 30
+	FrogJump.flipX = false
+	FrogJump.flipY = false
+	FrogJump.frame = 0
+	FrogJump.gamePause = true
+	FrogJump.loop = true
+	FrogJump.Play()
+	Frog.Add(FrogJump)
+
+	FrogEye = ui.AddAnim(ascii
+#
+#
+######--
+#
+#
+%%
+#
+######--
+#
+#
+#
+%%
+######=-
+#
+#
+#
+#
+%%
+######O-
+#
+#
+#
+#
+%%
+######Oo
+#
+#
+#
+#
+%%
+#
+######Oo
+#
+#
+#
+%%
+#
+#
+######Oo
+#
+#
+%%
+#
+#
+######Oo
+#
+#
+asciiend)
+	FrogEye.anchor = center_left
+	FrogEye.dock = center_left
+	FrogEye.x = 0
+	FrogEye.y = 0
+	FrogEye.w = 9
+	FrogEye.h = 5
+	FrogEye.pivotX = 0
+	FrogEye.pivotY = 0
+	FrogEye.color = #EEEEEE
+	FrogEye.duration = 30
+	FrogEye.flipX = false
+	FrogEye.flipY = false
+	FrogEye.frame = 0
+	FrogEye.gamePause = true
+	FrogEye.loop = true
+	FrogEye.Play()
+	Frog.Add(FrogEye)
+
+	JumpArrow = ui.AddAnim(ascii
+#
+#
+#
+#
+#
+.......
+##;;;:;
+.;;;::;
+######'
+%%
+#
+#
+#
+#
+##.......
+####;;;:;
+##.;;;::;
+.;;;:###'
+%%
+#
+#
+#
+####.......
+######;;;:;
+####.;;;::;
+##.;;;:###'
+.;;;:
+%%
+#
+#
+######.......
+########;;;:;
+######.;;;::;
+####.;;;:###'
+##.;;;:
+.;;;:
+%%
+#
+########.......
+##########;;;:;
+########.;;;::;
+######.;;;:###'
+####.;;;:
+##.;;;:
+.;;;:
+%%
+##########.......
+############;;;:;
+##########.;;;::;
+########.;;;:###'
+######.;;;:
+####.;;;:
+##.;;;:
+.;;;:
+asciiend)
+	JumpArrow.x = 15
+	JumpArrow.y = 1
+	JumpArrow.w = 17
+	JumpArrow.h = 8
+	JumpArrow.anchor = center_left
+	JumpArrow.dock = center_left
+	JumpArrow.visible = false
+	JumpArrow.pivotX = 0
+	JumpArrow.pivotY = 0
+	JumpArrow.color = #02e5ff
+	JumpArrow.duration = 72
+	JumpArrow.flipX = false
+	JumpArrow.flipY = false
+	JumpArrow.frame = 0
+	JumpArrow.gamePause = true
+	JumpArrow.loop = false
+	JumpArrow.Stop()
+
+	RPconcealButton = ui.AddButton()
+	RPconcealButton.x = 0
+	RPconcealButton.y = -5
+	RPconcealButton.w = 3
+	RPconcealButton.h = 3
+	RPconcealButton.text = "♫"
+	RPconcealButton.anchor = center_left
+	RPconcealButton.dock = center_left
+	RPconcealButton.sound = click
+	RPconcealButton.style = 1
+	RPconcealButton.SetPressed(Conceal)
+
+	RPpanel = ui.AddPanel()
+	RPpanel.x = 0
+	RPpanel.y = 0
+	RPpanel.w = 43
+	RPpanel.h = 12
+	RPpanel.anchor = center_center
+	RPpanel.dock = center_center
+	RPpanel.visible = false
+	RPpanel.clip = true
+	RPpanel.style = ui.AddStyle("#########")
+
+	PowerButton = ui.AddButton()
+	PowerButton.x = -18
+	PowerButton.y = 5
+	PowerButton.w = 3
+	PowerButton.h = 2
+	PowerButton.text = ""
+	PowerButton.anchor = center_center
+	PowerButton.dock = center_center
+	PowerButton.visible = false
+	PowerButton.sound = mindstone_on
+	PowerButton.style = 0
+	PowerButton.SetPressed(RPPower)
+	RPpanel.Add(PowerButton)
+	
+	PreviousButton = ui.AddButton()
+	PreviousButton.x = -9
+	PreviousButton.y = 5
+	PreviousButton.w = 3
+	PreviousButton.h = 2
+	PreviousButton.text = ""
+	PreviousButton.anchor = center_center
+	PreviousButton.dock = center_center
+	PreviousButton.visible = false
+	PreviousButton.sound = click
+	PreviousButton.style = 0
+	PreviousButton.SetPressed(PreviousMusic)
+	RPpanel.Add(PreviousButton)
+	
+	PlayStopButton = ui.AddButton()
+	PlayStopButton.x = 0
+	PlayStopButton.y = 5
+	PlayStopButton.w = 3
+	PlayStopButton.h = 2
+	PlayStopButton.text = ""
+	PlayStopButton.anchor = center_center
+	PlayStopButton.dock = center_center
+	PlayStopButton.visible = false
+	PlayStopButton.sound = click
+	PlayStopButton.style = 0
+	PlayStopButton.SetPressed(PlayStopMusic)
+	RPpanel.Add(PlayStopButton)
+
+	NextButton = ui.AddButton()
+	NextButton.x = 9
+	NextButton.y = 5
+	NextButton.w = 3
+	NextButton.h = 2
+	NextButton.text = ""
+	NextButton.anchor = center_center
+	NextButton.dock = center_center
+	NextButton.visible = false
+	NextButton.sound = click
+	NextButton.style = 0
+	NextButton.SetPressed(NextMusic)
+	RPpanel.Add(NextButton)
+
+	Textbg = ui.AddAnim(ascii
+        
+        
+asciiend)
+	Textbg.x = 14
+	Textbg.y = -4
+	Textbg.w = 8
+	Textbg.h = 2
+	Textbg.anchor = center_center
+	Textbg.dock = center_center
+	Textbg.visible = false
+	Textbg.color = #000000
+	RPpanel.Add(Textbg)
+
+	MusicAlbum = ui.AddText()
+	MusicAlbum.x = 11
+	MusicAlbum.y = -5
+	MusicAlbum.w = 7
+	MusicAlbum.h = 1
+	MusicAlbum.anchor = center_left
+	MusicAlbum.dock = center_center
+	MusicAlbum.visible = false
+	MusicAlbum.align = left
+	MusicAlbum.color = #028900
+	MusicAlbum.text = ""
+	RPpanel.Add(MusicAlbum)
+
+	MusicName = ui.AddText()
+	MusicName.x = 10
+	MusicName.y = -4
+	MusicName.w = 7
+	MusicName.h = 1
+	MusicName.anchor = center_left
+	MusicName.dock = center_center
+	MusicName.visible = false
+	MusicName.align = left
+	MusicName.color = #028900
+	MusicName.text = ""
+	RPpanel.Add(MusicName)
+
+	RProll = ui.AddAnim(ascii
+#########___________ _I-I__ ______________
+########/           "-|_|-.\   /#######/ /┊
+#######'       ____           /#######/ ' ┊
+######|  __,--'    `--.__     ‾‾‾‾‾‾‾‾ |  ┊
+#####/,-'      ,-"-.     ‾`-          /   '
+####/(        (  ^  )       )        '   /
+###/  `m.__    `-.-'      .m        /   /
+##|     `""mm.______,mm""'         |   .
+#/           `""""""'             /   /
+/________________________________/   /
+| /|\      ///      ||\      \\\ |  /
+\_\|/______\\\______||/______///_/.'
+%%
+#########___________ _I-I__ ______________
+########/           "-|_|-.\   /#######/ /┊
+#######'       ____           /#######/ ' ┊
+######|  __,--'    `--.__     ‾‾‾‾‾‾‾‾ |  ┊
+#####/,m´      ,-"-.     ‾`-          /   '
+####/(        (  ^  )       )        '   /
+###/  mm.__    `-.-'      .´        /   /
+##|     `""mm.______,m.""          |   .
+#/           `"""" '              /   /
+/________________________________/   /
+| /|\      ///      ||\      \\\ |  /
+\_\|/______\\\______||/______///_/.'
+%%
+#########___________ _I-I__ ______________
+########/           "-|_|-.\   /#######/ /┊
+#######'       ____           /#######/ ' ┊
+######|  __mm-'    `--m__     ‾‾‾‾‾‾‾‾ |  ┊
+#####/,-'      ,-"-.     ‾`-          /   '
+####/(        (  ^  )       )        '   /
+###/  mm._     `-.-'      .´        /   /
+##|      ""'m.______,..""          |   .
+#/           `"""""'              /   /
+/________________________________/   /
+| /|\      ///      ||\      \\\ |  /
+\_\|/______\\\______||/______///_/.'
+%%
+#########___________ _I-I__ ______________
+########/           "-|_|-.\   /#######/ /┊
+#######'       ____           /#######/ ' ┊
+######|  __mm-'    `-mm__     ‾‾‾‾‾‾‾‾ |  ┊
+#####/m-'      ,-"-.     ‾`m          /   '
+####/(        (  ^  )       )        '   /
+###/  ".._     `-.-'      .´        /   /
+##|      ""'..______,.m""          |   .
+#/           `"""""'              /   /
+/________________________________/   /
+| /|\      ///      ||\      \\\ |  /
+\_\|/______\\\______||/______///_/.'
+%%
+#########___________ _I-I__ ______________
+########/           "-|_|-.\   /#######/ /┊
+#######'       ____           /#######/ ' ┊
+######|  __,--'    `-m.__     ‾‾‾‾‾‾‾‾ |  ┊
+#####/,-'      ,-"-.     ‾mm          /   '
+####/(        (  ^  )       )        '   /
+###/  ".._     `-.-'      .´        /   /
+##|      ""'m.______,.mm"          |   .
+#/           `"""""'              /   /
+/________________________________/   /
+| /|\      ///      ||\      \\\ |  /
+\_\|/______\\\______||/______///_/.'
+asciiend)
+	RProll.x = 0
+	RProll.y = 0
+	RProll.anchor = center_center
+	RProll.dock = center_center
+	RProll.color = #EEEEEE
+	RProll.duration = 50
+	RProll.frame = 0
+	RProll.loop = true
+	RProll.flipX = false
+	RProll.flipY = false
+	RProll.playOnStart = false
+	RProll.pivotX = 0
+	RProll.pivotY = 0
+	RProll.visible = false
+	RProll.Stop()
+	RPpanel.Add(RProll)
+
+	RPswitch = ui.AddAnim(ascii
+#################### _I-I__ 
+####################"-|_|-.\
+###########################\\
+############################\\
+#############################\\
+#############################_))
+############################/_/-'
+############################`w
+%%
+#################### _I-I__ 
+####################"-|_|-.\
+##########################//
+#########################//
+#######################_//
+######################/_/-'
+######################`w
+asciiend)
+	RPswitch.x = -5
+	RPswitch.y = -2
+	RPswitch.anchor = center_center
+	RPswitch.dock = center_center
+	RPswitch.color = #EEEEEE
+	RPswitch.duration = 0
+	RPswitch.frame = 0
+	RPswitch.loop = false
+	RPswitch.flipX = false
+	RPswitch.flipY = false
+	RPswitch.playOnStart = false
+	RPswitch.pivotX = 0
+	RPswitch.pivotY = 0
+	RPswitch.visible = false
+	RPswitch.Stop()
+	RPpanel.Add(RPswitch)
+
+func Conceal()
+	PowerButton.visible = !PowerButton.visible
+	PreviousButton.visible = !PreviousButton.visible
+	PlayStopButton.visible = !PlayStopButton.visible
+	NextButton.visible = !NextButton.visible
+	Textbg.visible = !Textbg.visible
+	RProll.visible = !RProll.visible
+	RPswitch.visible = !RPswitch.visible
+	?MusicAlbum.visible
+		MusicAlbum.visible = !MusicAlbum.visible
+	?MusicName.visible
+		MusicName.visible = !MusicName.visible
+
+func RPPower()
+	RP = !RP
+	?!RP
+		music.Stop()
+		?!RPStop
+			RPStop = !RPStop
+
+func PreviousMusic()
+	?RP
+		MusicListY = MusicListY - 1
+		?MusicListY < 0
+			MusicListX = MusicListX - 1
+			?MusicListX < 0
+				MusicListX = LocationList.Count() - 1
+			MusicListY = MusicList[MusicListX].Count() - 1
+		music.Play(MusicList[MusicListX][MusicListY])
+		?RPStop
+			RPStop = !RPStop
+
+func PlayStopMusic()
+	?RP
+		RPStop = !RPStop
+		?RPStop
+			music.Stop()
+		:
+			music.Play(MusicList[MusicListX][MusicListY])
+
+func NextMusic()
+	?RP
+		MusicListY = MusicListY + 1
+		?MusicListY > MusicList[MusicListX].Count() - 1
+			MusicListX = MusicListX + 1
+			?MusicListX > LocationList.Count() - 1
+				MusicListX = 0
+			MusicListY = 0
+		music.Play(MusicList[MusicListX][MusicListY])
+		?RPStop
+			RPStop = !RPStop
+
+?!RP
+	PowerButton.sound = mindstone_on
+	PreviousButton.sound = click
+	PlayStopButton.sound = click
+	NextButton.sound = click
+	RPswitch.frame = 0
+	MusicAlbum.visible = false
+	MusicName.visible = false
+	RProll.Pause()
+:
+	PowerButton.sound = mindstone_off
+	PreviousButton.sound = confirm
+	PlayStopButton.sound = confirm
+	NextButton.sound = confirm
+	RPswitch.frame = 1
+	?!RPStop
+		?RProll.visible
+			MusicAlbum.visible = true
+			MusicName.visible = true
+		?MusicListX < 8
+			album = te.xt(LocationList[MusicListX])
+		:
+			album = LocationList[MusicListX][LangArray.IndexOf(te.language)]
+		MusicAlbum.text = album
+		MusicAlbum.w = string.Size(album)
+		?MusicAlbum.w > 7
+			MusicAlbum.x = 11 - (totaltime/20)%(MusicAlbum.w - 6)
+		:
+			MusicAlbum.x = 11
+		MusicName.text = music
+		MusicName.w = string.Size(music)
+		?MusicName.w > 7
+			MusicName.x = 10 - (totaltime/20)%(MusicName.w - 6)
+		:
+			MusicName.x = 10
+		RProll.Play()
+	:
+		MusicAlbum.visible = false
+		MusicName.visible = false
+		RProll.Pause()
+
+func DisplayAryControl(array)
+	?array.Count() > 0
+		?array[0] = 1
+			LilyPod0.frame = 0
+		:
+			LilyPod0.frame = 1
+		?array.Count() > 1
+			?array[1] = 1
+				LilyPod1.frame = 0
+			:
+				LilyPod1.frame = 1
+			?array.Count() > 2
+				?array[2] = 1
+					LilyPod2.frame = 0
+				:
+					LilyPod2.frame = 1
+				?array.Count() > 3
+					?array[3] = 1
+						LilyPod3.frame = 0
+					:
+						LilyPod3.frame = 1
+					?array.Count() > 4
+						?array[4] = 1
+							LilyPod4.frame = 0
+						:
+							LilyPod4.frame = 1
+						?array.Count() > 5
+							?array[5] = 1
+								LilyPod5.frame = 0
+							:
+								LilyPod5.frame = 1
+							?array.Count() > 6
+								?array[6] = 1
+									LilyPod6.frame = 0
+								:
+									LilyPod6.frame = 1
+								?array.Count() > 7
+									?array[7] = 1
+										LilyPod7.frame = 0
+									:
+										LilyPod7.frame = 1
+DisplayAryControl(LotuAry)
+
+func GenerateNewLily(array)
+	?staytime = 1
+		rngLD = rng % 64
+		var carry = rngLD
+		for i = 5..0
+			carry = carry - math.Pow(2, i)
+			?carry >= 0
+				EmAry[5-i] = 1
+			:
+				EmAry[5-i] = 0
+				carry = carry + math.Pow(2, i)
+		?startpos > 1 & presstime = -1
+			for i = 0..7
+				?i < 9 - startpos
+					LotuAry.Emplace(i, LotuAry[i + startpos - 1])
+				:?i < 7
+					LotuAry.Emplace(i, EmAry[i-2])
+				:?!(LotuAry[2] = 0 & LotuAry[3] = 0 & LotuAry[4] = 0 & LotuAry[5] = 0 & LotuAry[6] = 0)
+					LotuAry.Emplace(7, EmAry[5])
+				:
+					LotuAry.Emplace(7, 1)
+		:
+			for i = 0..7
+				?i < 8 - presstime
+					LotuAry.Emplace(i, LotuAry[i + presstime])
+				:?i < 7
+					LotuAry.Emplace(i, EmAry[i-2])
+				:?!(LotuAry[2] = 0 & LotuAry[3] = 0 & LotuAry[4] = 0 & LotuAry[5] = 0 & LotuAry[6] = 0)
+					LotuAry.Emplace(7, EmAry[5])
+				:
+					LotuAry.Emplace(7, 1)
+GenerateNewLily(LotuAry)
+
+?FrogJump.frame = 0 & croakonce = 0
+	play frog
+	croakonce = 1
+?FrogJump.frame ! 0
+	croakonce = 0
+
+?frogtime > 0 & eagle.visible = false
+	frogtime++
+?staytime > 0
+	staytime++
+
+?starttime > 0 & key = primaryEnd & frogtime = 0 & (input.x > Frog.absoluteX + 1 & input.x < Frog.absoluteX + Frog.w) & (input.y > Frog.absoluteY + 1 & input.y < Frog.absoluteY + Frog.h)
+	presstime = math.Clamp(math.CeilToInt(starttime%(6*tranphase)/tranphase),1,6)
+	FrogJump.duration = math.RoundToInt(math.Sqrt(200*presstime))
+	FrogEye.duration = FrogJump.duration
+	starttime = 0
+	staytime = 0
+	frogtime++
+	FrogJump.Play()
+	FrogEye.Play()
+:?key = primaryBegin & frogtime = 0 & (input.x > Frog.absoluteX + 1 & input.x < Frog.absoluteX + Frog.w) & (input.y > Frog.absoluteY + 1 & input.y < Frog.absoluteY + Frog.h)
+	starttime = 1
+:?starttime > 0 & key = primary & frogtime = 0 & (input.x > Frog.absoluteX + 1 & input.x < Frog.absoluteX + Frog.w) & (input.y > Frog.absoluteY + 1 & input.y < Frog.absoluteY + Frog.h)
+	starttime++
+:
+	starttime = 0
+
+?starttime > 0
+	JumpArrow.visible = true
+	?starttime%(6*tranphase) < tranphase + 1
+		JumpArrow.color = color.Lerp(#78EAF7, #02e5ff, starttime%(6*tranphase)/tranphase)
+		JumpArrow.frame = 0
+	:?starttime%(6*tranphase) < 2 * tranphase + 1
+		JumpArrow.color = color.Lerp(#80F2B0, #ffff62, (starttime%(6*tranphase)-tranphase)/tranphase)
+		JumpArrow.frame = 1
+	:?starttime%(6*tranphase) < 3 * tranphase + 1
+		JumpArrow.color = color.Lerp(#98ED5E, #32da5a, (starttime%(6*tranphase)-2*tranphase)/tranphase)
+		JumpArrow.frame = 2
+	:?starttime%(6*tranphase) < 4 * tranphase + 1
+		JumpArrow.color = color.Lerp(#199EAC, #0063ff, (starttime%(6*tranphase)-3*tranphase)/tranphase)
+		JumpArrow.frame = 3
+	:?starttime%(6*tranphase) < 5 * tranphase + 1
+		JumpArrow.color = color.Lerp(#804290, #ff2222, (starttime%(6*tranphase)-4*tranphase)/tranphase)
+		JumpArrow.frame = 4
+	:
+		JumpArrow.color = #rainFF
+		JumpArrow.frame = 5
+:
+	JumpArrow.visible = false
+	JumpArrow.color = #78EAF7
+	JumpArrow.frame = 0
+
+func ModeSelect()
+	?tranphase = 12.0
+		Easybutton.style = 3
+		Easybutton.tcolor = #EEEEEE
+		Hardbutton.style = 9
+		Hardbutton.tcolor = #232323
+	:?tranphase = 6.0
+		Easybutton.style = 9
+		Easybutton.tcolor = #232323
+		Hardbutton.style = 3
+		Hardbutton.tcolor = #EEEEEE
+	Easybutton.visible = !Easybutton.visible
+	Hardbutton.visible = !Hardbutton.visible
+
+func SelectEasy()
+	tranphase = 12.0
+	Modebutton.w = string.Size(te.xt(Easy)) + 2
+	Modebutton.text = te.xt(Easy)
+	Easybutton.visible = !Easybutton.visible
+	Hardbutton.visible = !Hardbutton.visible
+
+func SelectHard()
+	tranphase = 6.0
+	Modebutton.w = string.Size(te.xt(Hard)) + 2
+	Modebutton.text = te.xt(Hard)
+	Easybutton.visible = !Easybutton.visible
+	Hardbutton.visible = !Hardbutton.visible
+
+func StartAnim()
+	GAMEOVER.visible = false
+	frogtime = 1
+	?eagle.visible = true
+		flytime = 1
+		FrogJump.loop = false
+		FrogEye.loop = false
+	:
+		Frog.visible = true
+		FrogJump.duration = math.RoundToInt(math.Sqrt(200*(startpos+1)))
+		FrogEye.duration = FrogJump.duration
+		FrogJump.Play()
+		FrogEye.Play()
+	Startbutton.visible = false
+	Modebutton.visible = false
+	Easybutton.visible = false
+	Hardbutton.visible = false
+
+?flytime = 1
+	play scout_arrives
+?flytime > 0
+	flytime++
+?flytime > 60
+	LOGO.visible = false
+	eagle.visible = false
+	flytime = 0
+	?frogtime = 1
+		FrogJump.duration = 20
+		FrogEye.duration = 20
+		FrogJump.Play()
+		FrogEye.Play()
+:?flytime > 30
+	eagle.pivotX = 60 - 2*flytime
+	eagle.pivotY = math.RoundToInt(5*math.Pow((flytime-30)*0.066, 2))
+	Frog.x = 9 - eagle.pivotX
+	Frog.y = 5 - eagle.pivotY
+:?flytime > 0
+	eagle.pivotX = 60 - 2*flytime
+	eagle.pivotY = math.RoundToInt(20 - 5*math.Pow(flytime*0.066, 2))
+	LOGO.pivotX = -3*flytime
+
+?presstime = -1
+	?frogtime > 0 & eagle.visible = false
+		Frog.x = math.RoundToInt(math.Sqrt((startpos+1)/2.0)*frogtime-11)
+		Frog.y = math.RoundToInt(math.Sqrt((startpos+1)/2.0)*frogtime*(math.Sqrt((startpos+1)/2.0)*frogtime-10*(startpos+1))/(10*(startpos+1))+5)
+		?Frog.x >= 10*startpos - 1
+			frogtime = 0
+			?startpos > 1
+				staytime = 1
+	?frogtime = 0 & eagle.visible = false
+		Frog.x = 9
+		Frog.y = 5
+:
+	Frog.x = math.Min(math.RoundToInt(math.Sqrt(presstime/2.0)*frogtime+9),10*presstime+9)
+	Frog.y = math.Min(math.RoundToInt((math.Sqrt(presstime/2.0)*frogtime)*(math.Sqrt(presstime/2.0)*frogtime-10*presstime)/(10*presstime)+5),5)
+	?Frog.x >= 10*presstime+9
+		frogtime = 0
+		staytime = 1
+
+?FrogJump.frame = 6 & frogtime > 0
+	FrogJump.Pause()
+	FrogEye.Pause()
+?FrogJump.paused & Frog.y > 3
+	FrogJump.Play()
+	FrogEye.Play()
+
+?presstime ! - 1 & LotuAry[1] = 0 & staytime = 2
+	eagle.visible = true
+	GAMEOVER.visible = true
+	flytime = 1
+	frogtime = -1
+	starttime = 0
+	presstime = -1
+	staytime = 0
+	for i = 1..7
+		?LotuAry[i] = 1
+			startpos = i
+			i = 8
+?LotuAry[1] = 0 & flytime = 60
+	Startbutton.text = te.xt(Continue)
+	Startbutton.w = string.Size(Startbutton.text) + 6
+	Startbutton.visible = true
+	Frog.visible = false
+
+/*
+>`0,0,frogtime @frogtime@ flytime @flytime@ startpos @startpos@ duration @FrogJump.duration@
+>`0,1,starttime@starttime@ presstime@presstime@ staytime@staytime@ mode @tranphase@
+>`0,2,@rngLD@ @EmAry[0]@ @EmAry[1]@ @EmAry[2]@ @EmAry[3]@ @EmAry[4]@ @EmAry[5]@
+*/

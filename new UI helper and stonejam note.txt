@@ -1,0 +1,85 @@
+Hex for all enchantment colors:
+Cyan: #02e5ff Yellow: #ffff62 Green: #32da5a Blue: #0063ff Red: #ff2222
+1-6
+white cyan yellow green blue red rainbow
+
+List of valid ?loc:
+rocky, deadwood, cave, shroom, haunted, crypt, bronze, icy, temple, nagaraja
+
+Anim.color - (string)
+Anim.duration - (int) 30-based
+Anim.flipX - (bool)
+Anim.flipY - (bool)
+Anim.frame - (int) ?
+Anim.gamePause - (bool) If true, auto-pauses when the game pauses.
+
+Anim.pivotX - (int)
+Anim.pivotY - (int)
+
+Anim.Load(string) - Changes the contents of the Anim.
+Anim.playOnStart - (bool)
+Anim.loop - (bool)
+
+Anim.playing - (bool)
+Anim.paused - (bool)
+
+Anim.Pause()
+Anim.Play()
+Anim.Stop()
+
+anim.pivotX
+anim.pivotY
+
+button.SetPressed(f)
+button.SetDown(f)
+button.SetUp(f)
+
+//down start first contact
+//setup end last contact
+//pressed the whole process
+
+component.x
+component.y
+integer relative to its docked position.
+
+component.w
+component.h
+Sets the height of a panel to match the height of its parent panel
+
+component.absoluteX
+component.absoluteY
+integer
+read-only the component's position relative to the screen.
+
+component.anchor
+component.dock
+
+component.Recycle()
+
+component.parent
+component.visible //inherit/true/false
+  
+panel.children
+array Component[]
+
+panel.clip
+bool
+
+panel.color
+string
+
+panel.style
+int
+
+panel.Add(Component)
+panel.Add(Component, int)
+
+panel.Clear()
+Removes all UI elements from the Panel. 
+Components removed this way are recycled into the UI system and will be repurposed in future ui.Add_() calls. 
+Any variable references to those elements should be nulled or reassigned to avoid bugs.
+
+panel.Remove(Component)  /  panel.Remove(int)
+Removes a specific Component from a Panel or removes the Component at a specified index number. 
+Components removed this way are recycled into the UI system and will be repurposed in future ui.Add_() calls. 
+Any variable references to those elements should be nulled or reassigned to avoid bugs.

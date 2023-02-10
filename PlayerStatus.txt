@@ -1,0 +1,659 @@
+/*
+READ ME
+Import this script as a variable.
+Example:
+Type in Mind Stone:
+
+var PlayerStatus = import PlayerStatus
+PlayerStatus.Positive(buffs.string)
+PlayerStatus.Negative(debuffs.string)
+
+func:
+ToString() - Import this script as a var and @var.ToString()@. it'll print in a way that makes sense.
+Negative() - Run this function with string and it'll chop it up into a more usable format, i.e. the vars below.
+Positive() - Run this function with string and it'll chop it up into a more usable format, i.e. the vars below.
+
+Example of use:
+ ?!FoeStatus.poison
+  equip poison sword dP
+
+var PlayerStatus = import PlayerStatus
+PlayerStatus.Positive(buffs.string)
+PlayerStatus.Negative(debuffs.string)
+*/
+
+var poison = false //foe's poison debuff
+var poisonCount = 0
+var poisonDuration = 0
+
+var poisoned = false //player's poison debuff
+var poisonedCount = 0
+var poisonedDuration = 0
+
+var chill = false //foe's chill debuff
+var chillCount = 0
+var chillDuration = 0
+
+var chillatk = false //player's yeti chill debuff that on attack speed
+var chillatkCount = 0
+var chillatkDuration = 0
+
+var chillmov = false //player's yeti chill debuff that slows down the walking speed
+var chillmovCount = 0
+var chillmovDuration = 0
+
+var burn = false
+var burnCount = 0
+var burnDuration = 0
+
+var burn2 = false //Defensive fire DoT from shields and such
+var burn2Count = 0
+var burn2Duration = 0
+
+var stun = false
+var stunCount = 0
+var stunDuration = 0
+
+var NoHeal = false //Mr. Puff and dys's anti player healing debuff
+var NoHealCount = 0
+var NoHealDuration = 0
+
+var Blind = false //Pallas's range debuff
+var BlindCount = 0
+var BlindDuration = 0
+
+var buffProtec = false //Immunity to debuffs
+var buffProtecCount = 0
+var buffProtecDuration = 0
+
+var damageBuff = false //Damage increase - bolesh/Cultist miniboss
+var damageBuffCount = 0
+var damageBuffDuration = 0
+
+var smite = false //Blade of the Fallen God's buff
+var smiteCount = 0
+var smiteDuration = 0
+
+var pickpocket = false //Skeleton Arm's buff
+var pickpocketCount = 0
+var pickpocketDuration = 0
+
+var bardAOE = false //Bardiche active component, 1/4
+var bardAOECount = 0
+var bardAOEDuration = 0
+
+var bardCritChance = false
+var bardCritChanceCount = 0
+var bardCritChanceDuration = 0
+
+var bardCritMult = false
+var bardCritMultCount = 0
+var bardCritMultDuration = 0
+
+var bardMove = false
+var bardMoveCount = 0
+var bardMoveDuration = 0
+
+var qStaffAS = false //Quarterstaff active component, 1/2
+var qStaffASCount = 0
+var qStaffASDuration = 0
+
+var qStaffStun = false
+var qStaffStunCount = 0
+var qStaffStunDuration = 0
+
+var EXP = false //Potion effect
+var EXPCount = 0
+var EXPDuration = 0
+
+var strength = false //Potion effect
+var strengthCount = 0
+var strengthDuration = 0
+
+var luckyCrit = false //Potion effect
+var luckyCritCount = 0
+var luckyCritDuration = 0
+
+var luckyMult = false //Potion effect
+var luckyMultCount = 0
+var luckyMultDuration = 0
+
+var vamp = false //Potion effect
+var vampCount = 0
+var vampDuration = 0
+
+var berserk = false //Potion effect
+var berserkCount = 0
+var berserkDuration = 0
+
+var invis = false //Potion effect
+var invisCount = 0
+var invisDuration = 0
+
+
+func ToString()
+ var print = ""
+ ?buffProtec
+  ?string.Size(print) > 1
+   print = print + ", "
+  print = print + "Protected:" + buffProtecDuration
+ 
+ ?damageBuff
+  ?string.Size(print) > 1
+   print = print + ", "
+  print = print + "DamageUP:" + damageBuffCount + ":" + damageBuffDuration
+ 
+ ?smite
+  ?string.Size(print) > 1
+   print = print + ", "
+  print = print + "Smite:" + smiteCount + ":" + smiteDuration
+ 
+ ?pickpocket
+  ?string.Size(print) > 1
+   print = print + ", "
+  print = print + "PickPocket:" + pickpocketCount + ":" + pickpocketDuration
+ 
+ ?bardAOE
+  ?string.Size(print) > 1
+   print = print + ", "
+  print = print + "Bard Active"
+ 
+ ?qStaffStun
+  ?string.Size(print) > 1
+   print = print + ", "
+  print = print + "Quarterstaff Active"
+ 
+ ?EXP
+  ?string.Size(print) > 1
+   print = print + ", "
+  print = print + "EXP Pot:" + EXPDuration
+ 
+ ?strength
+  ?string.Size(print) > 1
+   print = print + ", "
+  print = print + "Strength Pot:" + strengthDuration
+ 
+ ?luckyCrit
+  ?string.Size(print) > 1
+   print = print + ", "
+  print = print + "Lucky Pot:" + luckyCritDuration
+ 
+ ?vamp
+  ?string.Size(print) > 1
+   print = print + ", "
+  print = print + "Vampiric Pot:" + vampDuration
+ 
+ ?berserk
+  ?string.Size(print) > 1
+   print = print + ", "
+  print = print + "Berserk Pot:" + berserkDuration
+ 
+ ?invis
+  ?string.Size(print) > 1
+   print = print + ", "
+  print = print + "Invis Pot:" + invisDuration
+ 
+ ?poison
+  ?string.Size(print) > 1
+   print = print + ", "
+  print = print + "Poisoned:"  + poisonCount + ":" + poisonDuration
+ 
+ ?poisoned
+  ?string.Size(print) > 1
+   print = print + ", "
+  print = print + "Poisoned:"  + poisonedCount + ":" + poisonedDuration
+ 
+ ?chill
+  ?string.Size(print) > 1
+   print = print + ", "
+  print = print + "Chilled:" + chillCount + ":" + chillDuration
+
+ ?chillatk
+  ?string.Size(print) > 1
+   print = print + ", "
+  print = print + "Chilled:" + chillatkCount + ":" + chillatkDuration
+
+ ?chillmov
+  ?string.Size(print) > 1
+   print = print + ", "
+  print = print + "Slowed:" + chillmovCount + ":" + chillmovDuration
+  
+ ?burn
+  ?string.Size(print) > 1
+   print = print + ", "
+  print = print + "Burning:" + burnCount + ":" + burnDuration
+ 
+ ?burn2
+  ?string.Size(print) > 1
+   print = print + ", "
+  print = print + "Burned:" + burn2Duration
+ 
+ ?stun
+  ?string.Size(print) > 1
+   print = print + ", "
+  print = print + "Stunned:" + stunDuration
+ 
+ ?NoHeal
+  ?string.Size(print) > 1
+   print = print + ", "
+  print = print + "No Healing:" + NoHealDuration
+ 
+ ?Blind
+  ?string.Size(print) > 1
+   print = print + ", "
+  print = print + "Blind:" + BlindCount + ":" + BlindDuration
+ 
+ return print
+
+func Negative(status)
+ var doublecheckindex
+ doublecheckindex = string.IndexOf(status, "puff_debuff_damage:")
+ var index
+ ?doublecheckindex = -1 | string.IndexOf(status, "debuff_damage:") < doublecheckindex
+  index = string.IndexOf(status, "debuff_damage:")
+ :
+  index = string.IndexOf(status, "debuff_damage:", doublecheckindex + 19)
+ ?index ! -1
+  poison = true
+  index = index + 14
+  poisonCount = int.Parse(string.Sub(status, index, string.IndexOf(status, ":", index) - index))
+  index = string.IndexOf(status, ":", index) +1
+  ?string.IndexOf(status, ",", index) ! -1
+   poisonDuration = int.Parse(string.Sub(status, index, string.IndexOf(status, ",", index) - index))
+  :
+   poisonDuration = int.Parse(string.Sub(status, index))
+ :
+  poison = false
+  poisonCount = 0
+  poisonDuration = 0
+
+ index = string.IndexOf(status, "debuff_duration_damage:")
+ ?index ! -1
+  poisoned = true
+  index = index + 23
+  poisonedCount = int.Parse(string.Sub(status, index, string.IndexOf(status, ":", index) - index))
+  index = string.IndexOf(status, ":", index) +1
+  ?string.IndexOf(status, ",", index) ! -1
+   poisonedDuration = int.Parse(string.Sub(status, index, string.IndexOf(status, ",", index) - index))
+  :
+   poisonedDuration = int.Parse(string.Sub(status, index))
+ :
+  poisoned = false
+  poisonedCount = 0
+  poisonedDuration = 0
+
+ index = string.IndexOf(status, "debuff_chill:")
+ ?index ! -1
+  chill = true
+  index = index + 13
+  chillCount = int.Parse(string.Sub(status, index, string.IndexOf(status, ":", index) - index))
+  index = string.IndexOf(status, ":", index) +1
+  ?string.IndexOf(status, ",", index) ! -1
+   chillDuration = int.Parse(string.Sub(status, index, string.IndexOf(status, ",", index) - index))
+  :
+   chillDuration = int.Parse(string.Sub(status, index))
+ :
+  chill = false
+  chillCount = 0
+  chillDuration = 0
+
+ index = string.IndexOf(status, "debuff_yeti_chill:")
+ ?index ! -1
+  chillatk = true
+  index = index + 18
+  chillatkCount = int.Parse(string.Sub(status, index, string.IndexOf(status, ":", index) - index))
+  index = string.IndexOf(status, ":", index) +1
+  ?string.IndexOf(status, ",", index) ! -1
+   chillatkDuration = int.Parse(string.Sub(status, index, string.IndexOf(status, ",", index) - index))
+  :
+   chillatkDuration = int.Parse(string.Sub(status, index))
+ :
+  chillatk = false
+  chillatkCount = 0
+  chillatkDuration = 0
+
+ index = string.IndexOf(status, "debuff_move_speed:")
+ ?index ! -1
+  chillmov = true
+  index = index + 18
+  chillmovCount = int.Parse(string.Sub(status, index, string.IndexOf(status, ":", index) - index))
+  index = string.IndexOf(status, ":", index) +1
+  ?string.IndexOf(status, ",", index) ! -1
+   chillmovDuration = int.Parse(string.Sub(status, index, string.IndexOf(status, ",", index) - index))
+  :
+   chillmovDuration = int.Parse(string.Sub(status, index))
+ :
+  chillmov = false
+  chillmovCount = 0
+  chillmovDuration = 0
+
+ index = string.IndexOf(status, "debuff_dot:")
+ ?index ! -1
+  burn = true
+  index = index + 11
+  burnCount = int.Parse(string.Sub(status, index, string.IndexOf(status, ":", index) - index))
+  index = string.IndexOf(status, ":", index) +1
+  ?string.IndexOf(status, ",", index) ! -1
+   burnDuration = int.Parse(string.Sub(status, index, string.IndexOf(status, ",", index) - index))
+  :
+   burnDuration = int.Parse(string.Sub(status, index))
+ :
+  burn = false
+  burnCount = 0
+  burnDuration = 0
+
+ index = string.IndexOf(status, "debuff_dot_2:")
+ ?index ! -1
+  burn2 = true
+  index = index + 13
+  burn2Count = int.Parse(string.Sub(status, index, string.IndexOf(status, ":", index) - index))
+  index = string.IndexOf(status, ":", index) +1
+  ?string.IndexOf(status, ",", index) ! -1
+   burn2Duration = int.Parse(string.Sub(status, index, string.IndexOf(status, ",", index) - index))
+  :
+   burn2Duration = int.Parse(string.Sub(status, index))
+ :
+  burn2 = false
+  burn2Count = 0
+  burn2Duration = 0
+
+ index = string.IndexOf(status, "stun:")
+ ?index ! -1
+  stun = true
+  index = index + 5
+  stunCount = int.Parse(string.Sub(status, index, string.IndexOf(status, ":", index) - index))
+  index = string.IndexOf(status, ":", index) +1
+  ?string.IndexOf(status, ",", index) ! -1
+   stunDuration = int.Parse(string.Sub(status, index, string.IndexOf(status, ",", index) - index))
+  :
+   stunDuration = int.Parse(string.Sub(status, index))
+ :
+  stun = false
+  stunCount = 0
+  stunDuration = 0
+ 
+ index = string.IndexOf(status, "puff_debuff_damage:")
+ ?index ! -1
+  NoHeal = true
+  index = index + 19
+  NoHealCount = int.Parse(string.Sub(status, index, string.IndexOf(status, ":", index) - index))
+  index = string.IndexOf(status, ":", index) +1
+  ?string.IndexOf(status, ",", index) ! -1
+   NoHealDuration = int.Parse(string.Sub(status, index, string.IndexOf(status, ",", index) - index))
+  :
+   NoHealDuration = int.Parse(string.Sub(status, index))
+ :
+  NoHeal = false
+  NoHealCount = 0
+  NoHealDuration = 0
+
+ index = string.IndexOf(status, "pallas_phase2_debuff:")
+ ?index ! -1
+  Blind = true
+  index = index + 21
+  BlindCount = int.Parse(string.Sub(status, index, string.IndexOf(status, ":", index) - index))
+  index = string.IndexOf(status, ":", index) +1
+  ?string.IndexOf(status, ",", index) ! -1
+   BlindDuration = int.Parse(string.Sub(status, index, string.IndexOf(status, ",", index) - index))
+  :
+   BlindDuration = int.Parse(string.Sub(status, index))
+ :
+  Blind = false
+  BlindCount = 0
+  BlindDuration = 0
+
+func Positive(status)
+ var index = string.IndexOf(status, "buff_protection:")
+ ?index ! -1
+  buffProtec = true
+  index = index + 16
+  buffProtecCount = int.Parse(string.Sub(status, index, string.IndexOf(status, ":", index) - index))
+  index = string.IndexOf(status, ":", index) +1
+  ?string.IndexOf(status, ",", index) ! -1
+   buffProtecDuration = int.Parse(string.Sub(status, index, string.IndexOf(status, ",", index) - index))
+  :
+   buffProtecDuration = int.Parse(string.Sub(status, index))
+ :
+  buffProtec = false
+  buffProtecCount = 0
+  buffProtecDuration = 0
+
+ index = string.IndexOf(status, "spider_buff_damage:")
+ ?index ! -1
+  damageBuff = true
+  index = index + 19
+  damageBuffCount = int.Parse(string.Sub(status, index, string.IndexOf(status, ":", index) - index))
+  index = string.IndexOf(status, ":", index) +1
+  ?string.IndexOf(status, ",", index) ! -1
+   damageBuffDuration = int.Parse(string.Sub(status, index, string.IndexOf(status, ",", index) - index))
+  :
+   damageBuffDuration = int.Parse(string.Sub(status, index))
+ :
+  damageBuff = false
+  damageBuffCount = 0
+  damageBuffDuration = 0
+
+ index = string.IndexOf(status, "smite:")
+ ?index ! -1
+  smite = true
+  index = index + 6
+  smiteCount = int.Parse(string.Sub(status, index, string.IndexOf(status, ":", index) - index))
+  index = string.IndexOf(status, ":", index) +1
+  ?string.IndexOf(status, ",", index) ! -1
+   smiteDuration = int.Parse(string.Sub(status, index, string.IndexOf(status, ",", index) - index))
+  :
+   smiteDuration = int.Parse(string.Sub(status, index))
+ :
+  smite = false
+  smiteCount = 0
+  smiteDuration = 0
+
+ index = string.IndexOf(status, "pick_pocket:")
+ ?index ! -1
+  pickpocket = true
+  index = index + 12
+  pickpocketCount = int.Parse(string.Sub(status, index, string.IndexOf(status, ":", index) - index))
+  index = string.IndexOf(status, ":", index) +1
+  ?string.IndexOf(status, ",", index) ! -1
+   pickpocketDuration = int.Parse(string.Sub(status, index, string.IndexOf(status, ",", index) - index))
+  :
+   pickpocketDuration = int.Parse(string.Sub(status, index))
+ :
+  pickpocket = false
+  pickpocketCount = 0
+  pickpocketDuration = 0
+
+ index = string.IndexOf(status, "bardiche_buff_aoe_chance:")
+ ?index ! -1
+  bardAOE = true
+  index = index + 25
+  bardAOECount = int.Parse(string.Sub(status, index, string.IndexOf(status, ":", index) - index))
+  index = string.IndexOf(status, ":", index) +1
+  ?string.IndexOf(status, ",", index) ! -1
+   bardAOEDuration = int.Parse(string.Sub(status, index, string.IndexOf(status, ",", index) - index))
+  :
+   bardAOEDuration = int.Parse(string.Sub(status, index))
+ :
+  bardAOE = false
+  bardAOECount = 0
+  bardAOEDuration = 0
+
+ index = string.IndexOf(status, "bardiche_buff_crit_chance:")
+ ?index ! -1
+  bardCritChance = true
+  index = index + 26
+  bardCritChanceCount = int.Parse(string.Sub(status, index, string.IndexOf(status, ":", index) - index))
+  index = string.IndexOf(status, ":", index) +1
+  ?string.IndexOf(status, ",", index) ! -1
+   bardCritChanceDuration = int.Parse(string.Sub(status, index, string.IndexOf(status, ",", index) - index))
+  :
+   bardCritChanceDuration = int.Parse(string.Sub(status, index))
+ :
+  bardCritChance = false
+  bardCritChanceCount = 0
+  bardCritChanceDuration = 0
+
+ index = string.IndexOf(status, "bardiche_buff_crit_mult:")
+ ?index ! -1
+  bardCritMult = true
+  index = index + 24
+  bardCritMultCount = int.Parse(string.Sub(status, index, string.IndexOf(status, ":", index) - index))
+  index = string.IndexOf(status, ":", index) +1
+  ?string.IndexOf(status, ",", index) ! -1
+   bardCritMultDuration = int.Parse(string.Sub(status, index, string.IndexOf(status, ",", index) - index))
+  :
+   bardCritMultDuration = int.Parse(string.Sub(status, index))
+ :
+  bardCritMult = false
+  bardCritMultCount = 0
+  bardCritMultDuration = 0
+
+ index = string.IndexOf(status, "bardiche_buff_move_speed:")
+ ?index ! -1
+  bardMove = true
+  index = index + 25
+  bardMoveCount = int.Parse(string.Sub(status, index, string.IndexOf(status, ":", index) - index))
+  index = string.IndexOf(status, ":", index) +1
+  ?string.IndexOf(status, ",", index) ! -1
+   bardMoveDuration = int.Parse(string.Sub(status, index, string.IndexOf(status, ",", index) - index))
+  :
+   bardMoveDuration = int.Parse(string.Sub(status, index))
+ :
+  bardMove = false
+  bardMoveCount = 0
+  bardMoveDuration = 0
+
+ index = string.IndexOf(status, "quarterstaff_buff_attack_speed:")
+ ?index ! -1
+  qStaffAS = true
+  index = index + 31
+  qStaffASCount = int.Parse(string.Sub(status, index, string.IndexOf(status, ":", index) - index))
+  index = string.IndexOf(status, ":", index) +1
+  ?string.IndexOf(status, ",", index) ! -1
+   qStaffASDuration = int.Parse(string.Sub(status, index, string.IndexOf(status, ",", index) - index))
+  :
+   qStaffASDuration = int.Parse(string.Sub(status, index))
+ :
+  qStaffAS = false
+  qStaffASCount = 0
+  qStaffASDuration = 0
+
+ index = string.IndexOf(status, "quarterstaff_buff_stun:")
+ ?index ! -1
+  qStaffStun = true
+  index = index + 23
+  qStaffStunCount = int.Parse(string.Sub(status, index, string.IndexOf(status, ":", index) - index))
+  index = string.IndexOf(status, ":", index) +1
+  ?string.IndexOf(status, ",", index) ! -1
+   qStaffStunDuration = int.Parse(string.Sub(status, index, string.IndexOf(status, ",", index) - index))
+  :
+   qStaffStunDuration = int.Parse(string.Sub(status, index))
+ :
+  qStaffStun = false
+  qStaffStunCount = 0
+  qStaffStunDuration = 0
+
+ index = string.IndexOf(status, "experience:")
+ ?index ! -1
+  EXP = true
+  index = index + 11
+  EXPCount = int.Parse(string.Sub(status, index, string.IndexOf(status, ":", index) - index))
+  index = string.IndexOf(status, ":", index) +1
+  ?string.IndexOf(status, ",", index) ! -1
+   EXPDuration = int.Parse(string.Sub(status, index, string.IndexOf(status, ",", index) - index))
+  :
+   EXPDuration = int.Parse(string.Sub(status, index))
+ :
+  EXP = false
+  EXPCount = 0
+  EXPDuration = 0
+
+ index = string.IndexOf(status, "strength:")
+ ?index ! -1
+  strength = true
+  index = index + 9
+  strengthCount = int.Parse(string.Sub(status, index, string.IndexOf(status, ":", index) - index))
+  index = string.IndexOf(status, ":", index) +1
+  ?string.IndexOf(status, ",", index) ! -1
+   strengthDuration = int.Parse(string.Sub(status, index, string.IndexOf(status, ",", index) - index))
+  :
+   strengthDuration = int.Parse(string.Sub(status, index))
+ :
+  strength = false
+  strengthCount = 0
+  strengthDuration = 0
+
+ index = string.IndexOf(status, "lucky_crit:")
+ ?index ! -1
+  luckyCrit = true
+  index = index + 11
+  luckyCritCount = int.Parse(string.Sub(status, index, string.IndexOf(status, ":", index) - index))
+  index = string.IndexOf(status, ":", index) +1
+  ?string.IndexOf(status, ",", index) ! -1
+   luckyCritDuration = int.Parse(string.Sub(status, index, string.IndexOf(status, ",", index) - index))
+  :
+   luckyCritDuration = int.Parse(string.Sub(status, index))
+ :
+  luckyCrit = false
+  luckyCritCount = 0
+  luckyCritDuration = 0
+
+ index = string.IndexOf(status, "lucky_mult:")
+ ?index ! -1
+  luckyMult = true
+  index = index + 11
+  luckyMultCount = int.Parse(string.Sub(status, index, string.IndexOf(status, ":", index) - index))
+  index = string.IndexOf(status, ":", index) +1
+  ?string.IndexOf(status, ",", index) ! -1
+   luckyMultDuration = int.Parse(string.Sub(status, index, string.IndexOf(status, ",", index) - index))
+  :
+   luckyMultDuration = int.Parse(string.Sub(status, index))
+ :
+  luckyMult = false
+  luckyMultCount = 0
+  luckyMultDuration = 0
+
+ index = string.IndexOf(status, "vampiric:")
+ ?index ! -1
+  vamp = true
+  index = index + 9
+  vampCount = int.Parse(string.Sub(status, index, string.IndexOf(status, ":", index) - index))
+  index = string.IndexOf(status, ":", index) +1
+  ?string.IndexOf(status, ",", index) ! -1
+   vampDuration = int.Parse(string.Sub(status, index, string.IndexOf(status, ",", index) - index))
+  :
+   vampDuration = int.Parse(string.Sub(status, index))
+ :
+  vamp = false
+  vampCount = 0
+  vampDuration = 0
+
+ index = string.IndexOf(status, "berserk:")
+ ?index ! -1
+  berserk = true
+  index = index + 8
+  berserkCount = int.Parse(string.Sub(status, index, string.IndexOf(status, ":", index) - index))
+  index = string.IndexOf(status, ":", index) +1
+  ?string.IndexOf(status, ",", index) ! -1
+   berserkDuration = int.Parse(string.Sub(status, index, string.IndexOf(status, ",", index) - index))
+  :
+   berserkDuration = int.Parse(string.Sub(status, index))
+ :
+  berserk = false
+  berserkCount = 0
+  berserkDuration = 0
+
+ index = string.IndexOf(status, "invisibility:")
+ ?index ! -1
+  invis = true
+  index = index + 13
+  invisCount = int.Parse(string.Sub(status, index, string.IndexOf(status, ":", index) - index))
+  index = string.IndexOf(status, ":", index) +1
+  ?string.IndexOf(status, ",", index) ! -1
+   invisDuration = int.Parse(string.Sub(status, index, string.IndexOf(status, ",", index) - index))
+  :
+   invisDuration = int.Parse(string.Sub(status, index))
+ :
+  invis = false
+  invisCount = 0
+  invisDuration = 0

@@ -1,0 +1,90 @@
+var BasicLocInfo
+var PotionStatus
+var PotionLoopCount
+var RecLast
+var BestPotionTime
+var WorstPotionTime
+var AveragePotionTime
+var LastPotionTime
+var PotionTimeSum
+var log
+?loc.begin
+	BasicLocInfo = loc.id + loc.stars
+	PotionLoopCount = storage.Get(BasicLocInfo + "LoopCount", 0)
+	RecLast = storage.Get(BasicLocInfo + "Last", "No record")
+	BestPotionTime = storage.Get(BasicLocInfo + "Best", "No record")
+	WorstPotionTime = storage.Get(BasicLocInfo + "Worst", "No record")
+	AveragePotionTime = storage.Get(BasicLocInfo + "Average", "No record")
+	?PotionLoopCount = 0
+		PotionTimeSum = 0
+	:
+		PotionTimeSum = PotionLoopCount * AveragePotionTime
+	?item.potion ! Empty
+		PotionStatus = true
+	:
+		PotionStatus = false
+	LastPotionTime = "Not used"
+	log = 0
+?loc.loop
+	?item.potion ! Empty
+		PotionStatus = true
+	:
+		PotionStatus = false
+	RecLast = storage.Get(BasicLocInfo + "Last", "No record")
+	LastPotionTime = "Not used"
+	log = 0
+?PotionStatus & item.potion = Empty
+	LastPotionTime = totaltime
+	PotionStatus = false
+?Type(LastPotionTime) = int & log = 0
+	storage.Set(BasicLocInfo + "LoopCount", storage.Incr(BasicLocInfo + "LoopCount"))
+	?BestPotionTime = "No record" | (Type(BestPotionTime) = int & LastPotionTime <= BestPotionTime)
+		BestPotionTime = LastPotionTime
+	?WorstPotionTime = "No record" | (Type(WorstPotionTime) = int & LastPotionTime >= WorstPotionTime)
+		WorstPotionTime = LastPotionTime
+	PotionTimeSum = PotionTimeSum + LastPotionTime
+	AveragePotionTime = PotionTimeSum / storage.Get(BasicLocInfo + "LoopCount")
+	storage.Set(BasicLocInfo + "Best", BestPotionTime)
+	storage.Set(BasicLocInfo + "Worst", WorstPotionTime)
+	storage.Set(BasicLocInfo + "Average", AveragePotionTime)
+	storage.Set(BasicLocInfo + "Last", LastPotionTime)
+	log = 1
+//////////////////////////////
+var check = import UI/Toggler
+func Output(x, y, color, a)
+	?check.toggler()
+		>`@x@,@y@,@color@,@a@
+//////////////////////////////
+func Display(PosX, PosY)
+	?PosX < 0
+		PosX = screen.w + PosX
+	?PosY < 0
+		PosY = screen.h + PosY
+	var Currentstr = "Current:" + LastPotionTime
+	var Laststr = "Last:" + RecLast
+	var Beststr = "Best:" + BestPotionTime
+	var Averagestr = "Average:" + AveragePotionTime
+	var Worststr = "Worst:" + WorstPotionTime
+	Output(PosX, PosY, #white, Currentstr)
+	Output(PosX + 3, PosY + 1, #white, Laststr)
+	Output(PosX + 3, PosY + 2, #white, Beststr)
+	Output(PosX, PosY + 3, #white, Averagestr)
+	Output(PosX + 2, PosY + 4, #white, Worststr)
+func PotionFilter(FilterT)
+	?Type(AveragePotionTime) = int & totaltime > BestPotionTime + FilterT
+		return false
+	:
+		return true
+func Clear()
+	storage.Delete(BasicLocInfo + "LoopCount")
+	storage.Delete(BasicLocInfo + "Best")
+	storage.Delete(BasicLocInfo + "Worst")
+	storage.Delete(BasicLocInfo + "Average")
+	storage.Delete(BasicLocInfo + "Last")
+	loc.Leave()
+func SetBest(SetNO)
+	storage.Set(BasicLocInfo + "Best", SetNO)
+	loc.Leave()
+func SetAvg(SetNO)
+	storage.Set(BasicLocInfo + "Average", SetNO)
+	loc.Leave()

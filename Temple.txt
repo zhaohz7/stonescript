@@ -1,0 +1,137 @@
+/*
+screen.FromWorldX(pos.x)
+screen.FromWorldZ(pos.z - pos.y)
+*/
+var Extract = import Extract
+var AdjustBFG = import UI/ActivationCenter
+var swordtime
+var SAtime
+?loc.begin
+	AdjustBFG.changeBFGthcurrentTo(10)
+	?loc.stars = 15
+		brew stone + bronze
+	swordtime = 0
+	SAtime = 0
+?loc.loop
+	swordtime = 0
+	SAtime = 0
+?ai.walking
+	swordtime = 0
+	SAtime = 0
+?loc=Temple
+	?item.GetCooldown("bardiche") < 879
+		?foe.distance > 29
+			?armor > 35
+				equipL trisk
+				equipR Cultist Mask
+			:?loc.begin | armor >= 14
+				equipL trisk
+				equipR Compound Shield shiny +21
+			:
+				equipL trisk
+				equipR Compound Shield -shiny +21
+		:?foe!boss
+			?foe.distance > 16 & foe.distance < 30
+				?foe = poison | foe.count > 4
+					?armor > 40 & Extract.Smite[1] > 6
+						equipL trisk
+						equipR Ice Shield ai +21
+					:
+						equipL trisk
+						equipR Ice Shield A	+21
+				:?armor < 14
+					equipL trisk
+					equipR Compound Shield -shiny +21
+				:?armor >= 14
+					equipL trisk
+					equipR shiny Compound Shield +21
+			:
+				?foe = poison
+					?Extract.Smite[1] > 14
+						?foe.distance < 8 & foe.hp < 80
+							?SAtime < 4
+								equip Skeleton Arm +21
+								SAtime++
+							:
+								equip Shiny Repeating Crossbow +21
+								equip Skeleton Arm +21
+								SAtime = 1
+						:
+							equip ice staff dI +20
+					:?Extract.Smite[1] < 4
+						equipL Big Aether Sword dU +21
+						equipR Big Ice Sword D +21
+					:
+						equipL Big Ice Sword dI +20
+						equipR Freezer dI +20				
+				:
+					equipL Big Poison Sword dP +21
+					equipR Big Fire Sword dF +21
+		:?foe = boss & foe ! phase1
+			?foe.distance < 10
+				?swordtime % 8 < 4
+					?Extract.FoeChill[2] < 6 | Extract.FoeChill[1] < 6
+						equipL Ice d_sword dI +21
+						equipR Ice d_sword dI +20
+					:?!Extract.FoePoison[0]
+						equipL Ice d_sword D +20
+						equipR Poison d_sword dP +20
+					:?!Extract.FoeBurn[0]
+						equipL Ice d_sword D +20
+						equipR Fire d_sword dF +20
+					:
+						equipL Ice d_sword D +20
+						equipR Ice d_sword D +21
+					swordtime++
+				:
+					?Extract.FoeChill[2] < 6 | Extract.FoeChill[1] < 6
+						equipL Ice d_sword dI +20
+						equipR Ice d_sword dI +21
+					:?!Extract.FoePoison[0]
+						equipL Poison d_sword dP +20
+						equipR Ice d_sword D +20
+					:?!Extract.FoeBurn[0]
+						equipL Fire d_sword dF +20
+						equipR Ice d_sword D +20
+					:
+						equipL Ice d_sword D +21
+						equipR Ice d_sword D +20
+					swordtime++			
+		:?foe = phase1
+			?foe.distance < 10
+				?loc.stars = 15 & item.potion ! empty & item.potion = Lucky & item.potion = auto
+					activate potion
+				?foe.state = 112 & foe.time = 58
+					equipL mind stone
+				:?swordtime % 8 < 4
+					?Extract.FoeChill[2] < 4 | Extract.FoeChill[1] < 6
+						equipL Ice d_sword dI +21
+						equipR Cultist Mask
+					:?Extract.Lucky[2] > 5
+						equipL Ice d_sword D +20
+						equipR Ice d_sword D +21
+					:
+						equipL Ice d_sword D +20
+						equipR Cultist Mask
+					swordtime++
+				:
+					?Extract.FoeChill[2] < 4 | Extract.FoeChill[1] < 6
+						equipL Ice d_sword dI +20
+						equipR Cultist Mask
+					:?!Extract.FoePoison[0]
+						equipL Poison d_sword dP +20
+						equipR Cultist Mask
+					:?!Extract.FoeBurn[0]
+						equipL Fire d_sword dF +20
+						equipR Cultist Mask
+					:?Extract.Lucky[2] > 5
+						equipL Ice d_sword D +21
+						equipR Ice d_sword D +20
+					:
+						equipL Ice d_sword D +21
+						equipR Cultist Mask
+					swordtime++
+			:
+				equipL trisk
+	?hp < maxhp
+		loc.Leave()

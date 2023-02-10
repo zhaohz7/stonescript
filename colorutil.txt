@@ -1,0 +1,69 @@
+Fills the screen with UI panels
+var y = -1
+func AddRow()
+  y++
+  for x = 0..screen.w-1
+    var p = ui.AddPanel()
+    p.style = 8
+    p.x = x
+    p.y = y
+    p.w = 1
+    p.h = 1
+    p.dock = top_left
+    p.color = #808080
+?y < screen.h
+  AddRow()
+  AddRow()
+
+- ui.AddCanvas()
+- canvas.Get(int,int) canvas.Set(), canvas.SetFG() and canvas.SetBG()
+
+the foreground and background colors
+?loc.begin
+  var canvas = ui.AddCanvas()
+  for x = 0..canvas.w
+    for y = 0..canvas.h
+      var fg = color.Random()
+      var bg = color.Random()
+      canvas.Set(x, y, fg, bg, ▄)
+
+- color.FromRGB(), color.ToRGB(), color.Random() and color.Lerp() 
+
+var c = color.Random()
+var rgb = color.ToRGB(c)
+var r = rgb［0］
+var g = rgb［1］
+var b = rgb［2］
+>`0,0,@c@, @c@ \n @r@ \n @g@ \n @b@
+
+var c = color.FromRGB(255, 0, 128)
+>`0,0,@c@, @c@
+
+var c1 = ＂#ff4400＂
+var c2 = ＂#8888ff＂
+var t = 0.5
+var c
+t = math.sin(time*0.1) / 2 + 0.5
+c = color.Lerp(c1, c2, t)
+>`0,1,@c@,@c@\n ██████
+
+Canvas.blend
+
+Possible values: Opaque, Multiply, Divide, Add, Subtract. Default value is "opaque".
+
+var filter1 = ui.AddCanvas()
+var filter2 = ui.AddCanvas()
+filter1.w = screen.w
+filter1.h = screen.h
+filter2.w = screen.w
+filter2.h = screen.h
+
+filter1.blend = multiply
+
+filter1.SetFG(#aa5555)
+filter1.SetBG(#dddddd)
+
+filter2.blend = add
+
+filter2.SetFG(#aa6600)
+filter2.SetBG(#662200)

@@ -1,0 +1,242 @@
+/*
+var Extract = import Extract
+
+Extract.Chill(＂foe＂)
+Extract.Poison(＂foe＂)
+Extract.Feeble(＂foe＂)
+Extract.BurnOff(＂foe＂)
+Extract.BurnDef(＂foe＂)
+Extract.Stun(＂foe＂)
+
+Extract.Damage(＂foe＂)
+Extract.BuffProtec(＂foe＂)
+Extract.Mirror(＂foe＂)
+
+Extract.PuffDebuff(＂hero＂)
+Extract.Poison(＂hero＂)
+Extract.BurnOff(＂hero＂)
+Extract.Stun(＂hero＂)
+Extract.Chill(＂hero＂)
+Extract.AtkChill(＂hero＂)
+Extract.MovChill(＂hero＂)
+Extract.PallasDebuff(＂hero＂)
+
+Extract.BladeBuff(＂hero＂)
+Extract.ArmBuff(＂hero＂)
+Extract.ExpBuff(＂hero＂)
+Extract.StrBuff(＂hero＂)
+Extract.LucBuff(＂hero＂)
+Extract.VamBuff(＂hero＂)
+Extract.BerBuff(＂hero＂)
+Extract.InvBuff(＂hero＂)
+*/
+
+var FoePoison
+var FoeChill
+var FoeFeeble
+var FoeBurn
+var FoeBurn2
+var FoeStun
+
+var FoeDamage
+var FoeBuffProtec
+var PoenaMirror
+
+var Chilled
+var Poisoned
+var AtkChilled
+var MovChilled
+var Burnt
+var Stunned
+var NoHeal
+var Blind
+
+var Smite
+var Pick
+var Plusdamage
+var EXP
+var Strength
+var Lucky
+var Vamp
+var Berserk
+var Invis
+
+func Extract(status, id)
+	var index = string.IndexOf(status, id)
+	var affect
+	var affectCount
+	var affectDuration
+	
+	?index ! -1
+		affect = true
+		index = index + string.Size(id)
+		affectCount = int.Parse(string.Sub(status, index, string.IndexOf(status, ":", index) - index))
+		index = string.IndexOf(status, ":", index) +1
+		?string.IndexOf(status, ",", index) ! -1
+			affectDuration = int.Parse(string.Sub(status, index, string.IndexOf(status, ",", index) - index))
+		:
+			affectDuration = int.Parse(string.Sub(status, index))
+	:
+		affect = false
+		affectCount = 0
+		affectDuration = 0
+		
+	return [affect, affectCount, affectDuration]
+
+func PuffDebuff(target)
+	var id = "puff_debuff_damage:"
+	
+	?target = "hero"
+		NoHeal = Extract(debuffs.string, id)
+	
+	
+func Poison(target)
+	var Id = "debuff_damage:"
+	var id = "debuff_duration_damage:"
+	
+	?target = "foe"
+		FoePoison = Extract(foe.debuffs.string, Id)
+	:?target = "hero"
+		Plusdamage = Extract(buffs.string, Id)
+		Poisoned = Extract(debuffs.string, id)
+		?!Poisoned[0] & !NoHeal[0]
+			Poisoned = Extract(debuffs.string, Id)
+	
+	
+func Feeble(target)
+	var id = "debuff_feeble:"
+	
+	?target = "foe"
+		FoeFeeble = Extract(foe.debuffs.string, id)
+	
+	
+func Chill(target)
+	var id = "debuff_chill:"
+	
+	?target = "foe"
+		FoeChill = Extract(foe.debuffs.string, id)
+	:?target = "hero"
+		Chilled = Extract(debuffs.string, id)
+	
+	
+func AtkChill(target)
+	var id = "debuff_yeti_chill:"
+	
+	?target = "hero"
+		AtkChilled = Extract(debuffs.string, id)
+	
+	
+func MovChill(target)
+	var id = "debuff_move_speed:"
+	
+	?target = "hero"
+		MovChilled = Extract(debuffs.string, id)
+	
+	
+func BurnOff(target)
+	var id = "debuff_dot:"
+	
+	?target = "foe"
+		FoeBurn = Extract(foe.debuffs.string, id)
+	:?target = "hero"
+		Burnt = Extract(debuffs.string, id)
+	
+	
+func BurnDef(target)
+	var id = "debuff_dot_2:"
+	
+	?target = "foe"
+		FoeBurn2 = Extract(foe.debuffs.string, id)
+	
+	
+func Stun(target)
+	var id = "stun:"
+	
+	?target = "foe"
+		FoeStun = Extract(foe.debuffs.string, id)
+	:?target = "hero"
+		Stunned = Extract(debuffs.string, id)
+	
+	
+func PallasDebuff(target)
+	var id = "pallas_phase2_debuff:"
+	
+	?target = "hero"
+		Blind = Extract(debuffs.string, id)
+	
+	
+func Damage(target)
+	var id = "spider_buff_damage:"
+	
+	?target = "foe"
+		FoeDamage = Extract(foe.buffs.string, id)
+	
+	
+func BuffProtec(target)
+	var id = "buff_protection:"
+	
+	?target = "foe"
+		FoeBuffProtec = Extract(foe.buffs.string, id)
+	
+	
+func Mirror(target)
+	var id = "poena_mirror:"
+	
+	?target = "foe"
+		PoenaMirror = Extract(foe.buffs.string, id)
+	
+	
+func BladeBuff(target)
+	var id = "smite:"
+	
+	?target = "hero"
+		Smite = Extract(buffs.string, id)
+	
+	
+func ArmBuff(target)
+	var id = "pick_pocket:"
+	
+	?target = "hero"
+		Pick = Extract(buffs.string, id)
+	
+	
+func ExpBuff(target)
+	var id = "experience:"
+	
+	?target = "hero"
+		EXP = Extract(buffs.string, id)
+	
+	
+func StrBuff(target)
+	var id = "strength:"
+	
+	?target = "hero"
+		Strength = Extract(buffs.string, id)
+	
+	
+func LucBuff(target)
+	var id = "lucky_crit:"
+	
+	?target = "hero"
+		Lucky = Extract(buffs.string, id)
+	
+	
+func VamBuff(target)
+	var id = "vampiric:"
+	
+	?target = "hero"
+		Vamp = Extract(buffs.string, id)
+	
+	
+func BerBuff(target)
+	var id = "berserk:"
+	
+	?target = "hero"
+		Berserk = Extract(buffs.string, id)
+	
+	
+func InvBuff(target)
+	var id = "invisibility:"
+	
+	?target = "hero"
+		Invis = Extract(buffs.string, id)

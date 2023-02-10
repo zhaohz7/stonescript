@@ -1,0 +1,201 @@
+var Extract = import Extract
+var wandtime = 0
+var swordtime = 0
+var hammertime = 0
+?loc.loop
+	wandtime = 0
+	swordtime = 0
+	hammertime = 0
+?ai.walking
+	wandtime = 0
+	swordtime = 0
+	hammertime = 0
+?loc = Mushroom
+	?item.GetCooldown("bardiche") < 879
+		?foe!boss & foe.distance < 17
+			?(foe = Epic_Snail & foe!boss) | (foe.hp < 81 & foe ! ant)
+				equip Skeleton Arm
+			:?Extract.Smite[1] < 4
+				?wandtime % 10 < 5
+					equipL Poison Wand D +21
+					equipR Poison Wand dP +21
+					wandtime++
+				:
+					equipL Poison Wand dP +21
+					equipR Poison Wand D +21
+					wandtime++
+			:
+				?wandtime % 10 < 5
+					equipL Ice Wand dI +21
+					equipR Poison Wand D +21
+					wandtime++
+				:
+					equipL Poison Wand D +21
+					equipR Ice Wand dI +21
+					wandtime++
+		?foe.distance > 16 & foe.distance < 30
+			?armor > 70 & foe!spawner & item.GetCooldown("bash") > 0 & item.GetCooldown("dash") > 0
+				equipL trisk
+				equipR Ice Shield ai *10 +21
+			:
+				equipL trisk
+				equipR Poison Shield A +21
+		?foe = Epic_Snail & foe = boss & foe.distance <= 9
+			?Extract.Smite[1] < 9
+				equip Bardiche
+			:?wandtime % 10 < 5
+				?!Extract.FoePoison[0]
+					equipL Ice Wand dI +21
+					equipR Poison Wand dP +21
+				:?Extract.FoeChill[1] < 6
+					equipL Ice Wand dI +21
+					equipR Poison Wand D +21
+				:
+					equipL Poison Wand dP +21
+					equipR Poison Wand D +21
+				wandtime++
+			:
+				?!Extract.FoePoison[0]
+					equipL Poison Wand dP +21
+					equipR Ice Wand dI +21
+				:?Extract.FoeChill[1] < 6
+					equipL Poison Wand D +21
+					equipR Ice Wand dI +21
+				:
+					equipL Poison Wand D +21
+					equipR Poison Wand dP +21
+				wandtime++
+		?foe = fluff 
+			?foe.distance > 10
+				equipL trisk
+				equipR hatchet
+			:?foe.distance > 4
+				equip shovel
+			:
+				equipR Poison Shield ap
+		?foe = angry shroom
+			?foe.distance < 10
+				?foe.armor > 0 & Extract.FoeChill[1] = 6 & Extract.FoePoison[0] & Extract.FoeBurn[0]
+					?hammertime % 34 < 17
+						equipL Shiny Poison Hammer D +21
+						equipR Poison Hammer D +21
+						hammertime++
+					:
+						equipL Poison Hammer D +21
+						equipR Shiny Poison Hammer D +21
+						hammertime++
+				:?swordtime % 8 < 4
+					?Extract.FoeChill[2] < 6 | Extract.FoeChill[1] < 6
+						equipL Poison d_sword D +20
+						equipR Ice d_sword dI +20
+					:?!Extract.FoePoison[0]
+						equipL Poison d_sword D +20
+						equipR Poison d_sword dP +20
+					:?!Extract.FoeBurn[0]
+						equipL Poison d_sword D +20
+						equipR Fire d_sword dF +20
+					:
+						equipL Poison d_sword D +20
+						equipR Poison d_sword D +21
+					swordtime++
+				:
+					?Extract.FoeChill[2] < 6 | Extract.FoeChill[1] < 6
+						equipL Ice d_sword dI +20
+						equipR Poison d_sword D +20
+					:?!Extract.FoePoison[0]
+						equipL Poison d_sword dP +20
+						equipR Poison d_sword D +20
+					:?!Extract.FoeBurn[0]
+						equipL Fire d_sword dF +20
+						equipR Poison d_sword D +20
+					:
+						equipL Poison d_sword D +21
+						equipR Poison d_sword D +20
+					swordtime++
+			:
+				equipL trisk
+				equipR Cultist Mask
+		?foe = Morel
+			?foe.distance < 10
+				?foe.armor > 0
+					?hammertime % 34 < 17
+						equipL Shiny Poison Hammer D +21
+						equipR Poison Hammer D +21
+						hammertime++
+					:
+						equipL Poison Hammer D +21
+						equipR Shiny Poison Hammer D +21
+						hammertime++
+				:?swordtime % 8 < 4
+					?Extract.FoeChill[2] < 6 | Extract.FoeChill[1] < 6
+						equipL Poison d_sword D +20
+						equipR Ice d_sword dI +20
+					:?!Extract.FoePoison[0]
+						equipL Poison d_sword D +20
+						equipR Poison d_sword dP +20
+					:?!Extract.FoeBurn[0]
+						equipL Poison d_sword D +20
+						equipR Fire d_sword dF +20
+					:
+						equipL Poison d_sword D +20
+						equipR Poison d_sword D +21
+					swordtime++
+				:
+					?Extract.FoeChill[2] < 6 | Extract.FoeChill[1] < 6
+						equipL Ice d_sword dI +20
+						equipR Poison d_sword D +20
+					:?!Extract.FoePoison[0]
+						equipL Poison d_sword dP +20
+						equipR Poison d_sword D +20
+					:?!Extract.FoeBurn[0]
+						equipL Fire d_sword dF +20
+						equipR Poison d_sword D +20
+					:
+						equipL Poison d_sword D +21
+						equipR Poison d_sword D +20
+					swordtime++
+			:
+				equipL trisk
+				equipR Cultist Mask
+		?foe = Enoki
+			?foe.distance < 10
+				?swordtime % 8 < 4
+					?Extract.FoeChill[2] < 6 | Extract.FoeChill[1] < 6
+						equipL Poison d_sword D +20
+						equipR Ice d_sword dI +20
+					:?!Extract.FoePoison[0]
+						equipL Poison d_sword D +20
+						equipR Poison d_sword dP +20
+					:?!Extract.FoeBurn[0]
+						equipL Poison d_sword D +20
+						equipR Fire d_sword dF +20
+					:
+						equipL Poison d_sword D +20
+						equipR Poison d_sword D +21
+					swordtime++
+				:
+					?Extract.FoeChill[2] < 6 | Extract.FoeChill[1] < 6
+						equipL Ice d_sword dI +20
+						equipR Poison d_sword D +20
+					:?!Extract.FoePoison[0]
+						equipL Poison d_sword dP +20
+						equipR Poison d_sword D +20
+					:?!Extract.FoeBurn[0]
+						equipL Fire d_sword dF +20
+						equipR Poison d_sword D +20
+					:
+						equipL Poison d_sword D +21
+						equipR Poison d_sword D +20
+					swordtime++
+			:
+				equipL trisk
+		?foe.distance > 29 
+			?armor > 35
+				equipL trisk
+				equipR Cultist Mask
+			:?armor >= 14 | loc.begin | loc.loop
+				equipL trisk
+				equipR Shiny Compound Shield +21
+			:
+				equipL trisk
+				equipR Compound Shield -shiny +21

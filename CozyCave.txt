@@ -1,0 +1,676 @@
+//Cozy Cave
+//by: link2_thepast
+//v1.0
+//Import 'CozyCave' into the Mind Stone, then visit Deadwood Waterfall.
+//Recommended to import this script BEFORE your other Stonescript graphics, because it uses draw.Clear() to erase the screen
+//Use the provided "Leave" button to exit; due to draw.Clear() the pause menu is invisible while in the cave!
+
+//Replaces Deadwood Waterfall with the cave where you do your crafting and keep all your items
+//Cave changes slightly depending on resources collected, whether you've beaten certain bosses, etc.
+
+//- SETTINGS -
+// disable dynamic item piles, forces max pile size
+var NO_DYN_ITEMS = false
+
+// disable most foreground elements
+// clears space for you to test your ASCII art, draw your own furniture, etc.
+var NO_STATIONS_OR_PILES = false
+
+
+
+//- VARIABLE DEFINITIONS -
+// colors
+var colorFloor = #333333
+var colorRock = #666666
+var colorRockLit = #888888
+var colorStation = #aaaaaa
+var colorStationLit = #cccccc
+var colorHighlight = #ffffff
+var colorPile = #aaaaaa
+var colorBtn = #777777
+
+// "Leave" button parameters
+var btnLeaveH = 5
+var btnLeaveW = 19
+var btnLeaveX = 0
+var btnLeaveY = screen.h - btnLeaveH
+var txtLeaveX = btnLeaveX + 7
+var txtLeaveY = btnLeaveY + 2
+
+// item counts for resource pile sizes
+var moon = item.GetCount("moon stone")
+var wands = item.GetCount("stone wand +0 *0")
+var stones = res.stone
+var prune = item.GetCount("poison rune +0 *0")
+var vrune = item.GetCount("vigor rune +0 *0")
+var arune = item.GetCount("aether rune +0 *0")
+var frune = item.GetCount("fire rune +0 *0")
+var irune = item.GetCount("ice rune +0 *0")
+var runes = prune + vrune + arune + frune + irune
+
+// thresholds for resource pile sizes
+var wandThresh1 = 10
+var wandThresh2 = 200
+var wandThresh3 = 5000
+var wandThresh4 = 10000
+
+var stoneThresh1 = 1000
+var stoneThresh2 = 7500
+var stoneThresh3 = 50000
+var stoneThresh4 = 100000
+
+var runeThresh1 = 300
+var runeThresh2 = 1000
+var runeThresh3 = 6000
+
+// fire timers
+var fTick = 0
+var sTick = 0
+var LTick = 0
+var fFireT = 0
+var fFireB = 0
+
+// global illumination flag, for animations
+var illuminated = false
+
+// global "initialized" flag
+var initialized = false
+
+//- CHAR ARRAYS FOR DYNAMIC DRAWING -
+// as of Stonejam 4 there's no simple way to draw behind the player
+var doorBgChars = [":","|","|","|","|"]
+var extRockChars = ["#"," ",",","-",".","#", "#","#","#"," ","^","#"]
+
+// randomly generated floor and smoke particles
+var floorChars = []
+var smokeChars = []
+
+var txtPotion = ""
+
+
+
+//- MAIN UPDATE LOOP -
+Update()
+func Update()
+  ?loc = waterfall
+    //- FIRST-TICK SETUP -
+    ?!initialized
+      initialized = true
+      
+      //change music
+      ambient.Stop()
+      music.Play(shop)
+      
+      //run graphics randomizations once
+      BuildFloor(12, 10)
+      BuildPotion()
+      
+      //create "Leave" button
+      var btnLeave = ui.AddButton()
+      btnLeave.h = btnLeaveH
+      btnLeave.w = btnLeaveW
+      btnLeave.x = btnLeaveX
+      btnLeave.y = btnLeaveY
+      btnLeave.text = "Leave"
+      btnLeave.SetPressed(loc.Leave)
+
+    //- DRAWING STARTS HERE -
+    draw.Clear()
+    draw.Player()
+    
+    // DRAW LEAVE BUTTON
+    draw.Box(btnLeaveX,btnLeaveY, btnLeaveW,btnLeaveH, colorBtn, 1)
+    >`@txtLeaveX@,@txtLeaveY@,Leave
+    
+    // DRAW BG CAVE ELEMENTS
+    DrawFloor()
+    DrawDoor(0,4)
+    DrawURRock(screen.w-13,0)
+    
+    DrawFire(screen.w-20, 10)
+    
+    // DRAW WORKSTATIONS
+    ?!NO_STATIONS_OR_PILES
+      DrawAnvil(screen.w/2 + 4, 12)
+      DrawCauldron(screen.w-20, 16)
+      DrawTable(screen.w/2 + 4, screen.h-10)
+    
+    // DRAW RESOURCE PILES
+    ?!NO_STATIONS_OR_PILES
+      DrawStonePile(5, screen.h-12)
+      DrawRunePile(17, screen.h-13)
+      DrawWandPile(screen.w/2 - 15,screen.h-7)
+    
+    // DRAW FG CAVE ELEMENTS
+    DrawURock(screen.w/2 + 3, 0)
+    DrawBLRock(-1, screen.h-11)
+    DrawBRRock(screen.w-22, screen.h-9)
+
+
+
+//- DRAWING FUNCTIONS -
+func DrawDoor(x,y)
+  //draw fg door frame
+  >`@x@,@y@,@colorStation@,ascii
+  ,--.
+ ´
+;
+|
+|
+|
+|
+|
+|
+asciiend
+
+  //draw bg door frame "behind" player
+  for j = 0..4
+    var fx = x+6
+    var fy = y+j+1
+    var c = doorBgChars[j]
+
+    ?draw.GetSymbol(fx-1,fy) = " "
+      >`@fx@,@fy@,@colorStation@,@c@
+
+  //draw rocks outside "behind" player
+  for i = 0..11
+    var fx = x+i
+    var fy = y+5
+    
+    ?i > 5
+      fx = fx-5
+      fy++
+    
+    var c = extRockChars[i]
+    
+    ?i=0 | i=6
+      >`@fx@,@fy@,@colorRock@,@c@
+    :
+      var pc = extRockChars[i-1]
+      ?draw.GetSymbol(fx-1,fy) = pc
+        >`@fx@,@fy@,@colorRock@,@c@
+
+  >`@x@,@y@,@colorRock@,ascii
+#
+#
+#
+#
+#
+#
+#
+##,-.
+#‾'.#\
+asciiend
+
+
+
+// randomly generate a 'w' wide horizontal floor
+func BuildFloor(y, w)
+  var pc = 0
+  var dy = 0
+  
+  for x = 0..screen.w-1
+    pc = rng % 3
+    
+    ?pc = 0
+      dy = rng % w
+      floorChars.Add( [x, y+dy] )
+
+
+
+func DrawFloor()
+  var x
+  var y
+  for i = 0..floorChars.Count()-1
+    x = floorChars[i][0]
+    y = floorChars[i][1]
+    >`@x@,@y@,@colorFloor@,-
+
+
+
+func DrawURRock(x,y)
+  >`@x@,@y@,@colorFloor@,ascii
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#-#######-
+###-
+-
+asciiend
+
+  >`@x@,@y@,@colorRock@,ascii
+\  V  \ , /##|
+#`,    v ;###|
+##\    ,´####|
+###|  /######|
+###|  |######|
+##,  ,|######|
+#;  : \######|
+/  _;  ´\####|
+ ,´ \    `###|
+###########;`|
+#######/`;´  |
+######; / ^ ;|
+asciiend
+
+  ?illuminated
+    >`@x@,@y@,@colorRockLit@,ascii
+#
+#
+##\
+###|
+###|
+##,##,
+#;##:
+/##_;
+#,´#\
+#
+#######/#;
+######;#/
+asciiend
+
+
+
+func DrawURock(x,y)
+  >`@x@,@y@,@colorFloor@,ascii
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#-########-
+########-########-
+####-#########-
+asciiend
+
+  >`@x@,@y@,@colorRock@,ascii
+\' ,\ V ' ;#\  v,´
+#`'##\ ,´v###`:/
+######`#######'
+#
+#
+#
+##############_
+###########_.´ `.
+#########,´ \´;  \
+asciiend
+
+  ?illuminated
+    >`@x@,@y@,@colorRockLit@,ascii
+#
+#
+#
+#
+#
+#
+#
+###############`.
+############\´;##\
+asciiend
+
+
+
+func DrawBRRock(x,y)
+  >`@x@,@y@,@colorRock@,ascii
+###################_##|
+#################_; `.|
+###############.´     |
+##############;       |
+#######,##_##(    _   |
+#####,´;.´ ',`   ; `. |
+###_;           /    \|
+#,´ \          ;-.    |
+/    `.^     .´   \   |
+asciiend
+
+
+
+func DrawBLRock(x,y)
+  >`@x@,@y@,@colorRock@,ascii
+|\
+| `. _
+|  ;´ :
+|      ‾\-.
+|       ´  `.
+|  ,-.       \  ,-._  ,-.
+|###################`/  ;.-,
+|###################´  ´   \
+|###################  _    ,`.
+|################### ; `.     \
+|###################´    \  ^  `.
+asciiend
+
+
+
+func DrawFire(x,y)
+  var xt = x+2
+  var xb = x+1
+  var yb = y+1
+  
+  // update timers
+  fTick++
+  fTick = fTick % 5
+  sTick++
+  sTick = sTick % (10 * (rng%2 + 1))
+  LTick++
+  LTick = LTick % (5 * (rng%2 + 1))
+  
+  // on fire tick, advance fire animations and smoke
+  ?fTick = 0
+    fFireT++
+    fFireT = fFireT % 4
+    fFireB++
+    fFireB = fFireB % 6
+    
+    for c : smokeChars
+      c[1] = c[1]-1
+  
+  // on smoke tick, create new smoke particle
+  ?sTick = 0
+    var sx = x + 2 + (rng % 3)
+    smokeChars.Add( [sx, y] )
+    
+    // pop old smoke particles
+    ?smokeChars.Count() > 10
+      smokeChars.RemoveAt(0)
+  
+  // on light tick, flicker lit surfaces
+  ?LTick = 0
+    illuminated = !illuminated
+  
+  // draw smoke
+  for c : smokeChars
+    var cx = c[0]
+    var cy = c[1]
+    >`@cx@,@cy@,#aaaaaa,'
+  
+  // draw rocks
+  ?illuminated
+    >`@x@,@y@,@colorRockLit@,ascii
+#.##•
+O####o
+#o##O
+asciiend
+  :
+    >`@x@,@y@,@colorRock@,ascii
+#.##•
+O####o
+#o##O
+asciiend
+  
+  // draw flame
+  ?fFireT = 0
+    >`@xt@,@y@,#white,ascii
+(`
+asciiend
+  :?fFireT = 1
+    >`@xt@,@y@,#white,ascii
+(,
+asciiend
+  :?fFireT = 2
+    >`@xt@,@y@,#white,ascii
+,)
+asciiend
+  :?fFireT = 3
+    >`@xt@,@y@,#white,ascii
+´)
+asciiend
+
+  ?fFireB = 0
+    >`@xb@,@yb@,#white,ascii
+#',)
+asciiend
+  :?fFireB = 1
+    >`@xb@,@yb@,#white,ascii
+#`.)
+asciiend
+  :?fFireB = 2
+    >`@xb@,@yb@,#white,ascii
+(` #
+asciiend
+  :?fFireB = 3
+    >`@xb@,@yb@,#white,ascii
+#,')
+asciiend
+  :?fFireB = 4
+    >`@xb@,@yb@,#white,ascii
+(.´#
+asciiend
+  :?fFireB = 5
+    >`@xb@,@yb@,#white,ascii
+( ´#
+asciiend
+
+
+
+func DrawAnvil(x,y)
+  >`@x@,@y@,@colorStation@,ascii
+_.──────.__
+`|      !.´
+##)____(
+#'──────'
+asciiend
+
+  ?illuminated
+    >`@x@,@y@,@colorStationLit@,ascii
+####────.__
+########!.´
+#######(
+########'
+asciiend
+
+
+
+func DrawCauldron(x,y)
+  >`@x@,@y@,@colorStation@,ascii
+##,─────,
+#_)‾‾‾‾‾(_
+(/       \)
+#\       /
+#/`--;--´\
+#####
+asciiend
+
+  ?illuminated
+    >`@x@,@y@,@colorStationLit@,ascii
+##,─────,
+asciiend
+
+
+
+func BuildPotion()
+  var r = rng % 8
+  ? r=0
+    txtPotion = "o/"
+  :?r=1
+    txtPotion = "/`"
+  :?r=2
+    txtPotion = "~≈"
+  :?r=3
+    txtPotion = ".:"
+  :?r=4
+    txtPotion = "~:"
+  :?r=5
+    txtPotion = "~o"
+  :?r=6
+    txtPotion = "o:"
+  :?r=7
+    txtPotion = "~/"
+  :
+    txtPotion = "  "
+
+
+
+func DrawTable(x,y)
+  var px = x+7
+  var py = y+1
+  
+  var sx = x+13
+  var sy = y+6
+  
+  // draw table and book
+  >`@x@,@y@,@colorStation@,ascii
+#
+###,───────,
+##/       /║
+#/       /#║
+/       ,
+║‾‾‾‾‾‾‾║###____
+║#######║##/   /
+##########/___//
+#########(≡≡≡≡/
+##########‾‾‾‾
+asciiend
+  
+  ?illuminated
+    >`@x@,@y@,@colorStationLit@,ascii
+#
+####───##──,
+##########/║
+###########║
+#
+############____
+asciiend
+  
+  // draw details
+  >`@sx@,@sy@,@colorHighlight@,Σ
+  
+  >`@px@,@py@,@colorHighlight@,@txtPotion@
+  
+  >`@x@,@y@,@colorHighlight@,ascii
+#######)(
+######(##)
+#######‾‾
+asciiend
+  
+  // only draw moondial stone if you've unlocked it
+  ?moon > 0
+    >`@x@,@y@,@colorHighlight@,ascii
+#
+#
+#
+##,C.
+##`-´
+asciiend
+
+
+
+func DrawWandPile(x,y)
+  ?wands > wandThresh4 | NO_DYN_ITEMS
+    >`@x@,@y@,@colorRock@,ascii
+#########
+########o
+#######/,|o
+#######o─`o\
+#########
+asciiend
+  
+  ?wands > wandThresh3 | NO_DYN_ITEMS
+    >`@x@,@y@,@colorPile@,ascii
+####o
+#o#/o-
+##\`/-o
+#/´o|´o
+o─ |o/´─o
+asciiend
+  :?wands > wandThresh2
+    >`@x@,@y@,@colorPile@,ascii
+#
+#
+######o
+o####o´\,
+#\##/-o`o-
+asciiend
+  :? wands > wandThresh1
+    >`@x@,@y@,@colorPile@,ascii
+#
+#
+####o
+###─o\###o
+########/
+asciiend
+
+func DrawStonePile(x,y)
+  ?stones > stoneThresh4 | NO_DYN_ITEMS
+    >`@x@,@y@,@colorRock@,ascii
+#######.
+######.O8
+#######oO.
+########o8o
+#
+asciiend
+  
+  ?stones > stoneThresh3 | NO_DYN_ITEMS
+    >`@x@,@y@,@colorPile@,ascii
+#
+###8o
+##oO8o.
+#.O8Ooo8
+8oOoo8OoO.
+asciiend
+  :?stones > stoneThresh2
+    >`@x@,@y@,@colorPile@,ascii
+##o
+#.O8
+8oOo##o8
+####o8OoO.
+#
+asciiend
+  :?stones > stoneThresh1
+    >`@x@,@y@,@colorPile@,ascii
+#
+##.
+#O8
+####o8Oo.
+#
+asciiend
+
+
+
+func DrawRunePile(x,y)
+  ?runes > runeThresh1 | NO_DYN_ITEMS
+    >`@x@,@y@,@colorRock@,ascii
+#####__.__
+####│`````│
+asciiend
+
+  ?runes > runeThresh3 | NO_DYN_ITEMS
+    >`@x@,@y@,@colorPile@,ascii
+#####*❤
+#####❄∞φ❤
+####❤φ∞*❄∞,
+#❤φ│‾‾'‾‾││#
+❄φ*└─────┘´φ❤
+####∞####∞❄∞φ*
+######φ
+asciiend
+  :?runes > runeThresh2
+    >`@x@,@y@,@colorPile@,ascii
+#
+#####❄∞φ❤
+####❤φ∞*❄∞,
+###│‾‾'‾‾││
+###└─────┘´#❤
+####∞
+######φ
+asciiend
+  :?runes > runeThresh1
+    >`@x@,@y@,@colorPile@,ascii
+#
+#
+####❤φ *❄∞,
+###│‾‾'‾‾││
+###└─────┘´
+asciiend
+
+

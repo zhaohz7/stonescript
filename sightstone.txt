@@ -1,0 +1,2 @@
+?key = ability1 | key = ability1Begin
+	equipL sight stone

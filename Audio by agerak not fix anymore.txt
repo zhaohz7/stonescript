@@ -1,0 +1,1323 @@
+//Audio Soundboard
+//
+// V1.0 by Agerak, by request of Mind Stone Thief
+// V1.1 added scroll acceleration
+//
+// set the output coordinates below
+// there will be one entry above and one below as well
+// use up and down to scroll through a list of sounds
+// press left and right simultaneously to play the currently selected sound
+// default key rates are 5f for scrolling and 20f for playing to prevent over looping
+// these can also be changed below
+
+var x // X coordinate output
+x=10
+var y // y coordinate output
+y=10
+var scroll // scroll limit timer (frames) [MUST BE POSITIVE]
+scroll=5
+var limit // playback limit timer (frames) [MUST BE NEGATIVE]
+limit=-20
+
+// Below is where the magic happens, enjoy
+
+var index=0
+var timer=0
+var soundlist=[
+"buy",
+"click",
+"confirm",
+"soul_stone",
+"sword_cast",
+"sword_hit",
+"wand_cast",
+"wand_hit",
+"player_kick",
+"player_punch",
+"stone_throw_cast",
+"stone_throw_hit",
+"grappling_cast",
+"grappling_hit",
+"grappling_idle",
+"hatchet_cast",
+"hatchet_hit",
+"shovel_cast",
+"torch_cast",
+"torch_hit",
+"torch_idle",
+"pickup_stone",
+"pickup_wood",
+"pickup_tar",
+"pickup_success",
+"soul_stone_drop",
+"wand_drop",
+"key_drop",
+"cross_deadwood_bump",
+"cross_deadwood_row",
+"cross_deadwood_splash",
+"ui_starfirst",
+"ui_starnew",
+"ui_starold1",
+"ui_starold2",
+"ui_starold3",
+"ui_starold4",
+"bronze_gate_open",
+"prompt_choice",
+"waterfall_hook_hit",
+"waterfall_splash",
+"haunted_gate_key_bounce_1",
+"haunted_gate_key_bounce_2",
+"haunted_gate_key_bounce_3",
+"haunted_gate_opening",
+"haunted_gate_point_lost",
+"haunted_gate_key_into_gate",
+"haunted_gate_shuffle",
+"haunted_gate_shuffle_fast",
+"haunted_gate_torch_off",
+"haunted_gate_torch_on",
+"haunted_gate_try_to_open",
+"paint_splat",
+"waterfall_land",
+"waterfall_rope_grab",
+"waterfall_rope_swing",
+"skeleton_boss_death",
+"skeleton_boss_legs_die",
+"spider_boss_death",
+"tree_boss_death",
+"mushroom_boss_death",
+"tree_boss_attack",
+"tree_boss_awake",
+"tree_boss_idle",
+"tree_boss_spike",
+"spider_boss_attack",
+"player_hit",
+"mushroom_boss_awake",
+"mushroom_boss_punch",
+"mushroom_boss_shoot",
+"skeleton_boss_arm1",
+"skeleton_boss_arm2",
+"skeleton_boss_attack",
+"skeleton_boss_idle",
+"skeleton_boss_bone_bounce",
+"skeleton_boss_arm_woosh",
+"equip",
+"unequip",
+"bat_attack_small",
+"bat_death_small",
+"bat_wing",
+"bat_wing_small",
+"spider_attack",
+"spider_death",
+"spider_death_small",
+"spider_eggs_spawn",
+"spider_walk",
+"scarab_awake",
+"scarab_bite",
+"scarab_death",
+"scarab_horn",
+"scarab_wings",
+"mosquito_attack",
+"mosquito_death",
+"mosquito_loop",
+"bronze_gate_locked",
+"bat_attack",
+"bat_death",
+"progress_1",
+"progress_2",
+"progress_3",
+"progress_4",
+"progress_5",
+"progress_6",
+"progress_7",
+"progress_8",
+"progress_9",
+"life_gain",
+"player_death",
+"logo_full",
+"logo_short",
+"smithy_hammer",
+"sightstone_cast",
+"error",
+"ranting_tree_halt",
+"treasure_close",
+"treasure_item_pop",
+"treasure_item_show",
+"treasure_open",
+"skeleton_boss_awake",
+"skeleton_boss_hand_slam",
+"level_up",
+"insta_kill",
+"spider_boss_awake",
+"metal_drop",
+"treasure_drop",
+"smithy_hammer_fail",
+"xp_tick",
+"crossbow_cast",
+"crossbow_hit",
+"wand_aether_cast",
+"wand_aether_hit",
+"wand_air_cast",
+"wand_air_hit",
+"wand_fire_cast",
+"wand_fire_hit",
+"wand_ice_cast",
+"wand_ice_hit",
+"wand_poison_cast",
+"wand_poison_hit",
+"wand_vigor_cast",
+"wand_vigor_hit",
+"skeleton_boss_arm_reconnect",
+"skeleton_boss_summon_minion",
+"mushroom_boss_fat_slam",
+"pickup_bronze",
+"temple_npc_chant",
+"temple_npc_clear_throat",
+"temple_npc_talk",
+"first_controller",
+"slave_npc",
+"slave_outro_chatter",
+"slave_outro_voice",
+"haunted_gate_npc_voice",
+"slave_outro_transition",
+"bronze_guardian_attack1",
+"bronze_guardian_attack2",
+"bronze_guardian_attack3",
+"bronze_guardian_death",
+"bronze_guardian_helmet",
+"bronze_guardian_power_up",
+"bronze_guardian_steps",
+"ant_attack",
+"ant_death",
+"ant_walk",
+"snail_attack",
+"snail_attack_small",
+"snail_death",
+"snail_death_small",
+"snail_walk",
+"ghost_death",
+"ghost_death_small",
+"skeletimmy_death",
+"skeletony_death",
+"skeletimmy_attack",
+"skeletony_attack",
+"skeletony_awake_a",
+"skeletony_awake_b",
+"skeletony_walk",
+"ghost_loop",
+"ghost_loop_small",
+"ghost_attack",
+"ghost_attack_small",
+"controller_death",
+"controller_whip_attack",
+"controller_whip_hit",
+"dominotaur_death",
+"dominotaur_whip_attack",
+"dominotaur_whip_hit",
+"mine_walker_death",
+"mine_walker_attack_a",
+"mine_walker_attack_b",
+"mine_walker_attack_hit",
+"mine_walker_awake",
+"mine_walker_step",
+"fire_elemental_attack",
+"fire_elemental_attack_hit",
+"fire_elemental_awake",
+"fire_elemental_death",
+"mine_walker_helmet_break",
+"ice_elemental_attack",
+"ice_elemental_attack_hit",
+"ice_elemental_awake",
+"ice_elemental_death",
+"ki_eater_attack",
+"ki_eater_attack_hit",
+"ki_eater_awake",
+"ki_eater_death",
+"ki_gobbler_attack",
+"ki_gobbler_attack_hit",
+"ki_gobbler_awake",
+"ki_gobbler_death",
+"ki_slerper_attack",
+"ki_slerper_attack_hit",
+"ki_slerper_awake",
+"ki_slerper_death",
+"bell_ringer_attack",
+"bell_ringer_attack_hit",
+"cult_guard_attack",
+"cult_guard_attack_hit",
+"cult_marksman_attack",
+"cult_marksman_attack_hit",
+"cult_sorcerer_attack",
+"cult_sorcerer_attack_hit",
+"cultist_death",
+"flying_serpent_loop",
+"poison_adept_attack",
+"poison_adept_attack_hit",
+"serpent_attack",
+"serpent_death",
+"serpent_handler_release",
+"serpent_hiss",
+"serpent_slither",
+"worm_rider_hop",
+"booklet_open",
+"booklet_turn_page",
+"booklet_close",
+"hammer_cast",
+"hammer_hit",
+"shield_dash",
+"fissure_break_apart",
+"fissure_unmake",
+"mindstone_off",
+"mindstone_on",
+"triskelion_fuse",
+"potion_berserk",
+"potion_cleansing",
+"potion_defensive",
+"potion_experience",
+"potion_healing",
+"potion_invisibility",
+"potion_lightning",
+"potion_lucky",
+"potion_strength",
+"potion_vampiric",
+"bronze_guardian_pulling_hammer",
+"bronze_guardian_removing_hammer",
+"bronze_guardian_turbine",
+"bronze_guardian_ears_ring",
+"bronze_guardian_fuse",
+"bronze_guardian_attack4",
+"yeti_attack",
+"yeti_attack_flick",
+"yeti_attack_hit",
+"yeti_awake_blow",
+"yeti_awake_explosion",
+"yeti_awake_inhale",
+"yeti_awake_lick",
+"yeti_blow",
+"yeti_blow_ice_wall",
+"yeti_death",
+"yeti_inhale",
+"yeti_inhale_lick",
+"nagaraja_awake_roar",
+"nagaraja_awake_swallow",
+"nagaraja_awake_tongue_1",
+"nagaraja_awake_tongue_2",
+"nagaraja_dead",
+"nagaraja_poison_attack",
+"nagaraja_poison_attack_hit",
+"nagaraja_wail",
+"nagaraja_wail_brick",
+"nagaraja_attack_eat",
+"nagaraja_attack_lick",
+"nagaraja_attack_swallow",
+"nagaraja_tongue_damaged",
+"nagaraja_tongue_lift",
+"nagaraja_tongue_smell",
+"nagaraja_tongue_wrap",
+"bearer3_talk",
+"bearer_attack",
+"bearer_attack_hit",
+"bearer_death",
+"bearer_stealing",
+"bearer_super_attack",
+"bearer_scream",
+"bearer4_talk",
+"bearer4_talk_evolving",
+"bearer_evolving",
+"elementalist_aether_attack",
+"elementalist_aether_attack_hit",
+"elementalist_aether_blink",
+"elementalist_death",
+"elementalist_fire_attack",
+"elementalist_fire_attack_hit",
+"elementalist_fire_blink",
+"elementalist_ice_attack",
+"elementalist_ice_attack_hit",
+"elementalist_ice_blink",
+"elementalist_poison_attack",
+"elementalist_poison_attack_hit",
+"elementalist_poison_blink",
+"elementalist_vigor_attack",
+"elementalist_vigor_attack_hit",
+"elementalist_vigor_blink",
+"bearer5_talk",
+"elementalist_evolving",
+"perfected_attack",
+"perfected_attack_hit",
+"perfected_death",
+"perfected_defense",
+"perfected_energy_ball",
+"perfected_energy_ball_hit",
+"perfected_summon",
+"perfected_talk",
+"epilogue_devolving",
+"epliogue_player_evolves",
+"epilogue_talk",
+"devolved_talk",
+"dysangelos_guidance",
+"dysangelos_guidance_1",
+"dysangelos_guidance_2",
+"dysangelos_guidance_3",
+"dysangelos_intro_talk",
+"ranting_tree_talk_halt",
+"ranting_tree_talk_again",
+"ranting_tree_talk_how_dare",
+"ranting_tree_talk_avenge",
+"ranting_tree_talk_get_out",
+"ranting_tree_talk_impressive",
+"ranting_tree_talk_very_well",
+"hans_talk_intro",
+"hans_talk_reward",
+"scotty_a_pleasure",
+"scotty_a_worthy_opponent",
+"scotty_deuced",
+"scotty_failte_back",
+"scotty_getting_good",
+"scotty_grr",
+"scotty_guess_which",
+"scotty_intro",
+"scotty_lets_harden",
+"scotty_make_ye_guess",
+"scotty_noo_jist",
+"scotty_perhaps_the_rules",
+"scotty_pick_some_treasure",
+"scotty_shall_we_up",
+"scotty_we_have_wee_use",
+"scotty_well_met",
+"scotty_well_then",
+"scotty_wizard",
+"scotty_wrong_choice",
+"scotty_hell_be_back",
+"scotty_out_of_treasure",
+"scotty_there_he_is",
+"nagaraja_choir",
+"mushroom_boss_split",
+"ant_hill",
+"treasure_drop_common",
+"treasure_drop_epic",
+"treasure_drop_giant",
+"treasure_drop_humble",
+"treasure_drop_rare",
+"dominotaur_awake",
+"fire_geyser",
+"ice_pillar",
+"treasure_item_cyan",
+"treasure_item_yellow",
+"treasure_item_green",
+"treasure_item_blue",
+"treasure_item_red",
+"treasure_item_rainbow",
+"ki_slerper_walk",
+"mindstone_found",
+"ghost_tomb_death",
+"perfected_fly_start",
+"perfected_fly_loop",
+"perfected_fly_end",
+"shop_door_open",
+"shop_door_enter",
+"scorpion_death",
+"bomb_cart_explosion",
+"bomb_cart_fuse",
+"bomb_cart_move",
+"bronze_gate_close",
+"poison_powerup",
+"acronian_cultist_power_up",
+"giant_ice_elemental_attack",
+"scout_dialog",
+"morel_punch",
+"falling_stonefolk",
+"scout_arrives",
+"scout_leaves",
+"scout_wing",
+"scout_focus",
+"dog_bark",
+"frog",
+"lost_item_boost",
+"treasure_item_lost",
+"blade_glow",
+"blade_pallas_attack",
+"blade_raise",
+"blade_drag",
+"pallas_voice",
+"boo_voice",
+"ranting_tree_talk_extra"
+]
+
+?timer>0
+ timer--
+:?timer<0
+ timer++
+
+var accel=0
+
+?key=down|key=up
+ ?accel<scroll*30
+  accel++
+
+?key=upEnd|key=downEnd
+ accel=0
+
+?key=down&timer<=0
+ timer=scroll-accel/30
+ index--
+ ?index<0
+  index=soundlist.Count()-1
+
+?key=up&timer<=0
+ timer=scroll-accel/30
+ index++
+ ?index>=soundlist.Count()
+  index=0
+
+var check = import UI\Toggler
+func Output(x,y,color,a)
+  ?check.toggler()
+    >`@x@,@y@,@color@,@a@
+
+Output(x,y,#ffffff,index)
+//Output(x-3,y,#ffffff,timer)
+
+Output(x+4,y,#ffffff,soundlist[index])
+?index>0&index<soundlist.Count()-1
+  Output(x+1,y-1,#666666,"▲  "+soundlist[index+1])
+  Output(x+1,y+1,#666666,"▼  "+soundlist[index-1])
+:?index=0
+  Output(x+1,y-1,#666666,"▲  "+soundlist[index+1])
+  Output(x+1,y+1,#666666,"▼  "+soundlist[soundlist.Count()-1])
+:?index=soundlist.Count()-1
+  Output(x+1,y-1,#666666,"▲  "+soundlist[0])
+  Output(x+1,y+1,#666666,"▼  "+soundlist[index-1])
+
+?key=left&key=right&timer>=0
+ timer=limit
+ ?index=0
+  play buy
+ :?index=1
+  play click
+ :?index=2
+  play confirm
+ :?index=3
+  play soul_stone
+ :?index=4
+  play sword_cast
+ :?index=5
+  play sword_hit
+ :?index=6
+  play wand_cast
+ :?index=7
+  play wand_hit
+ :?index=8
+  play player_kick
+ :?index=9
+  play player_punch
+ :?index=10
+  play stone_throw_cast
+ :?index=11
+  play stone_throw_hit
+ :?index=12
+  play grappling_cast
+ :?index=13
+  play grappling_hit
+ :?index=14
+  play grappling_idle
+ :?index=15
+  play hatchet_cast
+ :?index=16
+  play hatchet_hit
+ :?index=17
+  play shovel_cast
+ :?index=18
+  play torch_cast
+ :?index=19
+  play torch_hit
+ :?index=20
+  play torch_idle
+ :?index=21
+  play pickup_stone
+ :?index=22
+  play pickup_wood
+ :?index=23
+  play pickup_tar
+ :?index=24
+  play pickup_success
+ :?index=25
+  play soul_stone_drop
+ :?index=26
+  play wand_drop
+ :?index=27
+  play key_drop
+ :?index=28
+  play cross_deadwood_bump
+ :?index=29
+  play cross_deadwood_row
+ :?index=30
+  play cross_deadwood_splash
+ :?index=31
+  play ui_starfirst
+ :?index=32
+  play ui_starnew
+ :?index=33
+  play ui_starold1
+ :?index=34
+  play ui_starold2
+ :?index=35
+  play ui_starold3
+ :?index=36
+  play ui_starold4
+ :?index=37
+  play bronze_gate_open
+ :?index=38
+  play prompt_choice
+ :?index=39
+  play waterfall_hook_hit
+ :?index=40
+  play waterfall_splash
+ :?index=41
+  play haunted_gate_key_bounce_1
+ :?index=42
+  play haunted_gate_key_bounce_2
+ :?index=43
+  play haunted_gate_key_bounce_3
+ :?index=44
+  play haunted_gate_opening
+ :?index=45
+  play haunted_gate_point_lost
+ :?index=46
+  play haunted_gate_key_into_gate
+ :?index=47
+  play haunted_gate_shuffle
+ :?index=48
+  play haunted_gate_shuffle_fast
+ :?index=49
+  play haunted_gate_torch_off
+ :?index=50
+  play haunted_gate_torch_on
+ :?index=51
+  play haunted_gate_try_to_open
+ :?index=52
+  play paint_splat
+ :?index=53
+  play waterfall_land
+ :?index=54
+  play waterfall_rope_grab
+ :?index=55
+  play waterfall_rope_swing
+ :?index=56
+  play skeleton_boss_death
+ :?index=57
+  play skeleton_boss_legs_die
+ :?index=58
+  play spider_boss_death
+ :?index=59
+  play tree_boss_death
+ :?index=60
+  play mushroom_boss_death
+ :?index=61
+  play tree_boss_attack
+ :?index=62
+  play tree_boss_awake
+ :?index=63
+  play tree_boss_idle
+ :?index=64
+  play tree_boss_spike
+ :?index=65
+  play spider_boss_attack
+ :?index=66
+  play player_hit
+ :?index=67
+  play mushroom_boss_awake
+ :?index=68
+  play mushroom_boss_punch
+ :?index=69
+  play mushroom_boss_shoot
+ :?index=70
+  play skeleton_boss_arm1
+ :?index=71
+  play skeleton_boss_arm2
+ :?index=72
+  play skeleton_boss_attack
+ :?index=73
+  play skeleton_boss_idle
+ :?index=74
+  play skeleton_boss_bone_bounce
+ :?index=75
+  play skeleton_boss_arm_woosh
+ :?index=76
+  play equip
+ :?index=77
+  play unequip
+ :?index=78
+  play bat_attack_small
+ :?index=79
+  play bat_death_small
+ :?index=80
+  play bat_wing
+ :?index=81
+  play bat_wing_small
+ :?index=82
+  play spider_attack
+ :?index=83
+  play spider_death
+ :?index=84
+  play spider_death_small
+ :?index=85
+  play spider_eggs_spawn
+ :?index=86
+  play spider_walk
+ :?index=87
+  play scarab_awake
+ :?index=88
+  play scarab_bite
+ :?index=89
+  play scarab_death
+ :?index=90
+  play scarab_horn
+ :?index=91
+  play scarab_wings
+ :?index=92
+  play mosquito_attack
+ :?index=93
+  play mosquito_death
+ :?index=94
+  play mosquito_loop
+ :?index=95
+  play bronze_gate_locked
+ :?index=96
+  play bat_attack
+ :?index=97
+  play bat_death
+ :?index=98
+  play progress_1
+ :?index=99
+  play progress_2
+ :?index=100
+  play progress_3
+ :?index=101
+  play progress_4
+ :?index=102
+  play progress_5
+ :?index=103
+  play progress_6
+ :?index=104
+  play progress_7
+ :?index=105
+  play progress_8
+ :?index=106
+  play progress_9
+ :?index=107
+  play life_gain
+ :?index=108
+  play player_death
+ :?index=109
+  play logo_full
+ :?index=110
+  play logo_short
+ :?index=111
+  play smithy_hammer
+ :?index=112
+  play sightstone_cast
+ :?index=113
+  play error
+ :?index=114
+  play ranting_tree_halt
+ :?index=115
+  play treasure_close
+ :?index=116
+  play treasure_item_pop
+ :?index=117
+  play treasure_item_show
+ :?index=118
+  play treasure_open
+ :?index=119
+  play skeleton_boss_awake
+ :?index=120
+  play skeleton_boss_hand_slam
+ :?index=121
+  play level_up
+ :?index=122
+  play insta_kill
+ :?index=123
+  play spider_boss_awake
+ :?index=124
+  play metal_drop
+ :?index=125
+  play treasure_drop
+ :?index=126
+  play smithy_hammer_fail
+ :?index=127
+  play xp_tick
+ :?index=128
+  play crossbow_cast
+ :?index=129
+  play crossbow_hit
+ :?index=130
+  play wand_aether_cast
+ :?index=131
+  play wand_aether_hit
+ :?index=132
+  play wand_air_cast
+ :?index=133
+  play wand_air_hit
+ :?index=134
+  play wand_fire_cast
+ :?index=135
+  play wand_fire_hit
+ :?index=136
+  play wand_ice_cast
+ :?index=137
+  play wand_ice_hit
+ :?index=138
+  play wand_poison_cast
+ :?index=139
+  play wand_poison_hit
+ :?index=140
+  play wand_vigor_cast
+ :?index=141
+  play wand_vigor_hit
+ :?index=142
+  play skeleton_boss_arm_reconnect
+ :?index=143
+  play skeleton_boss_summon_minion
+ :?index=144
+  play mushroom_boss_fat_slam
+ :?index=145
+  play pickup_bronze
+ :?index=146
+  play temple_npc_chant
+ :?index=147
+  play temple_npc_clear_throat
+ :?index=148
+  play temple_npc_talk
+ :?index=149
+  play first_controller
+ :?index=150
+  play slave_npc
+ :?index=151
+  play slave_outro_chatter
+ :?index=152
+  play slave_outro_voice
+ :?index=153
+  play haunted_gate_npc_voice
+ :?index=154
+  play slave_outro_transition
+ :?index=155
+  play bronze_guardian_attack1
+ :?index=156
+  play bronze_guardian_attack2
+ :?index=157
+  play bronze_guardian_attack3
+ :?index=158
+  play bronze_guardian_death
+ :?index=159
+  play bronze_guardian_helmet
+ :?index=160
+  play bronze_guardian_power_up
+ :?index=161
+  play bronze_guardian_steps
+ :?index=162
+  play ant_attack
+ :?index=163
+  play ant_death
+ :?index=164
+  play ant_walk
+ :?index=165
+  play snail_attack
+ :?index=166
+  play snail_attack_small
+ :?index=167
+  play snail_death
+ :?index=168
+  play snail_death_small
+ :?index=169
+  play snail_walk
+ :?index=170
+  play ghost_death
+ :?index=171
+  play ghost_death_small
+ :?index=172
+  play skeletimmy_death
+ :?index=173
+  play skeletony_death
+ :?index=174
+  play skeletimmy_attack
+ :?index=175
+  play skeletony_attack
+ :?index=176
+  play skeletony_awake_a
+ :?index=177
+  play skeletony_awake_b
+ :?index=178
+  play skeletony_walk
+ :?index=179
+  play ghost_loop
+ :?index=180
+  play ghost_loop_small
+ :?index=181
+  play ghost_attack
+ :?index=182
+  play ghost_attack_small
+ :?index=183
+  play controller_death
+ :?index=184
+  play controller_whip_attack
+ :?index=185
+  play controller_whip_hit
+ :?index=186
+  play dominotaur_death
+ :?index=187
+  play dominotaur_whip_attack
+ :?index=188
+  play dominotaur_whip_hit
+ :?index=189
+  play mine_walker_death
+ :?index=190
+  play mine_walker_attack_a
+ :?index=191
+  play mine_walker_attack_b
+ :?index=192
+  play mine_walker_attack_hit
+ :?index=193
+  play mine_walker_awake
+ :?index=194
+  play mine_walker_step
+ :?index=195
+  play fire_elemental_attack
+ :?index=196
+  play fire_elemental_attack_hit
+ :?index=197
+  play fire_elemental_awake
+ :?index=198
+  play fire_elemental_death
+ :?index=199
+  play mine_walker_helmet_break
+ :?index=200
+  play ice_elemental_attack
+ :?index=201
+  play ice_elemental_attack_hit
+ :?index=202
+  play ice_elemental_awake
+ :?index=203
+  play ice_elemental_death
+ :?index=204
+  play ki_eater_attack
+ :?index=205
+  play ki_eater_attack_hit
+ :?index=206
+  play ki_eater_awake
+ :?index=207
+  play ki_eater_death
+ :?index=208
+  play ki_gobbler_attack
+ :?index=209
+  play ki_gobbler_attack_hit
+ :?index=210
+  play ki_gobbler_awake
+ :?index=211
+  play ki_gobbler_death
+ :?index=212
+  play ki_slerper_attack
+ :?index=213
+  play ki_slerper_attack_hit
+ :?index=214
+  play ki_slerper_awake
+ :?index=215
+  play ki_slerper_death
+ :?index=216
+  play bell_ringer_attack
+ :?index=217
+  play bell_ringer_attack_hit
+ :?index=218
+  play cult_guard_attack
+ :?index=219
+  play cult_guard_attack_hit
+ :?index=220
+  play cult_marksman_attack
+ :?index=221
+  play cult_marksman_attack_hit
+ :?index=222
+  play cult_sorcerer_attack
+ :?index=223
+  play cult_sorcerer_attack_hit
+ :?index=224
+  play cultist_death
+ :?index=225
+  play flying_serpent_loop
+ :?index=226
+  play poison_adept_attack
+ :?index=227
+  play poison_adept_attack_hit
+ :?index=228
+  play serpent_attack
+ :?index=229
+  play serpent_death
+ :?index=230
+  play serpent_handler_release
+ :?index=231
+  play serpent_hiss
+ :?index=232
+  play serpent_slither
+ :?index=233
+  play worm_rider_hop
+ :?index=234
+  play booklet_open
+ :?index=235
+  play booklet_turn_page
+ :?index=236
+  play booklet_close
+ :?index=237
+  play hammer_cast
+ :?index=238
+  play hammer_hit
+ :?index=239
+  play shield_dash
+ :?index=240
+  play fissure_break_apart
+ :?index=241
+  play fissure_unmake
+ :?index=242
+  play mindstone_off
+ :?index=243
+  play mindstone_on
+ :?index=244
+  play triskelion_fuse
+ :?index=245
+  play potion_berserk
+ :?index=246
+  play potion_cleansing
+ :?index=247
+  play potion_defensive
+ :?index=248
+  play potion_experience
+ :?index=249
+  play potion_healing
+ :?index=250
+  play potion_invisibility
+ :?index=251
+  play potion_lightning
+ :?index=252
+  play potion_lucky
+ :?index=253
+  play potion_strength
+ :?index=254
+  play potion_vampiric
+ :?index=255
+  play bronze_guardian_pulling_hammer
+ :?index=256
+  play bronze_guardian_removing_hammer
+ :?index=257
+  play bronze_guardian_turbine
+ :?index=258
+  play bronze_guardian_ears_ring
+ :?index=259
+  play bronze_guardian_fuse
+ :?index=260
+  play bronze_guardian_attack4
+ :?index=261
+  play yeti_attack
+ :?index=262
+  play yeti_attack_flick
+ :?index=263
+  play yeti_attack_hit
+ :?index=264
+  play yeti_awake_blow
+ :?index=265
+  play yeti_awake_explosion
+ :?index=266
+  play yeti_awake_inhale
+ :?index=267
+  play yeti_awake_lick
+ :?index=268
+  play yeti_blow
+ :?index=269
+  play yeti_blow_ice_wall
+ :?index=270
+  play yeti_death
+ :?index=271
+  play yeti_inhale
+ :?index=272
+  play yeti_inhale_lick
+ :?index=273
+  play nagaraja_awake_roar
+ :?index=274
+  play nagaraja_awake_swallow
+ :?index=275
+  play nagaraja_awake_tongue_1
+ :?index=276
+  play nagaraja_awake_tongue_2
+ :?index=277
+  play nagaraja_dead
+ :?index=278
+  play nagaraja_poison_attack
+ :?index=279
+  play nagaraja_poison_attack_hit
+ :?index=280
+  play nagaraja_wail
+ :?index=281
+  play nagaraja_wail_brick
+ :?index=282
+  play nagaraja_attack_eat
+ :?index=283
+  play nagaraja_attack_lick
+ :?index=284
+  play nagaraja_attack_swallow
+ :?index=285
+  play nagaraja_tongue_damaged
+ :?index=286
+  play nagaraja_tongue_lift
+ :?index=287
+  play nagaraja_tongue_smell
+ :?index=288
+  play nagaraja_tongue_wrap
+ :?index=289
+  play bearer3_talk
+ :?index=290
+  play bearer_attack
+ :?index=291
+  play bearer_attack_hit
+ :?index=292
+  play bearer_death
+ :?index=293
+  play bearer_stealing
+ :?index=294
+  play bearer_super_attack
+ :?index=295
+  play bearer_scream
+ :?index=296
+  play bearer4_talk
+ :?index=297
+  play bearer4_talk_evolving
+ :?index=298
+  play bearer_evolving
+ :?index=299
+  play elementalist_aether_attack
+ :?index=300
+  play elementalist_aether_attack_hit
+ :?index=301
+  play elementalist_aether_blink
+ :?index=302
+  play elementalist_death
+ :?index=303
+  play elementalist_fire_attack
+ :?index=304
+  play elementalist_fire_attack_hit
+ :?index=305
+  play elementalist_fire_blink
+ :?index=306
+  play elementalist_ice_attack
+ :?index=307
+  play elementalist_ice_attack_hit
+ :?index=308
+  play elementalist_ice_blink
+ :?index=309
+  play elementalist_poison_attack
+ :?index=310
+  play elementalist_poison_attack_hit
+ :?index=311
+  play elementalist_poison_blink
+ :?index=312
+  play elementalist_vigor_attack
+ :?index=313
+  play elementalist_vigor_attack_hit
+ :?index=314
+  play elementalist_vigor_blink
+ :?index=315
+  play bearer5_talk
+ :?index=316
+  play elementalist_evolving
+ :?index=317
+  play perfected_attack
+ :?index=318
+  play perfected_attack_hit
+ :?index=319
+  play perfected_death
+ :?index=320
+  play perfected_defense
+ :?index=321
+  play perfected_energy_ball
+ :?index=322
+  play perfected_energy_ball_hit
+ :?index=323
+  play perfected_summon
+ :?index=324
+  play perfected_talk
+ :?index=325
+  play epilogue_devolving
+ :?index=326
+  play epliogue_player_evolves
+ :?index=327
+  play epilogue_talk
+ :?index=328
+  play devolved_talk
+ :?index=329
+  play dysangelos_guidance
+ :?index=330
+  play dysangelos_guidance_1
+ :?index=331
+  play dysangelos_guidance_2
+ :?index=332
+  play dysangelos_guidance_3
+ :?index=333
+  play dysangelos_intro_talk
+ :?index=334
+  play ranting_tree_talk_halt
+ :?index=335
+  play ranting_tree_talk_again
+ :?index=336
+  play ranting_tree_talk_how_dare
+ :?index=337
+  play ranting_tree_talk_avenge
+ :?index=338
+  play ranting_tree_talk_get_out
+ :?index=339
+  play ranting_tree_talk_impressive
+ :?index=340
+  play ranting_tree_talk_very_well
+ :?index=341
+  play hans_talk_intro
+ :?index=342
+  play hans_talk_reward
+ :?index=343
+  play scotty_a_pleasure
+ :?index=344
+  play scotty_a_worthy_opponent
+ :?index=345
+  play scotty_deuced
+ :?index=346
+  play scotty_failte_back
+ :?index=347
+  play scotty_getting_good
+ :?index=348
+  play scotty_grr
+ :?index=349
+  play scotty_guess_which
+ :?index=350
+  play scotty_intro
+ :?index=351
+  play scotty_lets_harden
+ :?index=352
+  play scotty_make_ye_guess
+ :?index=353
+  play scotty_noo_jist
+ :?index=354
+  play scotty_perhaps_the_rules
+ :?index=355
+  play scotty_pick_some_treasure
+ :?index=356
+  play scotty_shall_we_up
+ :?index=357
+  play scotty_we_have_wee_use
+ :?index=358
+  play scotty_well_met
+ :?index=359
+  play scotty_well_then
+ :?index=360
+  play scotty_wizard
+ :?index=361
+  play scotty_wrong_choice
+ :?index=362
+  play scotty_hell_be_back
+ :?index=363
+  play scotty_out_of_treasure
+ :?index=364
+  play scotty_there_he_is
+ :?index=365
+  play nagaraja_choir
+ :?index=366
+  play mushroom_boss_split
+ :?index=367
+  play ant_hill
+ :?index=368
+  play treasure_drop_common
+ :?index=369
+  play treasure_drop_epic
+ :?index=370
+  play treasure_drop_giant
+ :?index=371
+  play treasure_drop_humble
+ :?index=372
+  play treasure_drop_rare
+ :?index=373
+  play dominotaur_awake
+ :?index=374
+  play fire_geyser
+ :?index=375
+  play ice_pillar
+ :?index=376
+  play treasure_item_cyan
+ :?index=377
+  play treasure_item_yellow
+ :?index=378
+  play treasure_item_green
+ :?index=379
+  play treasure_item_blue
+ :?index=380
+  play treasure_item_red
+ :?index=381
+  play treasure_item_rainbow
+ :?index=382
+  play ki_slerper_walk
+ :?index=383
+  play mindstone_found
+ :?index=384
+  play ghost_tomb_death
+ :?index=385
+  play perfected_fly_start
+ :?index=386
+  play perfected_fly_loop
+ :?index=387
+  play perfected_fly_end
+ :?index=388
+  play shop_door_open
+ :?index=389
+  play shop_door_enter
+ :?index=390
+  play scorpion_death
+ :?index=391
+  play bomb_cart_explosion
+ :?index=392
+  play bomb_cart_fuse
+ :?index=393
+  play bomb_cart_move
+ :?index=394
+  play bronze_gate_close
+ :?index=395
+  play poison_powerup
+ :?index=396
+  play acronian_cultist_power_up
+ :?index=397
+  play giant_ice_elemental_attack
+ :?index=398
+  play scout_dialog
+ :?index=399
+  play morel_punch
+ :?index=400
+  play falling_stonefolk
+ :?index=401
+  play scout_arrives
+ :?index=402
+  play scout_leaves
+ :?index=403
+  play scout_wing
+ :?index=404
+  play scout_focus
+ :?index=405
+  play dog_bark
+ :?index=406
+  play frog
+ :?index=407
+  play lost_item_boost
+ :?index=408
+  play treasure_item_lost
+ :?index=409
+  play blade_glow
+ :?index=410
+  play blade_pallas_attack
+ :?index=411
+  play blade_raise
+ :?index=412
+  play blade_drag
+ :?index=413
+  play pallas_voice
+ :?index=414
+  play boo_voice
+ :?index=415
+  play ranting_tree_talk_extra

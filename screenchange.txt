@@ -1,0 +1,7 @@
+?key = leftBegin
+  screen.Previous()
+:?key = rightBegin
+  screen.Next()
+
+?key = upBegin
+  screen.ResetOffset()

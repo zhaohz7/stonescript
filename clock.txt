@@ -1,0 +1,9 @@
+var MonthInLetters
+var monthletter
+
+MonthInLetters = [January, February, March, April, May, June, July, August, September, October, November, December]
+monthletter = MonthInLetters[time.month-1]
+
+>`40,21,Today is the\n@time.day@. of @monthletter@ @time.year@
+>`40,20,@time.hour@:@time.minute@:@time.second@
+

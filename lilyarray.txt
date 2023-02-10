@@ -1,0 +1,227 @@
+/*
+array test
+*/
+ui.root.visible = true
+ui.root.style = 0
+
+var LotuAry = [0,0,0,0,0,0,0,0]
+
+var LilyLeave0
+var LilyLeave1
+var LilyLeave2
+var LilyLeave3
+var LilyLeave4
+var LilyLeave5
+var LilyLeave6
+var LilyLeave7
+
+?loc.begin
+	ambient.Stop()
+
+	LilyLeave0 = ui.AddAnim(ascii
+####_
+#,´   `.
+/       \
+\       /
+#\/|..-´
+%%
+#
+asciiend)
+	LilyLeave0.anchor = center_left
+	LilyLeave0.dock = center_left
+	LilyLeave0.x = 0
+	LilyLeave0.y = 6
+	LilyLeave0.w = 10
+	LilyLeave0.h = 5
+	LilyLeave0.pivotX = 0
+	LilyLeave0.pivotY = 0
+	LilyLeave0.color = #618a3d
+	LilyLeave0.duration = 0
+	LilyLeave0.frame = 1
+	LilyLeave0.loop = false
+	LilyLeave0.flipX = false
+	LilyLeave0.flipY = false
+	LilyLeave0.playOnStart = false
+	LilyLeave0.Stop()
+
+	LilyLeave1 = ui.AddAnim(ascii
+####_
+#,´   `.
+/       \
+\       /
+#\/|..-´
+%%
+#
+asciiend)
+	LilyLeave1.anchor = center_left
+	LilyLeave1.dock = center_left
+	LilyLeave1.x = 10
+	LilyLeave1.y = 6
+	LilyLeave1.w = 10
+	LilyLeave1.h = 5
+	LilyLeave1.pivotX = 0
+	LilyLeave1.pivotY = 0
+	LilyLeave1.color = #618a3d
+	LilyLeave1.duration = 0
+	LilyLeave1.frame = 0
+	LilyLeave1.loop = false
+	LilyLeave1.flipX = false
+	LilyLeave1.flipY = false
+	LilyLeave1.playOnStart = false
+	LilyLeave1.Stop()
+
+	LilyLeave2 = ui.AddAnim(ascii
+####_
+#,´   `.
+/       \
+\       /
+#\/|..-´
+%%
+#
+asciiend)
+	LilyLeave2.anchor = center_left
+	LilyLeave2.dock = center_left
+	LilyLeave2.x = 20
+	LilyLeave2.y = 6
+	LilyLeave2.w = 10
+	LilyLeave2.h = 5
+	LilyLeave2.pivotX = 0
+	LilyLeave2.pivotY = 0
+	LilyLeave2.color = #618a3d
+	LilyLeave2.duration = 0
+	LilyLeave2.frame = 0
+	LilyLeave2.loop = false
+	LilyLeave2.flipX = false
+	LilyLeave2.flipY = false
+	LilyLeave2.playOnStart = false
+	LilyLeave2.Stop()
+
+	LilyLeave3 = ui.AddAnim(ascii
+####_
+#,´   `.
+/       \
+\       /
+#\/|..-´
+%%
+#
+asciiend)
+	LilyLeave3.anchor = center_left
+	LilyLeave3.dock = center_left
+	LilyLeave3.x = 30
+	LilyLeave3.y = 6
+	LilyLeave3.w = 10
+	LilyLeave3.h = 5
+	LilyLeave3.pivotX = 0
+	LilyLeave3.pivotY = 0
+	LilyLeave3.color = #618a3d
+	LilyLeave3.duration = 0
+	LilyLeave3.frame = 0
+	LilyLeave3.loop = false
+	LilyLeave3.flipX = false
+	LilyLeave3.flipY = false
+	LilyLeave3.playOnStart = false
+	LilyLeave3.Stop()
+
+	LilyLeave4 = ui.AddAnim(ascii
+####_
+#,´   `.
+/       \
+\       /
+#\/|..-´
+%%
+#
+asciiend)
+	LilyLeave4.anchor = center_left
+	LilyLeave4.dock = center_left
+	LilyLeave4.x = 40
+	LilyLeave4.y = 6
+	LilyLeave4.w = 10
+	LilyLeave4.h = 5
+	LilyLeave4.pivotX = 0
+	LilyLeave4.pivotY = 0
+	LilyLeave4.color = #618a3d
+	LilyLeave4.duration = 0
+	LilyLeave4.frame = 0
+	LilyLeave4.loop = false
+	LilyLeave4.flipX = false
+	LilyLeave4.flipY = false
+	LilyLeave4.playOnStart = false
+	LilyLeave4.Stop()
+
+	LilyLeave5 = ui.AddAnim(ascii
+####_
+#,´   `.
+/       \
+\       /
+#\/|..-´
+%%
+#
+asciiend)
+	LilyLeave5.anchor = center_left
+	LilyLeave5.dock = center_left
+	LilyLeave5.x = 50
+	LilyLeave5.y = 6
+	LilyLeave5.w = 10
+	LilyLeave5.h = 5
+	LilyLeave5.pivotX = 0
+	LilyLeave5.pivotY = 0
+	LilyLeave5.color = #618a3d
+	LilyLeave5.duration = 0
+	LilyLeave5.frame = 0
+	LilyLeave5.loop = false
+	LilyLeave5.flipX = false
+	LilyLeave5.flipY = false
+	LilyLeave5.playOnStart = false
+	LilyLeave5.Stop()
+
+	LilyLeave6 = ui.AddAnim(ascii
+####_
+#,´   `.
+/       \
+\       /
+#\/|..-´
+%%
+#
+asciiend)
+	LilyLeave6.anchor = center_left
+	LilyLeave6.dock = center_left
+	LilyLeave6.x = 60
+	LilyLeave6.y = 6
+	LilyLeave6.w = 10
+	LilyLeave6.h = 5
+	LilyLeave6.pivotX = 0
+	LilyLeave6.pivotY = 0
+	LilyLeave6.color = #618a3d
+	LilyLeave6.duration = 0
+	LilyLeave6.frame = 0
+	LilyLeave6.loop = false
+	LilyLeave6.flipX = false
+	LilyLeave6.flipY = false
+	LilyLeave6.playOnStart = false
+	LilyLeave6.Stop()
+
+	LilyLeave7 = ui.AddAnim(ascii
+####_
+#,´   `.
+/       \
+\       /
+#\/|..-´
+%%
+#
+asciiend)
+	LilyLeave7.anchor = center_left
+	LilyLeave7.dock = center_left
+	LilyLeave7.x = 70
+	LilyLeave7.y = 6
+	LilyLeave7.w = 10
+	LilyLeave7.h = 5
+	LilyLeave7.pivotX = 0
+	LilyLeave7.pivotY = 0
+	LilyLeave7.color = #618a3d
+	LilyLeave7.duration = 0
+	LilyLeave7.frame = 0
+	LilyLeave7.loop = false
+	LilyLeave7.flipX = false
+	LilyLeave7.flipY = false
+	LilyLeave7.playOnStart = false
+	LilyLeave7.Stop()

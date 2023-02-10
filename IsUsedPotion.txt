@@ -1,0 +1,63 @@
+/*
+Mind Stone Thief, thanks to xx!
+吸血药水	vampiric potion		~:	20秒20%吸血
+清洁药水	cleansing potion	~/	50%回复+清debuff
+治愈药水	healing potion		~≈	100%回复
+狂暴药水	berserk potion		/:	10秒攻速+15
+力量药水	strength potion		oo	10秒击晕+3倍破甲
+幸运药水	lucky potion		o:	6秒100%暴击 & +2暴击倍数
+隐形药水	invisibility potion	o/	15秒100%闪避
+防御药水	defensive potion	~o	50%回复+100%盾
+闪电药水	lightning potion	.:	150全图伤害
+经验药水	experience potion	/`	30秒额外经验和气
+
+e.g.
+var Potion = new IsUsedPotion
+Potion.IsUsedPotion()
+Potion.showText()
+*/
+
+var symbol
+var symbegin
+var potiontype = ""
+var potionstatus = false
+
+func IsUsedPotion()
+	symbol = draw.getSymbol(4, 3) + draw.getSymbol(5, 3)
+	?loc.begin | loc.loop
+		symbegin = symbol
+		?symbol = "~≈"
+			potiontype = "healing"
+		:?symbol = "~:"
+			potiontype = "vampiric"
+		:?symbol = "~/"
+			potiontype = "cleansing"
+		:?symbol = "/:"
+			potiontype = "berserk"
+		:?symbol = "oo"
+			potiontype = "strength"
+		:?symbol = "o:"
+			potiontype = "lucky"
+		:?symbol = "o/"
+			potiontype = "invisibility"
+		:?symbol = "~o"
+			potiontype = "defensive"
+		:?symbol = ".:"
+			potiontype = "lightning"
+		:?symbol = "/`"
+			potiontype = "experience"
+		:
+			potiontype = ""
+	?loc.loop | string.Equals(symbol, symbegin)
+		potionstatus = false
+	?!string.Equals(potiontype, "") & !string.Equals(symbol, symbegin) & ai.enabled
+		potionstatus = true
+	return potionstatus
+
+func showText()
+	?!string.Equals(potiontype, "")
+		>`0,7,@potiontype@
+	?potionstatus
+		>`0,8,used
+	:
+		>`0,8,not used

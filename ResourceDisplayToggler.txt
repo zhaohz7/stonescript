@@ -1,0 +1,120 @@
+/*
+ResourceDisplay v1.1 ssrpg v2.99.0 by Mind Stone Thief
+Special thanks: Toggler from Agerak
+Show Resources's number and their variance.
+how to use:SOOO EASY!!!Only have to
+import ResourceDisplay
+Advanced input: press both Z and C simultaneouly to conceal or re-display this module. Updated: storage display settings.
+*/
+var delay = 0
+var Stoneearn
+var Woodearn
+var Tarearn
+var Bronzeearn
+var Kiearn
+var PotResAry = [0,0,0,0]
+var PotionUsage = 0
+
+?loc.begin
+	?!storage.Has("UIToggler")
+		storage.set("UIToggler", 1)
+	?!storage.Has("flip")
+		storage.set("flip", 1)
+	var Stonebegin = res.stone
+	var Woodbegin = res.wood
+	var Tarbegin = res.tar
+	var Bronzebegin = res.bronze
+	var Kibegin = res.ki
+
+?loc.loop
+	Stonebegin = res.stone
+	Woodbegin = res.wood
+	Tarbegin = res.tar
+	Bronzebegin = res.bronze
+	Kibegin = res.ki
+	?item.potion = Empty
+		PotResAry = [0,0,0,0]
+//private functions
+//////////////////////////////////////////////////
+func toggler()
+	return storage.get("UIToggler", 1)
+//////////////////////////////////////////////////
+func transintstr(x)
+	var intval
+	?x > 0
+		intval = "+" + x
+	:?x < 0
+		intval = "" + x
+	:?x = 0
+		intval = ""
+	:
+		intval = "invalid integer!"
+	return intval
+//////////////////////////////////////////////////
+func ColorOfResourceEarn(x)
+	?x > 0
+		return "#rainFF"
+	:
+		return "#red"
+//////////////////////////////////////////////////
+func Output(x, y, color, a)
+	?toggler()
+		>`@x@,@y@,@color@,@a@
+//////////////////////////////////////////////////
+func BlankGenerator(length)
+	var blank = ""
+	for i = 1..length
+		blank = blank + " "
+	return blank
+//////////////////////////////////////////////////
+?delay > 0
+	delay--
+?key = bumpL
+	?key = bumpR
+		?delay = 0
+			delay = 15
+			storage.Set("flip", -1 * storage.Get("flip", 1))
+			storage.incr("UIToggler", storage.Get("flip", 1))
+
+?item.potion  = Healing
+	PotResAry = [0,0,2,0]
+:?item.potion = Vampiric
+	PotResAry = [0,0,1,1]
+:?item.potion = Cleansing
+	PotResAry = [0,1,1,0]
+:?item.potion = Berserk
+	PotResAry = [0,1,0,1]
+:?item.potion = Strength
+	PotResAry = [2,0,0,0]
+:?item.potion = Lucky
+	PotResAry = [1,0,0,1]
+:?item.potion = Invisibility
+	PotResAry = [1,1,0,0]
+:?item.potion = Defensive
+	PotResAry = [1,0,1,0]
+:?item.potion = Lightning
+	PotResAry = [0,0,0,2]
+:?item.potion = Experience
+	PotResAry = [0,2,0,0]
+
+?item.potion = Empty & item.potion = auto & PotResAry ! [0,0,0,0]
+	PotionUsage = 1
+:
+	PotionUsage = 0
+
+Stoneearn = res.stone - Stonebegin - 10 * PotionUsage * PotResAry[0]
+Woodearn = res.wood - Woodbegin - 10 * PotionUsage * PotResAry[1]
+Tarearn = res.tar - Tarbegin - 10 * PotionUsage * PotResAry[2]
+Bronzeearn = res.bronze - Bronzebegin - 10 * PotionUsage * PotResAry[3]
+Kiearn = res.ki - Kibegin
+
+Output( 0 * screen.w / 5, 0, #white, "o" + Stonebegin + BlankGenerator(screen.w / 5 - string.Size("" + Stonebegin) - 1))
+Output( 1 * screen.w / 5, 0, #white, "_/`" + Woodbegin + BlankGenerator(screen.w / 5 - string.Size("" + Woodbegin) - 3))
+Output( 2 * screen.w / 5, 0, #white, "≈" + Tarbegin + BlankGenerator(screen.w / 5 - string.Size("" + Tarbegin) - 1))
+Output( 3 * screen.w / 5, 0, #white, ":." + Bronzebegin + BlankGenerator(screen.w / 5 - string.Size("" + Bronzebegin) - 2))
+Output( 4 * screen.w / 5, 0, #white, "@" + Kibegin + BlankGenerator(screen.w / 5 - string.Size("" + Kibegin) - 1))
+Output( 0 * screen.w / 5 + string.Size("" + Stonebegin) + 1, 0, ColorOfResourceEarn(Stoneearn), transintstr(Stoneearn))
+Output( 1 * screen.w / 5 + string.Size("" + Woodbegin) + 3, 0, ColorOfResourceEarn(Woodearn), transintstr(Woodearn))
+Output( 2 * screen.w / 5 + string.Size("" + Tarbegin) + 1, 0, ColorOfResourceEarn(Tarearn), transintstr(Tarearn))
+Output( 3 * screen.w / 5 + string.Size("" + Bronzebegin) + 2, 0, ColorOfResourceEarn(Bronzeearn), transintstr(Bronzeearn))
+Output( 4 * screen.w / 5 + string.Size("" + Kibegin) + 1, 0, ColorOfResourceEarn(Kiearn), transintstr(Kiearn))

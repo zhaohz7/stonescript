@@ -1,0 +1,48 @@
+var LogicJudge = false
+var DropJudge = false
+var resetLJ = 0
+var resetDJ = 0
+var dodgeNO = 0
+func dodgereset()
+  ?loc.loop
+    LogicJudge = false
+    DropJudge = false
+    resetLJ = 0
+    resetDJ = 0
+    dodgeNO = 0
+func CheckPoison(posX, posY,w,h)
+  draw.Box(posX, posY, w, h, #333333, -1)
+  >`0,10,@dodgeNO@
+  var Xm = posX + w - 1
+  var Ym = posY + h - 1
+  ?LogicJudge = true
+   resetLJ ++
+  ?resetLJ > 6
+   LogicJudge = false
+   resetLJ = 0
+   dodgeNO = dodgeNO + 1
+  for x = posX..Xm
+    for y = posY..Ym
+      ?draw.GetSymbol(x,y) = "(" 
+        LogicJudge = true
+  return dodgeNO
+
+func NagaDrop(posX, posY,w,h)
+  draw.Box(posX, posY, w, h, #333333, -2)
+  >`5,10,@DropJudge@
+  var Xm = posX + w - 1
+  var Ym = posY + h - 1
+  ?DropJudge = true
+   resetDJ ++
+  ?resetDJ > 7
+   DropJudge = false
+   resetDJ = 0
+  for x = posX..Xm
+    for y = posY..Ym
+      ?draw.GetSymbol(x,y) = "/" 
+        DropJudge = true
+  return DropJudge
+
+
+
+

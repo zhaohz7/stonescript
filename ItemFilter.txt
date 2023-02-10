@@ -1,0 +1,96 @@
+/*
+Mind Stone Thief
+v1.0
+Usage:
+var IF = import ItemFilter
+IF.ItemString()
+!!in any other scripts,first
+var IF = import ItemFilter
+then IF.OutputL IF.OutputR could be used !!
+*/
+///////////////////////////////////////////////////////////////////////////////////////private funcs
+func IndexSearchLast(Array,Criteria)
+	var index = -1
+	?Array.Count() > 0
+		for i = Array.Count() - 1 .. 0
+			?string.IndexOf("" + Array[i],"" + Criteria) ! -1
+				index = i
+				i = -1
+	return index
+
+func IndexSearchArrayLast(Array,CriteriaArray)
+	var index = -1
+	?Array.Count() > 0 & CriteriaArray.Count() > 0
+		for i = Array.Count() - 1 .. 0
+			for j = CriteriaArray.Count() - 1 .. 0
+				?string.IndexOf("" + Array[i],"" + CriteriaArray[j]) ! -1
+					index = i
+					j = -1
+					i = -1
+	return index
+
+func CountIndexOf(Array,value)
+	var Count = 0
+	?Array.Count() > 0
+		for i = 0 .. Array.Count() - 1
+			?string.IndexOf("" + Array[i],"" + value) ! -1
+				Count = Count + 1
+	return Count
+
+func IndexOf(Array,value)
+	var IndexArray = []
+	?Array.Count() > 0
+		for i = 0 .. Array.Count() - 1
+			?string.IndexOf("" + Array[i],"" + value) ! -1
+				IndexArray.Add(i)
+	return IndexArray
+
+func RemoveIndexOfLast(Array,CriteriaArray)
+	?Array.Count() > 0 & CriteriaArray.Count() > 0
+		for i = Array.Count() - 1 .. 0
+			for j = CriteriaArray.Count() - 1 .. 0
+				?string.IndexOf("" + Array[i],"" + CriteriaArray[j]) ! -1
+					Array.RemoveAt(i)
+					j = -1
+					i = -1
+	return Array
+///////////////////////////////////////////////////////////////////////////////////////
+func ChopItem(Item)
+	var ElementArray = ["Poison", "Vigor", "Æther", "Fire", "Ice"]
+	var FilterArray = ["_", "crossbow", "quarterstaff", "bardiche", "wand", "shield", "hammer", "sword", "runestone", "stones"]
+	var SuffixArray = ["D","A","dP","dp","aP","ap","dL","dh","aL","ah","dU","du","aU","au","dF","df","aF","af","dI","di","aI","ai"]
+	var Store = ""
+	var Array = []
+	var Output = ""
+	?!string.Equals(Store,Item)
+		Store = Item
+		?!string.Equals(Store, "")
+			Array = string.Split(Store, true)
+			?IndexSearchLast(Array,lost) = Array.Count() - 1
+				Array.RemoveAt(Array.Count() - 1)
+			?CountIndexOf(Array,shiny) > 1
+				Array.RemoveAt(IndexOf(Array,shiny)[IndexOf(Array,shiny).Count() - 1])
+				Array.Insert(0,Shiny)
+			:?CountIndexOf(Array,shiny) > 0 & Array.IndexOf(shiny) = Array.Count() - 1
+				Array.RemoveAt(Array.IndexOf(shiny))
+				Array.Insert(0,Shiny)
+			?IndexSearchArrayLast(Array,ElementArray) ! -1 & IndexSearchArrayLast(Array,ElementArray) > Array.Count() - 6
+				Array = RemoveIndexOfLast(Array,ElementArray)
+				?IndexSearchArrayLast(Array,SuffixArray) = Array.Count() - 1
+					Array.Insert(IndexSearchLast(Array,"*"),Array[IndexSearchArrayLast(Array,SuffixArray)])
+					Array = RemoveIndexOfLast(Array,SuffixArray)
+			?CountIndexOf(Array,Stone) > 1 & IndexSearchLast(Array,Stone) = IndexSearchArrayLast(Array,FilterArray) - 1
+				Array.RemoveAt(IndexOf(Array,Stone)[IndexOf(Array,Stone).Count() - 1])
+			:?CountIndexOf(Array,Stone) > 0 & Array.IndexOf(Stone) = IndexSearchArrayLast(Array,FilterArray) - 1
+				Array.RemoveAt(Array.IndexOf(Stone))
+			Array = RemoveIndexOfLast(Array,FilterArray)
+			Output = string.Join(" ", Array)
+		:
+			Output = ""
+	return Output
+
+var OutputL = ""
+var OutputR = ""
+func ItemString()
+	OutputL = ChopItem(item.left)
+	OutputR = ChopItem(item.right)
